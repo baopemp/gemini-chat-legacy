@@ -16,13 +16,13 @@ Android 2.1 (API 7) android.jar, so any newer API fails to compile. The rest is 
 ## 1. Layout
 
 ```
-├── HANDOFF_FOR_CLAUDE.md      this file
+├── docs/HANDOFF.md            this file
 ├── README.md                  quick start
 ├── AGENTS.md                  hard rules (short version of section 3)
 ├── android_project/           apktool project: AndroidManifest.xml, apktool.yml, res/, assets/emoji.tsv, smali/
 ├── java/                      Java sources (see section 2); GENERATED_SMALI.txt lists the smali they produce
 ├── java_sources/              jadx decompile of the current APK (reference only, not compilable)
-├── keystore/                  release keystore + credentials
+├── keystore/                  signing key (git-ignored, generated on first build if missing)
 ├── tools/                     apktool.jar (2.7.0), uber-apk-signer.jar (1.3.0), src/Dex2Smali.java, src/Smali2Dex.java
 ├── scripts/
 │   ├── build_apk.sh           audits, then build, align, sign: build/gemini_chat_v<ver>.apk
@@ -75,7 +75,7 @@ Smali generated from `java/` must not be edited by hand: change the Java source 
 
 ## 4. Rules
 
-1. **Sign only with `keystore/gemini_chat.keystore`** (alias `geminichat`, passwords `geminipass`). A different key means users must uninstall and lose their chats.
+1. **Keep signing with the same key.** `build_apk.sh` uses `keystore/gemini_chat.keystore` (git-ignored; created on the first build if missing; override with `KEYSTORE`, `KS_ALIAS`, `KS_PASS`). A different key means users must uninstall and lose their chats, so back the keystore up.
    v1 signatures must use **SHA-1** digests, because Android < 4.3 can't verify SHA-256 JAR signatures. uber-apk-signer/apksig picks this automatically from minSdk. Don't switch to plain `jarsigner` defaults.
 2. **API-7 verifier rule.** Never reference an API 8+ class from a class that can load on Android 2.1. Gate with `Build.VERSION.SDK_INT` and put the newer API in its own class (pattern: `ImageUtil` → `ImageUtilApi8`), or use reflection (`Compat`, `LiveSocket.enableSni`). Newer attribute ids are used as raw ints (`MessageFormatter.ATTR_SELECTABLE_ITEM_BACKGROUND`).
 3. **No network on the UI thread** (StrictMode kills it on 3.0+, silently on 2.x). Text: `AsyncTask.doInBackground`. Live: every send goes through `LiveSession`'s writer thread. 0.8.6 hit this: Live text worked on 2.1 and silently failed on 4.4.

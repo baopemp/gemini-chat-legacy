@@ -17,8 +17,9 @@ adb install -r build/gemini_chat_v0.8.7.apk    # -r keeps chats and settings
 ./tests/run_tests.sh                           # optional: JVM verification + unit tests
 ```
 
-The build tools (`tools/apktool.jar`, `tools/uber-apk-signer.jar`) are included.
-`scripts/download_tools.sh` re-fetches them from GitHub if they're missing.
+Needs a JDK 8+ (for `keytool`), Python 3 and `curl`. The first build downloads apktool and uber-apk-signer into `tools/`
+(`scripts/download_tools.sh`) and creates a local signing key in `keystore/`. Keep that key: an APK signed with a different key
+can't update an installed copy, so you'd have to uninstall first (that deletes chats).
 
 ## Layout
 
@@ -29,7 +30,25 @@ The build tools (`tools/apktool.jar`, `tools/uber-apk-signer.jar`) are included.
 | `java_sources/` | jadx decompile of the current APK, for reading only |
 | `scripts/` | build script and smali audits |
 | `tests/` | dex2jar-based JVM test suite, Live API harness, emulator mocks |
-| `keystore/` | release key (alias `geminichat`, password `geminipass`) |
-| `docs/` | `ARCHITECTURE.md`, `CHANGELOG.md` |
+| `keystore/` | your signing key (git-ignored, generated on first build) |
+| `docs/` | `ARCHITECTURE.md`, `CHANGELOG.md`, `HANDOFF.md` |
 
-Read `HANDOFF_FOR_CLAUDE.md` before changing anything. It lists the rules, smali pitfalls and known limitations.
+Read `docs/HANDOFF.md` before changing anything. It lists the rules, smali pitfalls and known limitations.
+
+## Setup
+
+1. Install the APK and open **Settings**.
+2. Paste a Gemini API key from [Google AI Studio](https://aistudio.google.com/apikey). The free tier works.
+3. Pick a model and chat. Gemini Live needs a microphone and a recent network connection.
+
+The key is stored in the app's private preferences on the device and is sent only to `generativelanguage.googleapis.com`.
+
+## Credits
+
+- Build tools: [Apktool](https://github.com/iBotPeaches/Apktool) and [uber-apk-signer](https://github.com/patrickfav/uber-apk-signer) (both Apache-2.0), downloaded on first build.
+- Emoji list: the Python [`emoji`](https://pypi.org/project/emoji/) package, which tracks the official Unicode emoji data.
+- Built with the assistance of AI.
+
+## License
+
+[MIT](LICENSE) © 2026 BaoPump

@@ -1,6 +1,6 @@
 # Agent Rules: Gemini Chat (Legacy Android Client)
 
-Full context: `HANDOFF_FOR_CLAUDE.md`. All paths are relative to the project root.
+Full context: `docs/HANDOFF.md`. All paths are relative to the project root.
 
 ## Build pipeline
 1. Java classes live in `java/` (ChatActivity, SettingsActivity, LiveActivity, LiveSession, LiveSocket, ReplyParser, AutoNamer, DatabaseHelper,
@@ -14,8 +14,8 @@ Full context: `HANDOFF_FOR_CLAUDE.md`. All paths are relative to the project roo
 6. Add a `docs/CHANGELOG.md` entry and regenerate `java_sources/` with jadx from the new APK.
 
 ## Keystore
-- File `keystore/gemini_chat.keystore`, alias `geminichat`, store/key password `geminipass`.
-- Never sign with any other key (users would lose their data). v1 signature digests must stay SHA-1 (minSdk 7); uber-apk-signer handles this automatically.
+- `keystore/gemini_chat.keystore` is git-ignored and created on the first build if missing (override: `KEYSTORE`, `KS_ALIAS`, `KS_PASS`).
+- Never switch signing keys once a build is installed somewhere (users would lose their data). v1 signature digests must stay SHA-1 (minSdk 7); uber-apk-signer handles this automatically.
 
 ## Platform constraints
 - minSdk 7 / targetSdk 14, Dalvik, 256 MB RAM devices. No AndroidX, Play Services or Kotlin.

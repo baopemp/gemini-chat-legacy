@@ -1,7 +1,11 @@
+# build output
 build/
-tests/.cache/
-tools/.java-toolchain/
 android_project/build/
+# downloaded tools and test caches
+tools/*.jar
+tools/.java-toolchain/
+tests/.cache/
+# signing keys: never commit
 keystore/
 *.keystore
 *.jks

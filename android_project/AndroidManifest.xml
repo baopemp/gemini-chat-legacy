@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><manifest xmlns:android="http://schemas.android.com/apk/res/android" android:compileSdkVersion="23" android:compileSdkVersionCodename="6.0-2438415" package="com.gemini.chat" platformBuildVersionCode="29" platformBuildVersionName="10.0.0">
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <application android:icon="@drawable/icon" android:label="Gemini">
+        <activity android:configChanges="keyboardHidden|orientation|screenSize" android:label="Gemini" android:launchMode="singleTop" android:name=".ChatListActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:configChanges="keyboardHidden|orientation|screenSize" android:label="Chat" android:launchMode="singleTop" android:name=".ChatActivity" android:windowSoftInputMode="adjustResize|stateHidden"/>
+        <activity android:configChanges="keyboardHidden|orientation|screenSize" android:label="Settings" android:launchMode="singleTop" android:name=".SettingsActivity"/>
+        <activity android:name=".SafActivity" android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+        <activity android:name=".FileExplorerActivity"/>
+        <activity android:configChanges="keyboardHidden|orientation|screenSize" android:label="Live" android:name=".LiveActivity" android:windowSoftInputMode="adjustResize|stateHidden"/>
+    </application>
+</manifest>

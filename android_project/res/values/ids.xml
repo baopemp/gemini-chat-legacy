@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item type="id" name="scroll_chat" />
+    <item type="id" name="layout_chat" />
+    <item type="id" name="et_input" />
+    <item type="id" name="btn_send" />
+    <item type="id" name="btn_stop" />
+    <item type="id" name="et_api_key" />
+    <item type="id" name="spinner_model" />
+    <item type="id" name="et_system_instruction" />
+    <item type="id" name="btn_save" />
+    <item type="id" name="btn_backups" />
+</resources>

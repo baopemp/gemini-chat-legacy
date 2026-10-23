@@ -1,0 +1,7 @@
+build/
+tests/.cache/
+tools/.java-toolchain/
+android_project/build/
+keystore/
+*.keystore
+*.jks

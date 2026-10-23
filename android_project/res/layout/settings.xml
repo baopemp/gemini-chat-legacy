@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:id="@+id/settings_root" android:orientation="vertical" android:padding="16.0dip" android:focusable="true" android:focusableInTouchMode="true" android:layout_width="fill_parent" android:layout_height="wrap_content">
+        <TextView android:textStyle="bold" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="API key" />
+        <EditText android:id="@id/et_api_key" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="4.0dip" android:hint="Gemini API key" android:inputType="textPassword" />
+        <TextView android:textSize="12.0sp" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="Stored only on this device." />
+        <CheckBox android:id="@+id/cb_time_grounding" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="12.0dip" android:text="Time grounding" />
+        <TextView android:id="@+id/tv_time_grounding" android:textSize="12.0sp" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="Sends this device's current date and time to the model." />
+        <TextView android:id="@+id/tv_model_label" android:textStyle="bold" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="20.0dip" android:text="Model" />
+        <Spinner android:id="@id/spinner_model" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="4.0dip" />
+        <TextView android:id="@+id/tv_system_label" android:textStyle="bold" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="20.0dip" android:text="System instructions" />
+        <EditText android:id="@id/et_system_instruction" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="4.0dip" android:hint="Optional, e.g. &quot;You are a helpful assistant.&quot;" android:minLines="2" android:inputType="textMultiLine" />
+        <Button android:id="@id/btn_save" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="24.0dip" android:text="Save Settings" />
+        <Button android:id="@id/btn_backups" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="8.0dip" android:text="Backups..." />
+    </LinearLayout>
+</ScrollView>

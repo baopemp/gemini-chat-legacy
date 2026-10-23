@@ -7,6 +7,7 @@ Without `-skin`, the classic emulator ignores `hw.lcd.width/height` in config.in
 1. Build a mock-endpoint variant (never ship it), on a *copy* of the project:
    ```bash
    sed -i 's#https://generativelanguage.googleapis.com/v1beta/models/#http://10.0.2.2:8765/v1beta/models/#g' android_project/smali/com/gemini/chat/*.smali
+   sed -i 's#https://generativelanguage.googleapis.com/v1beta/interactions#http://10.0.2.2:8765/v1beta/interactions#g' android_project/smali/com/gemini/chat/*.smali
    sed -i 's#"wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent"#"ws://10.0.2.2:8766/ws"#' android_project/smali/com/gemini/chat/*.smali
    ```
    Replace the URL *prefix* (`/g`): javac folds constant concatenations (e.g. the auto-naming URL) into one string.

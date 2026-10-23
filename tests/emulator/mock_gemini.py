@@ -5,10 +5,39 @@ LOG = sys.argv[1] if len(sys.argv) > 1 else "requests.log"
 BUSY = 0
 REPLY = [0]
 class H(http.server.BaseHTTPRequestHandler):
+    def tts(self, rec):
+        # Read Aloud (Interactions API, stream): SSE step.delta events with base64 audio/l16 24 kHz.
+        # Text containing "ttsfail" -> in-stream error event; "tts429" -> HTTP 429.
+        b = rec["body"]
+        text = b["input"][0]["content"][0]["text"]
+        if rec["key"] != "TESTKEY" or "tts429" in text:
+            code = 400 if rec["key"] != "TESTKEY" else 429
+            out = json.dumps({"error": {"code": code, "message": "mock tts error %d" % code}}).encode()
+            self.send_response(code); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(out))); self.end_headers(); self.wfile.write(out); return
+        import base64, math
+        self.send_response(200); self.send_header("Content-Type", "text/event-stream"); self.end_headers()
+        def ev(o):
+            self.wfile.write(("event: %s\ndata: %s\n\n" % (o["event_type"], json.dumps(o))).encode()); self.wfile.flush()
+        ev({"interaction": {"id": "mock"}, "event_type": "interaction.created"})
+        ev({"index": 0, "step": {"type": "model_output"}, "event_type": "step.start"})
+        rate = 24000
+        for k in range(6):  # 6 x 0.5 s of tone
+            pcm = b"".join(int(5000 * math.sin(2 * math.pi * 330 * (k * rate // 2 + i) / rate)).to_bytes(2, "little", signed=True) for i in range(rate // 2))
+            if k == 0: pcm = pcm[:-1]  # odd-sized chunk
+            ev({"index": 0, "delta": {"type": "audio", "mime_type": "audio/l16", "data": base64.b64encode(pcm).decode()}, "event_type": "step.delta"})
+            if "ttsfail" in text and k == 1:
+                ev({"error": {"message": "mock in-stream failure", "code": "internal"}, "event_type": "error"}); return
+            time.sleep(0.2)
+        ev({"index": 0, "event_type": "step.stop"})
+        ev({"interaction": {"id": "mock", "usage": {}}, "event_type": "interaction.completed"})
+        self.wfile.write(b"event: done\ndata: [DONE]\n\n"); self.wfile.flush()
+
     def do_POST(self):
         n = int(self.headers.get("Content-Length", 0)); body = self.rfile.read(n).decode("utf-8")
         rec = {"path": self.path, "key": self.headers.get("x-goog-api-key"), "ctype": self.headers.get("Content-Type"), "body": json.loads(body)}
         with open(LOG, "a") as f: f.write(json.dumps(rec) + "\n")
+        if self.path.endswith("/v1beta/interactions"):
+            return self.tts(rec)
         lastparts = rec["body"]["contents"][-1]["parts"]
         last = next((p["text"] for p in lastparts if "text" in p), "").lower()
         global BUSY

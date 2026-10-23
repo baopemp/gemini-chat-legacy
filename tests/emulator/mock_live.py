@@ -1,5 +1,5 @@
 # Mock of the Gemini Live API (BidiGenerateContent) for emulator UI tests. ws://0.0.0.0:8766/<anything>
-# Conversation models: setup -> setupComplete; text or (activityStart, audio..., activityEnd / audioStreamEnd) -> transcript +
+# Conversation models: setup -> setupComplete; text or (activityStart, audio..., activityEnd / audioStreamEnd) -> late transcript +
 #   3 s of 24 kHz PCM tone (word-by-word output transcription, first chunk odd-sized) + turnComplete + a resumption handle.
 #   Text containing "goaway": goAway, then the server closes the connection 1 s later (tests automatic resumption).
 #   A session started with sessionResumption.handle answers "(resumed)".
@@ -19,8 +19,7 @@ def tone(ms, freq=440, rate=24000):
     return b"".join(int(6000 * math.sin(2 * math.pi * freq * i / rate)).to_bytes(2, "little", signed=True) for i in range(n))
 
 async def reply(ws, heard, words, n):
-    if heard:
-        await ws.send(json.dumps({"serverContent": {"inputTranscription": {"text": heard}}}))
+    # like the real server, the model's transcript of the user's speech can arrive after its answer has started
     log({"server": "reply start"})
     pcm = tone(3000)
     parts = words.split(" ")
@@ -29,6 +28,8 @@ async def reply(ws, heard, words, n):
         chunk = pcm[i * step:(i + 1) * step]
         await ws.send(json.dumps({"serverContent": {"modelTurn": {"parts": [{"inlineData": {"mimeType": "audio/pcm;rate=24000", "data": base64.b64encode(chunk[:-1] if i == 0 else chunk).decode()}}]}}}))
         await ws.send(json.dumps({"serverContent": {"outputTranscription": {"text": w + " "}}}))
+        if i == 1 and heard:
+            await ws.send(json.dumps({"serverContent": {"inputTranscription": {"text": heard}}}))
         await asyncio.sleep(0.05)
     await ws.send(json.dumps({"serverContent": {"generationComplete": True}}))
     await ws.send(json.dumps({"serverContent": {"turnComplete": True}}))

@@ -46,7 +46,8 @@ Android 2.1 (API 7) android.jar, so any newer API fails to compile. The rest is 
 | Class | Source | What it does |
 |---|---|---|
 | `ChatListActivity` | smali | chat list, New Chat / Settings / Delete All; installs `TLSSocketFactory` on API 16-19 |
-| `ChatActivity` | Java | chat screen, streaming request (`GeminiTask`), long-press actions, attachment bar, rename, Stop keeps partial |
+| `ChatActivity` | Java | chat screen, streaming request (`GeminiTask`), long-press actions, attachment bar, Read Aloud menu items, Stop keeps partial |
+| `ReadAloud` | Java | Read Aloud: Interactions API text-to-speech (SSE audio deltas) → `AudioTrack`, in the Live voice |
 | `AutoNamer` | Java | auto-naming after the first reply (used by chat and Live) |
 | `SettingsActivity` | Java | settings (XML layout + sections built in code: custom model, thinking, auto-name, Live) |
 | `LiveActivity` | Java | Live voice screen: mic (`AudioRecord`) to the model and the transcriber, speaker (`AudioTrack`, jitter buffer), synced transcript, echo gate, auto-resume, saves turns |
@@ -99,9 +100,14 @@ Smali generated from `java/` must not be edited by hand: change the Java source 
 - If a handler can throw, place it *inside* the outer try range.
 - Check branch direction every time; always rebuild, decompile (`jadx`) and run the tests.
 
-## 6. Current state (0.8.7)
+## 6. Current state (0.8.8)
 
-`tests/run_tests.sh`: 91/91 classes pass `-Xverify:all`; 104/104 checks pass. `tests/live/LiveCheck2.java`: resumption + transcriber against the real API.
+`tests/run_tests.sh`: 95/95 classes pass `-Xverify:all`; 116/116 checks pass.
+
+0.8.8 (2026-10-23), Android 2.1 emulator with the mocks: Read Aloud (request body, toast, Stop Reading in both menus, in-stream
+error toast), Settings layout, Rename only in the chat list, Live hands-free and push-to-talk turns saved exactly once (late
+transcripts update the saved turn; DB rows alternate user/model). Real API: one Read Aloud request (flash-lite TTS, 41 audio events).
+The owner confirmed Live works on his Galaxy Y (real mic and speaker) before the duplicate-turn fix. `tests/live/LiveCheck2.java`: resumption + transcriber against the real API.
 
 Verified (2026-10-23, see `docs/CHANGELOG.md` for the full list):
 | Where | What passed |
@@ -115,7 +121,7 @@ Google's endpoint accepts TLS 1.0 (ECDHE and plain RSA AES-CBC-SHA) and serves a
 
 ### Known limitations / open items
 
-- **Not verified:** a real microphone and speaker (emulators have none; the protocol is verified on the JVM), the 5.0+ ripple
+- **Not verified:** Read Aloud sound on a real phone (emulators have no audio out), the 5.0+ ripple
   (no 5.0 image here), 3.8 Flash thinking (free tier answered 503 every time; same code path as 3.6 Flash).
 - **Live on a phone speaker:** no echo cancellation on old phones. Push-to-talk is the default; hands-free mutes the mic for the
   whole reply + 0.7 s, so you can't interrupt by voice there (tap the mic button or type to interrupt).

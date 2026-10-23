@@ -430,6 +430,35 @@ public class Tests {
         writeStream.invoke(null, new ByteArrayInputStream(bigData), big);
         check("oversized settings rejected", !(Boolean) valid.invoke(null, null, big, false), "");
 
+        // ---------- 4. Read Aloud (Interactions API text-to-speech) ----------
+        Class<?> ra = Class.forName("com.gemini.chat.ReadAloud");
+        String rb = (String) m(ra, "requestBody", String.class, String.class, String.class).invoke(null, "gemini-3.8-flash-lite-tts", "Kore", "Xin chào \"bạn\"");
+        org.json.JSONObject rj = new org.json.JSONObject(rb);
+        check("tts body model/stream", "gemini-3.8-flash-lite-tts".equals(rj.getString("model")) && rj.getBoolean("stream"), rb);
+        check("tts body text", "Xin chào \"bạn\"".equals(rj.getJSONArray("input").getJSONObject(0).getJSONArray("content").getJSONObject(0).getString("text"))
+                && "user_input".equals(rj.getJSONArray("input").getJSONObject(0).getString("type")), rb);
+        check("tts body voice", "Kore".equals(rj.getJSONObject("generation_config").getJSONArray("speech_config").getJSONObject(0).getString("voice")), rb);
+        org.json.JSONObject rf = rj.getJSONObject("response_format");
+        check("tts body format l16 24k", "audio".equals(rf.getString("type")) && "audio/l16".equals(rf.getString("mime_type")) && rf.getInt("sample_rate") == 24000, rf);
+        Method audioOf = m(ra, "audioOf", String.class);
+        check("tts audio delta", "AAEC".equals(audioOf.invoke(null, "{\"index\":0,\"delta\":{\"type\":\"audio\",\"mime_type\":\"audio/l16\",\"data\":\"AAEC\"},\"event_type\":\"step.delta\"}")), "");
+        check("tts text delta ignored", audioOf.invoke(null, "{\"index\":1,\"delta\":{\"text\":\"hi\",\"type\":\"text\"},\"event_type\":\"step.delta\"}") == null, "");
+        check("tts other events ignored", audioOf.invoke(null, "{\"index\":0,\"step\":{\"type\":\"model_output\"},\"event_type\":\"step.start\"}") == null
+                && audioOf.invoke(null, "{\"interaction\":{\"id\":\"x\"},\"event_type\":\"interaction.completed\"}") == null, "");
+        String errMsg = null;
+        try { audioOf.invoke(null, "{\"error\":{\"message\":\"boom\",\"code\":\"gateway_timeout\"},\"event_type\":\"error\"}"); }
+        catch (java.lang.reflect.InvocationTargetException e) { errMsg = e.getCause().getMessage(); }
+        check("tts in-stream error", "Error gateway_timeout: boom".equals(errMsg), errMsg);
+        Method speakable = m(ra, "speakable", String.class);
+        String sp1 = (String) speakable.invoke(null, "# Title\n\nSome **bold** and `code` 😂 here.\n\n```java\nint x = 1;\n```\n\n---\n\n- one\n- two\n\nArea $\\pi r^2$.");
+        check("speakable drops markup/code/emoji", sp1.contains("Title") && sp1.contains("Some bold and code") && !sp1.contains("**")
+                && !sp1.contains("int x") && !sp1.contains(":joy:") && !sp1.contains("😂") && sp1.contains("one") && sp1.contains("π"), sp1);
+        check("speakable empty for code only", "".equals(speakable.invoke(null, "```\nls -la\n```")), speakable.invoke(null, "```\nls -la\n```"));
+        String sp2 = (String) speakable.invoke(null, "| Name | Age |\n|---|---|\n| An | 20 |");
+        check("speakable table as text", sp2.contains("An") && sp2.contains("20") && !sp2.contains("|") && !sp2.contains("─"), sp2);
+        check("tts error message", "Error 429: Quota exceeded".equals(m(ra, "errorMessage", int.class, String.class).invoke(null, 429, "{\"error\":{\"code\":429,\"message\":\"Quota exceeded\"}}"))
+                && "Error 500".equals(m(ra, "errorMessage", int.class, String.class).invoke(null, 500, "<html>")), "");
+
         System.out.println("PASS " + pass + " / FAIL " + fail);
         if (fail > 0) System.exit(1);
     }

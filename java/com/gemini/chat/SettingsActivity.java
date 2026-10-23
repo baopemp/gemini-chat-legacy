@@ -38,7 +38,7 @@ public class SettingsActivity extends Activity {
     static final String[] THINKING_VALUES = {"", "minimal", "low", "medium", "high"};
 
     private EditText etApiKey, etSystemInstruction, etCustomModel, etLiveCustom;
-    private Spinner spinnerModel, spTextThinking, spTextSize, spLiveModel, spLiveThinking, spVoice;
+    private Spinner spinnerModel, spTextThinking, spTextSize, spLiveModel, spLiveThinking, spVoice, spTts;
     private TextView tvLiveThinking;
     private CheckBox cbAutoName, cbShowThoughts, cbHandsFree, cbMuted, cbLiveText;
 
@@ -165,14 +165,17 @@ public class SettingsActivity extends Activity {
         tvLiveThinking = title("Live thinking level");
         spLiveThinking = spinner(new String[]{"Low", "Medium", "High"});
         spVoice = spinner(LiveActivity.VOICES);
+        spTts = spinner(ReadAloud.MODELS);
         cbHandsFree = check("Hands-free");
         cbMuted = check("Mute voice");
         cbLiveText = check("Live text while speaking");
         at = insert(col, at, new View[]{title("Live speech model"), spLiveModel, etLiveCustom, tvLiveThinking,
-                spLiveThinking, title("Voice"), spVoice, cbHandsFree, hint("Talk freely; the model detects when you stop."),
+                spLiveThinking, title("Voice"), spVoice, hint("Also used by Read Aloud (hold a reply)."),
+                title("Read Aloud model"), spTts, cbHandsFree, hint("Talk freely; the model detects when you stop."),
                 cbMuted, hint("Replies are shown as text only."), cbLiveText,
                 hint("Shows your words in the text box as you speak.")},
-                new LinearLayout.LayoutParams[]{fill(20), fill(4), fill(4), fill(16), fill(4), fill(16), fill(4), fill(12),
+                new LinearLayout.LayoutParams[]{fill(20), fill(4), fill(4), fill(16), fill(4), fill(16), fill(4), fill(0),
+                        fill(16), fill(4), fill(12),
                         fill(0), fill(8), fill(0), fill(8), fill(0)});
         // 4. "System instructions", Save and Backups stay last (settings.xml)
 
@@ -239,6 +242,8 @@ public class SettingsActivity extends Activity {
         for (int i = 0; i < LiveActivity.VOICES.length; i++) {
             if (LiveActivity.voiceName(LiveActivity.VOICES[i]).equals(v)) spVoice.setSelection(i);
         }
+        int tts = indexOf(ReadAloud.MODELS, sp.getString("tts_model", ReadAloud.DEFAULT_MODEL));
+        spTts.setSelection(tts < 0 ? 0 : tts);
         cbHandsFree.setChecked(sp.getBoolean("live_hands_free", false));
         cbMuted.setChecked(sp.getBoolean("live_muted", false));
         cbLiveText.setChecked(sp.getBoolean("live_text", true));
@@ -300,6 +305,7 @@ public class SettingsActivity extends Activity {
         if (lpos == LiveActivity.LIVE_MODELS.length) e.putString("live_custom_model", liveModel);
         e.putString("live_thinking", LiveActivity.THINKING[Math.max(0, spLiveThinking.getSelectedItemPosition())]);
         e.putString("live_voice", LiveActivity.voiceName(LiveActivity.VOICES[Math.max(0, spVoice.getSelectedItemPosition())]));
+        e.putString("tts_model", ReadAloud.MODELS[Math.max(0, spTts.getSelectedItemPosition())]);
         e.putBoolean("live_hands_free", cbHandsFree.isChecked());
         e.putBoolean("live_muted", cbMuted.isChecked());
         e.putBoolean("live_text", cbLiveText.isChecked());

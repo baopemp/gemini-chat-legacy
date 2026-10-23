@@ -7,7 +7,7 @@ Full context: `docs/HANDOFF.md`. All paths are relative to the project root.
    Markdown, MessageFormatter, EmojiMap, TimeGrounding, Thumbnail, B64, Compat). Edit them and run `./scripts/build_java.sh`; their smali is generated.
    The remaining hand-written smali (ChatListActivity, ConfigManager, ConfigBinder, SafActivity, FileExplorerActivity, ImageUtil*, TLSSocketFactory, R)
    is edited in `android_project/smali/com/gemini/chat/`.
-2. Bump the version in `android_project/apktool.yml` only: `versionCode` = `versionName` without dots (0.8.7 → `'87'`).
+2. Bump the version in `android_project/apktool.yml` only: `versionCode` = `versionName` without dots (0.8.8 → `'88'`).
 3. `./scripts/build_apk.sh` runs the audits, `apktool b`, zipalign and signing → `build/gemini_chat_v<ver>.apk`.
 4. `./tests/run_tests.sh` runs the JVM bytecode verification and unit tests. It must report 0 failures.
 5. Smoke-test on ARM emulators: API 7 (240x320, 120 dpi) and API 19 at least (`tests/emulator/README.md`).
@@ -37,6 +37,10 @@ Full context: `docs/HANDOFF.md`. All paths are relative to the project root.
   (needs `thinkingConfig.thinkingLevel`), `gemini-3.1-flash-live-preview`. Audio in 16-bit PCM (`audio/pcm;rate=N`), out 24 kHz.
   `sessionResumption` handles are used to resume. The text box is filled by a parallel `gemini-3.5-transcribe-live` session
   (TEXT modality; `interimInputTranscription` while speaking, `inputTranscription` final).
+- Read Aloud: `POST https://generativelanguage.googleapis.com/v1beta/interactions` (Interactions API), body
+  `{model, input:[{type:user_input, content:[{type:text,text}]}], response_format:{type:audio, mime_type:audio/l16, sample_rate:24000},
+  generation_config:{speech_config:[{voice}]}, stream:true}`; SSE `step.delta` events with `delta.type == "audio"` carry base64 PCM.
+  Models: `gemini-3.8-flash-lite-tts` (default), `gemini-3.8-flash-tts`, `gemini-3.1-flash-tts-preview`; voice = the Live voice.
 - Time grounding (Settings checkbox, default on): `"Current date and time: Thursday, 2026-10-22T23:06:27.791+07:00; Unix: 1792685187791ms"`
   is appended to the system instruction on every request (text and Live). It's the only hidden instruction.
 - Auto-naming (default on, `AutoNamer`): one `generateContent` call to `gemini-3.5-flash-lite` after a chat's first reply (chat or Live).

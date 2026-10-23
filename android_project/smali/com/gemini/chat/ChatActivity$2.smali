@@ -26,7 +26,7 @@
     .locals 0
 
     .prologue
-    .line 522
+    .line 527
     iput-object p1, p0, Lcom/gemini/chat/ChatActivity$2;->this$0:Lcom/gemini/chat/ChatActivity;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
@@ -40,7 +40,7 @@
     .locals 2
 
     .prologue
-    .line 524
+    .line 529
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$2;->this$0:Lcom/gemini/chat/ChatActivity;
 
     invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$200(Lcom/gemini/chat/ChatActivity;)Lcom/gemini/chat/ChatActivity$GeminiTask;
@@ -63,7 +63,7 @@
 
     invoke-virtual {v0, v1}, Landroid/widget/Button;->setEnabled(Z)V
 
-    .line 525
+    .line 530
     :cond_0
     return-void
 .end method
@@ -72,7 +72,7 @@
     .locals 0
 
     .prologue
-    .line 528
+    .line 533
     return-void
 .end method
 
@@ -80,6 +80,6 @@
     .locals 0
 
     .prologue
-    .line 531
+    .line 536
     return-void
 .end method

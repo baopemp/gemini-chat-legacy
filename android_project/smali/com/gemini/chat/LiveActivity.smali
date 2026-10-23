@@ -108,6 +108,14 @@
 
 .field private final ui:Landroid/os/Handler;
 
+.field private userRow:J
+
+.field private userText:Ljava/lang/String;
+
+.field private userTs:J
+
+.field private userView:Landroid/widget/TextView;
+
 .field private voice:Ljava/lang/String;
 
 
@@ -341,7 +349,7 @@
 .end method
 
 .method public constructor <init>()V
-    .locals 1
+    .locals 2
 
     .prologue
     .line 36
@@ -376,21 +384,26 @@
 
     iput-object v0, p0, Lcom/gemini/chat/LiveActivity;->typedPrefix:Ljava/lang/String;
 
-    .line 82
+    .line 85
+    const-wide/16 v0, -0x1
+
+    iput-wide v0, p0, Lcom/gemini/chat/LiveActivity;->userRow:J
+
+    .line 90
     new-instance v0, Ljava/lang/StringBuffer;
 
     invoke-direct {v0}, Ljava/lang/StringBuffer;-><init>()V
 
     iput-object v0, p0, Lcom/gemini/chat/LiveActivity;->modelShown:Ljava/lang/StringBuffer;
 
-    .line 83
+    .line 91
     new-instance v0, Ljava/util/LinkedList;
 
     invoke-direct {v0}, Ljava/util/LinkedList;-><init>()V
 
     iput-object v0, p0, Lcom/gemini/chat/LiveActivity;->pendingText:Ljava/util/LinkedList;
 
-    .line 540
+    .line 562
     new-instance v0, Lcom/gemini/chat/LiveActivity$5;
 
     invoke-direct {v0, p0}, Lcom/gemini/chat/LiveActivity$5;-><init>(Lcom/gemini/chat/LiveActivity;)V
@@ -639,7 +652,7 @@
 
     .prologue
     .line 36
-    invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->updateBox()V
+    invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->lateOrBox()V
 
     return-void
 .end method
@@ -756,6 +769,16 @@
     return v0
 .end method
 
+.method static synthetic access$3500(Lcom/gemini/chat/LiveActivity;)J
+    .locals 2
+
+    .prologue
+    .line 36
+    iget-wide v0, p0, Lcom/gemini/chat/LiveActivity;->micOpenAfter:J
+
+    return-wide v0
+.end method
+
 .method static synthetic access$3502(Lcom/gemini/chat/LiveActivity;J)J
     .locals 1
 
@@ -766,7 +789,27 @@
     return-wide p1
 .end method
 
-.method static synthetic access$3600(Lcom/gemini/chat/LiveActivity;)Z
+.method static synthetic access$3600(Lcom/gemini/chat/LiveActivity;)J
+    .locals 2
+
+    .prologue
+    .line 36
+    iget-wide v0, p0, Lcom/gemini/chat/LiveActivity;->userRow:J
+
+    return-wide v0
+.end method
+
+.method static synthetic access$3700(Lcom/gemini/chat/LiveActivity;)V
+    .locals 0
+
+    .prologue
+    .line 36
+    invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->newUserTurn()V
+
+    return-void
+.end method
+
+.method static synthetic access$3800(Lcom/gemini/chat/LiveActivity;)Z
     .locals 1
 
     .prologue
@@ -776,7 +819,7 @@
     return v0
 .end method
 
-.method static synthetic access$3700(Lcom/gemini/chat/LiveActivity;)V
+.method static synthetic access$3900(Lcom/gemini/chat/LiveActivity;)V
     .locals 0
 
     .prologue
@@ -786,7 +829,7 @@
     return-void
 .end method
 
-.method static synthetic access$3800(Lcom/gemini/chat/LiveActivity;)J
+.method static synthetic access$4000(Lcom/gemini/chat/LiveActivity;)J
     .locals 2
 
     .prologue
@@ -796,7 +839,7 @@
     return-wide v0
 .end method
 
-.method static synthetic access$3900(Lcom/gemini/chat/LiveActivity;)V
+.method static synthetic access$4100(Lcom/gemini/chat/LiveActivity;)V
     .locals 0
 
     .prologue
@@ -806,7 +849,7 @@
     return-void
 .end method
 
-.method static synthetic access$4000(Lcom/gemini/chat/LiveActivity;)Z
+.method static synthetic access$4200(Lcom/gemini/chat/LiveActivity;)Z
     .locals 1
 
     .prologue
@@ -872,12 +915,12 @@
     .locals 8
 
     .prologue
-    .line 253
+    .line 261
     new-instance v7, Landroid/widget/TextView;
 
     invoke-direct {v7, p0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
 
-    .line 254
+    .line 262
     invoke-static {}, Ljava/lang/System;->currentTimeMillis()J
 
     move-result-wide v4
@@ -898,18 +941,18 @@
 
     invoke-virtual {v7, v0}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
 
-    .line 255
+    .line 263
     invoke-static {v7, p1}, Lcom/gemini/chat/MessageFormatter;->styleView(Landroid/widget/TextView;Ljava/lang/String;)V
 
-    .line 256
+    .line 264
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->turns:Landroid/widget/LinearLayout;
 
     invoke-virtual {v0, v7}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
 
-    .line 257
+    .line 265
     invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->scrollDown()V
 
-    .line 258
+    .line 266
     return-object v7
 .end method
 
@@ -917,7 +960,7 @@
     .locals 3
 
     .prologue
-    .line 324
+    .line 332
     const-string v0, "GeminiPrefs"
 
     const/4 v1, 0x0
@@ -945,7 +988,7 @@
     .locals 1
 
     .prologue
-    .line 659
+    .line 699
     iget-boolean v0, p0, Lcom/gemini/chat/LiveActivity;->modelTurnActive:Z
 
     if-nez v0, :cond_0
@@ -964,23 +1007,23 @@
 
     if-nez v0, :cond_1
 
-    .line 660
+    .line 700
     :cond_0
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->player:Lcom/gemini/chat/LiveActivity$Player;
 
     invoke-virtual {v0}, Lcom/gemini/chat/LiveActivity$Player;->flush()V
 
-    .line 661
+    .line 701
     const/4 v0, 0x1
 
     invoke-direct {p0, v0}, Lcom/gemini/chat/LiveActivity;->finishModelTurn(Z)V
 
-    .line 662
+    .line 702
     const/4 v0, 0x0
 
     iput-boolean v0, p0, Lcom/gemini/chat/LiveActivity;->modelTurnActive:Z
 
-    .line 664
+    .line 704
     :cond_1
     return-void
 .end method
@@ -989,7 +1032,7 @@
     .locals 9
 
     .prologue
-    .line 329
+    .line 337
     const-string v0, "GeminiPrefs"
 
     const/4 v1, 0x0
@@ -998,19 +1041,19 @@
 
     move-result-object v7
 
-    .line 330
+    .line 338
     invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->apiKey()Ljava/lang/String;
 
     move-result-object v1
 
-    .line 331
+    .line 339
     invoke-virtual {v1}, Ljava/lang/String;->length()I
 
     move-result v0
 
     if-nez v0, :cond_0
 
-    .line 332
+    .line 340
     const-string v0, "Please go to Settings to set API Key"
 
     const/4 v1, 0x1
@@ -1021,19 +1064,19 @@
 
     invoke-virtual {v0}, Landroid/widget/Toast;->show()V
 
-    .line 333
+    .line 341
     const-string v0, "No API key"
 
     invoke-direct {p0, v0}, Lcom/gemini/chat/LiveActivity;->setStatus(Ljava/lang/String;)V
 
-    .line 334
+    .line 342
     invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->updateButtons()V
 
-    .line 346
+    .line 354
     :goto_0
     return-void
 
-    .line 337
+    .line 345
     :cond_0
     const-string v0, "system_instruction"
 
@@ -1051,14 +1094,14 @@
 
     move-result-object v4
 
-    .line 338
+    .line 346
     iget v0, p0, Lcom/gemini/chat/LiveActivity;->sessionGen:I
 
     add-int/lit8 v8, v0, 0x1
 
     iput v8, p0, Lcom/gemini/chat/LiveActivity;->sessionGen:I
 
-    .line 339
+    .line 347
     new-instance v0, Lcom/gemini/chat/LiveSession;
 
     iget-object v2, p0, Lcom/gemini/chat/LiveActivity;->model:Ljava/lang/String;
@@ -1075,7 +1118,7 @@
 
     iput-object v0, p0, Lcom/gemini/chat/LiveActivity;->session:Lcom/gemini/chat/LiveSession;
 
-    .line 340
+    .line 348
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->model:Ljava/lang/String;
 
     invoke-static {v0}, Lcom/gemini/chat/LiveSession;->needsThinkingLevel(Ljava/lang/String;)Z
@@ -1096,7 +1139,7 @@
 
     iput-object v1, v0, Lcom/gemini/chat/LiveSession;->thinkingLevel:Ljava/lang/String;
 
-    .line 341
+    .line 349
     :cond_1
     if-eqz p1, :cond_2
 
@@ -1104,7 +1147,7 @@
 
     iput-object p1, v0, Lcom/gemini/chat/LiveSession;->resumeHandle:Ljava/lang/String;
 
-    .line 343
+    .line 351
     :goto_1
     if-eqz p1, :cond_3
 
@@ -1113,17 +1156,17 @@
     :goto_2
     invoke-direct {p0, v0}, Lcom/gemini/chat/LiveActivity;->setStatus(Ljava/lang/String;)V
 
-    .line 344
+    .line 352
     invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->updateButtons()V
 
-    .line 345
+    .line 353
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->session:Lcom/gemini/chat/LiveSession;
 
     invoke-virtual {v0}, Lcom/gemini/chat/LiveSession;->start()V
 
     goto :goto_0
 
-    .line 342
+    .line 350
     :cond_2
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->session:Lcom/gemini/chat/LiveSession;
 
@@ -1135,7 +1178,7 @@
 
     goto :goto_1
 
-    .line 343
+    .line 351
     :cond_3
     new-instance v0, Ljava/lang/StringBuilder;
 
@@ -1182,7 +1225,7 @@
     .locals 2
 
     .prologue
-    .line 98
+    .line 106
     invoke-virtual {p0}, Lcom/gemini/chat/LiveActivity;->getResources()Landroid/content/res/Resources;
 
     move-result-object v0
@@ -1210,15 +1253,15 @@
     .prologue
     const/4 v4, 0x0
 
-    .line 584
+    .line 611
     if-eqz p1, :cond_1
 
-    .line 585
+    .line 612
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity;->pendingText:Ljava/util/LinkedList;
 
     monitor-enter v1
 
-    .line 586
+    .line 613
     :goto_0
     :try_start_0
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->pendingText:Ljava/util/LinkedList;
@@ -1249,7 +1292,7 @@
 
     goto :goto_0
 
-    .line 587
+    .line 614
     :catchall_0
     move-exception v0
 
@@ -1265,10 +1308,10 @@
     :try_end_1
     .catchall {:try_start_1 .. :try_end_1} :catchall_0
 
-    .line 588
+    .line 615
     invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->showModel()V
 
-    .line 590
+    .line 617
     :cond_1
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->modelShown:Ljava/lang/StringBuffer;
 
@@ -1280,24 +1323,24 @@
 
     move-result-object v0
 
-    .line 591
+    .line 618
     invoke-virtual {v0}, Ljava/lang/String;->length()I
 
     move-result v1
 
     if-lez v1, :cond_2
 
-    .line 592
+    .line 619
     const-string v1, "model"
 
-    invoke-direct {p0, v1, v0}, Lcom/gemini/chat/LiveActivity;->save(Ljava/lang/String;Ljava/lang/String;)V
+    invoke-direct {p0, v1, v0}, Lcom/gemini/chat/LiveActivity;->save(Ljava/lang/String;Ljava/lang/String;)J
 
-    .line 593
+    .line 620
     iget-boolean v0, p0, Lcom/gemini/chat/LiveActivity;->destroyed:Z
 
     if-nez v0, :cond_2
 
-    .line 595
+    .line 622
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->db:Lcom/gemini/chat/DatabaseHelper;
 
     iget-wide v2, p0, Lcom/gemini/chat/LiveActivity;->chatId:J
@@ -1308,133 +1351,98 @@
 
     invoke-static {p0, v0, v2, v3, v1}, Lcom/gemini/chat/AutoNamer;->maybeStart(Landroid/content/Context;Lcom/gemini/chat/DatabaseHelper;JLcom/gemini/chat/AutoNamer$Callback;)V
 
-    .line 602
+    .line 629
     :cond_2
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->modelShown:Ljava/lang/StringBuffer;
 
     invoke-virtual {v0, v4}, Ljava/lang/StringBuffer;->setLength(I)V
 
-    .line 603
+    .line 630
     const/4 v0, 0x0
 
     iput-object v0, p0, Lcom/gemini/chat/LiveActivity;->modelView:Landroid/widget/TextView;
 
-    .line 604
+    .line 631
     iput-boolean v4, p0, Lcom/gemini/chat/LiveActivity;->modelTurnDone:Z
 
-    .line 605
+    .line 632
     return-void
 .end method
 
 .method private finishUserTurn()V
-    .locals 5
+    .locals 8
 
     .prologue
     const/4 v2, 0x0
 
-    .line 609
-    iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->heard:Ljava/lang/StringBuffer;
+    .line 639
+    invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->spokenText()Ljava/lang/String;
 
-    invoke-virtual {v0}, Ljava/lang/StringBuffer;->toString()Ljava/lang/String;
+    move-result-object v3
 
-    move-result-object v0
+    .line 640
+    invoke-virtual {v3}, Ljava/lang/String;->length()I
 
-    invoke-virtual {v0}, Ljava/lang/String;->trim()Ljava/lang/String;
+    move-result v0
 
-    move-result-object v0
+    if-nez v0, :cond_1
 
-    .line 610
-    invoke-virtual {v0}, Ljava/lang/String;->length()I
-
-    move-result v1
-
-    if-nez v1, :cond_0
-
-    new-instance v0, Ljava/lang/StringBuilder;
-
-    invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
-
-    iget-object v1, p0, Lcom/gemini/chat/LiveActivity;->spokenFinal:Ljava/lang/StringBuffer;
-
-    invoke-virtual {v1}, Ljava/lang/StringBuffer;->toString()Ljava/lang/String;
-
-    move-result-object v1
-
-    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v0
-
-    iget-object v1, p0, Lcom/gemini/chat/LiveActivity;->spokenInterim:Ljava/lang/String;
-
-    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v0
-
-    invoke-virtual {v0}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-
-    move-result-object v0
-
-    invoke-virtual {v0}, Ljava/lang/String;->trim()Ljava/lang/String;
-
-    move-result-object v0
-
-    .line 611
+    .line 656
     :cond_0
-    invoke-virtual {v0}, Ljava/lang/String;->length()I
-
-    move-result v1
-
-    if-lez v1, :cond_3
-
-    const/4 v1, 0x1
-
-    .line 612
     :goto_0
-    if-eqz v1, :cond_1
+    return-void
 
-    .line 613
-    const-string v3, "user"
-
-    const/4 v4, 0x0
-
-    invoke-direct {p0, v3, v4, v0}, Lcom/gemini/chat/LiveActivity;->addTurnView(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Landroid/widget/TextView;
-
-    .line 614
-    const-string v3, "user"
-
-    invoke-direct {p0, v3, v0}, Lcom/gemini/chat/LiveActivity;->save(Ljava/lang/String;Ljava/lang/String;)V
-
-    .line 616
+    .line 641
     :cond_1
-    iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->heard:Ljava/lang/StringBuffer;
+    iget-wide v0, p0, Lcom/gemini/chat/LiveActivity;->userRow:J
 
-    invoke-virtual {v0, v2}, Ljava/lang/StringBuffer;->setLength(I)V
+    const-wide/16 v4, -0x1
 
-    .line 617
-    iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->spokenFinal:Ljava/lang/StringBuffer;
+    cmp-long v0, v0, v4
 
-    invoke-virtual {v0, v2}, Ljava/lang/StringBuffer;->setLength(I)V
+    if-nez v0, :cond_3
 
-    .line 618
-    const-string v0, ""
+    .line 642
+    invoke-static {}, Ljava/lang/System;->currentTimeMillis()J
 
-    iput-object v0, p0, Lcom/gemini/chat/LiveActivity;->spokenInterim:Ljava/lang/String;
+    move-result-wide v0
 
-    .line 619
-    if-eqz v1, :cond_2
+    iput-wide v0, p0, Lcom/gemini/chat/LiveActivity;->userTs:J
 
+    .line 643
+    iput-object v3, p0, Lcom/gemini/chat/LiveActivity;->userText:Ljava/lang/String;
+
+    .line 644
+    const-string v0, "user"
+
+    invoke-direct {p0, v0, v2, v3}, Lcom/gemini/chat/LiveActivity;->addTurnView(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Landroid/widget/TextView;
+
+    move-result-object v0
+
+    iput-object v0, p0, Lcom/gemini/chat/LiveActivity;->userView:Landroid/widget/TextView;
+
+    .line 645
+    const-string v0, "user"
+
+    invoke-direct {p0, v0, v3}, Lcom/gemini/chat/LiveActivity;->save(Ljava/lang/String;Ljava/lang/String;)J
+
+    move-result-wide v0
+
+    iput-wide v0, p0, Lcom/gemini/chat/LiveActivity;->userRow:J
+
+    .line 646
     iget-boolean v0, p0, Lcom/gemini/chat/LiveActivity;->liveText:Z
 
     if-eqz v0, :cond_2
 
-    .line 620
+    .line 647
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->input:Landroid/widget/EditText;
 
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity;->typedPrefix:Ljava/lang/String;
 
     invoke-virtual {v0, v1}, Landroid/widget/EditText;->setText(Ljava/lang/CharSequence;)V
 
-    .line 621
+    .line 648
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->input:Landroid/widget/EditText;
 
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity;->input:Landroid/widget/EditText;
@@ -1449,19 +1457,56 @@
 
     invoke-virtual {v0, v1}, Landroid/widget/EditText;->setSelection(I)V
 
-    .line 623
+    .line 650
     :cond_2
     const-string v0, ""
 
     iput-object v0, p0, Lcom/gemini/chat/LiveActivity;->typedPrefix:Ljava/lang/String;
 
-    .line 624
-    return-void
+    goto :goto_0
 
+    .line 651
     :cond_3
-    move v1, v2
+    iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->userText:Ljava/lang/String;
 
-    .line 611
+    invoke-virtual {v3, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+
+    move-result v0
+
+    if-nez v0, :cond_0
+
+    .line 652
+    iput-object v3, p0, Lcom/gemini/chat/LiveActivity;->userText:Ljava/lang/String;
+
+    .line 653
+    iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->userView:Landroid/widget/TextView;
+
+    if-eqz v0, :cond_4
+
+    iget-object v7, p0, Lcom/gemini/chat/LiveActivity;->userView:Landroid/widget/TextView;
+
+    const-string v1, "user"
+
+    iget-wide v4, p0, Lcom/gemini/chat/LiveActivity;->userTs:J
+
+    move-object v0, p0
+
+    move-object v6, v2
+
+    invoke-static/range {v0 .. v6}, Lcom/gemini/chat/MessageFormatter;->format(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/util/ArrayList;)Ljava/lang/CharSequence;
+
+    move-result-object v0
+
+    invoke-virtual {v7, v0}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
+
+    .line 654
+    :cond_4
+    iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->db:Lcom/gemini/chat/DatabaseHelper;
+
+    iget-wide v4, p0, Lcom/gemini/chat/LiveActivity;->userRow:J
+
+    invoke-virtual {v0, v4, v5, v3}, Lcom/gemini/chat/DatabaseHelper;->updateMessage(JLjava/lang/String;)V
+
     goto :goto_0
 .end method
 
@@ -1475,7 +1520,7 @@
 
     const/4 v10, 0x1
 
-    .line 293
+    .line 301
     iget-wide v2, p0, Lcom/gemini/chat/LiveActivity;->chatId:J
 
     const-wide/16 v4, -0x1
@@ -1486,17 +1531,17 @@
 
     move-object v0, v1
 
-    .line 316
+    .line 324
     :goto_0
     return-object v0
 
-    .line 294
+    .line 302
     :cond_0
     new-instance v4, Ljava/util/ArrayList;
 
     invoke-direct {v4}, Ljava/util/ArrayList;-><init>()V
 
-    .line 295
+    .line 303
     iget-object v2, p0, Lcom/gemini/chat/LiveActivity;->db:Lcom/gemini/chat/DatabaseHelper;
 
     iget-wide v6, p0, Lcom/gemini/chat/LiveActivity;->chatId:J
@@ -1505,14 +1550,14 @@
 
     move-result-object v2
 
-    .line 296
+    .line 304
     if-nez v2, :cond_1
 
     move-object v0, v1
 
     goto :goto_0
 
-    .line 298
+    .line 306
     :cond_1
     :try_start_0
     const-string v3, "role"
@@ -1527,7 +1572,7 @@
 
     move-result v5
 
-    .line 299
+    .line 307
     :cond_2
     :goto_1
     invoke-interface {v2}, Landroid/database/Cursor;->moveToNext()Z
@@ -1536,7 +1581,7 @@
 
     if-eqz v6, :cond_4
 
-    .line 300
+    .line 308
     invoke-interface {v2, v3}, Landroid/database/Cursor;->getString(I)Ljava/lang/String;
 
     move-result-object v6
@@ -1545,7 +1590,7 @@
 
     move-result-object v7
 
-    .line 301
+    .line 309
     const-string v8, "user"
 
     invoke-virtual {v8, v6}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
@@ -1575,7 +1620,7 @@
 
     if-lez v8, :cond_2
 
-    .line 302
+    .line 310
     const/4 v8, 0x2
 
     new-array v8, v8, [Ljava/lang/String;
@@ -1594,27 +1639,27 @@
 
     goto :goto_1
 
-    .line 306
+    .line 314
     :catchall_0
     move-exception v0
 
     invoke-interface {v2}, Landroid/database/Cursor;->close()V
 
-    .line 307
+    .line 315
     throw v0
 
-    .line 306
+    .line 314
     :cond_4
     invoke-interface {v2}, Landroid/database/Cursor;->close()V
 
-    .line 308
+    .line 316
     invoke-virtual {v4}, Ljava/util/ArrayList;->size()I
 
     move-result v2
 
     move v3, v0
 
-    .line 309
+    .line 317
     :goto_2
     if-lez v2, :cond_5
 
@@ -1638,7 +1683,7 @@
 
     if-gt v0, v5, :cond_5
 
-    .line 310
+    .line 318
     add-int/lit8 v0, v2, -0x1
 
     invoke-virtual {v4, v0}, Ljava/util/ArrayList;->get(I)Ljava/lang/Object;
@@ -1655,14 +1700,14 @@
 
     add-int/2addr v0, v3
 
-    .line 311
+    .line 319
     add-int/lit8 v2, v2, -0x1
 
     move v3, v0
 
     goto :goto_2
 
-    .line 313
+    .line 321
     :cond_5
     invoke-virtual {v4}, Ljava/util/ArrayList;->size()I
 
@@ -1674,7 +1719,7 @@
 
     goto/16 :goto_0
 
-    .line 314
+    .line 322
     :cond_6
     invoke-virtual {v4}, Ljava/util/ArrayList;->size()I
 
@@ -1686,7 +1731,7 @@
 
     move v1, v2
 
-    .line 315
+    .line 323
     :goto_3
     invoke-virtual {v4}, Ljava/util/ArrayList;->size()I
 
@@ -1713,7 +1758,7 @@
     :cond_7
     move-object v0, v3
 
-    .line 316
+    .line 324
     goto/16 :goto_0
 .end method
 
@@ -1721,16 +1766,16 @@
     .locals 2
 
     .prologue
-    .line 245
+    .line 253
     iget-boolean v0, p0, Lcom/gemini/chat/LiveActivity;->connected:Z
 
     if-nez v0, :cond_0
 
-    .line 250
+    .line 258
     :goto_0
     return-void
 
-    .line 247
+    .line 255
     :cond_0
     iget-boolean v0, p0, Lcom/gemini/chat/LiveActivity;->talking:Z
 
@@ -1742,7 +1787,7 @@
 
     const-string v0, "Listening (hands-free)..."
 
-    .line 249
+    .line 257
     :goto_1
     iget-boolean v1, p0, Lcom/gemini/chat/LiveActivity;->muted:Z
 
@@ -1771,13 +1816,13 @@
 
     goto :goto_0
 
-    .line 247
+    .line 255
     :cond_2
     const-string v0, "Listening... tap \"Send speech\" when done"
 
     goto :goto_1
 
-    .line 248
+    .line 256
     :cond_3
     iget-boolean v0, p0, Lcom/gemini/chat/LiveActivity;->handsFree:Z
 
@@ -1793,11 +1838,37 @@
     goto :goto_1
 .end method
 
+.method private lateOrBox()V
+    .locals 4
+
+    .prologue
+    .line 546
+    iget-wide v0, p0, Lcom/gemini/chat/LiveActivity;->userRow:J
+
+    const-wide/16 v2, -0x1
+
+    cmp-long v0, v0, v2
+
+    if-eqz v0, :cond_0
+
+    invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->finishUserTurn()V
+
+    .line 548
+    :goto_0
+    return-void
+
+    .line 547
+    :cond_0
+    invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->updateBox()V
+
+    goto :goto_0
+.end method
+
 .method private loadExisting()V
     .locals 13
 
     .prologue
-    .line 271
+    .line 279
     iget-wide v0, p0, Lcom/gemini/chat/LiveActivity;->chatId:J
 
     const-wide/16 v2, -0x1
@@ -1806,12 +1877,12 @@
 
     if-nez v0, :cond_1
 
-    .line 289
+    .line 297
     :cond_0
     :goto_0
     return-void
 
-    .line 272
+    .line 280
     :cond_1
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->db:Lcom/gemini/chat/DatabaseHelper;
 
@@ -1821,10 +1892,10 @@
 
     move-result-object v7
 
-    .line 273
+    .line 281
     if-eqz v7, :cond_0
 
-    .line 275
+    .line 283
     :try_start_0
     const-string v0, "role"
 
@@ -1844,14 +1915,14 @@
 
     move-result v10
 
-    .line 276
+    .line 284
     const-string v0, "timestamp"
 
     invoke-interface {v7, v0}, Landroid/database/Cursor;->getColumnIndex(Ljava/lang/String;)I
 
     move-result v11
 
-    .line 277
+    .line 285
     :cond_2
     :goto_1
     invoke-interface {v7}, Landroid/database/Cursor;->moveToNext()Z
@@ -1860,12 +1931,12 @@
 
     if-eqz v0, :cond_4
 
-    .line 278
+    .line 286
     invoke-interface {v7, v8}, Landroid/database/Cursor;->getString(I)Ljava/lang/String;
 
     move-result-object v1
 
-    .line 279
+    .line 287
     const-string v0, "user"
 
     invoke-virtual {v0, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
@@ -1882,13 +1953,13 @@
 
     if-eqz v0, :cond_2
 
-    .line 280
+    .line 288
     :cond_3
     new-instance v12, Landroid/widget/TextView;
 
     invoke-direct {v12, p0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
 
-    .line 281
+    .line 289
     invoke-interface {v7, v10}, Landroid/database/Cursor;->getString(I)Ljava/lang/String;
 
     move-result-object v2
@@ -1911,10 +1982,10 @@
 
     invoke-virtual {v12, v0}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
 
-    .line 282
+    .line 290
     invoke-static {v12, v1}, Lcom/gemini/chat/MessageFormatter;->styleView(Landroid/widget/TextView;Ljava/lang/String;)V
 
-    .line 283
+    .line 291
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->turns:Landroid/widget/LinearLayout;
 
     invoke-virtual {v0, v12}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
@@ -1923,20 +1994,20 @@
 
     goto :goto_1
 
-    .line 286
+    .line 294
     :catchall_0
     move-exception v0
 
     invoke-interface {v7}, Landroid/database/Cursor;->close()V
 
-    .line 287
+    .line 295
     throw v0
 
-    .line 286
+    .line 294
     :cond_4
     invoke-interface {v7}, Landroid/database/Cursor;->close()V
 
-    .line 288
+    .line 296
     invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->scrollDown()V
 
     goto :goto_0
@@ -1946,7 +2017,7 @@
     .locals 4
 
     .prologue
-    .line 712
+    .line 753
     iget-boolean v0, p0, Lcom/gemini/chat/LiveActivity;->handsFree:Z
 
     if-eqz v0, :cond_1
@@ -1985,49 +2056,92 @@
     goto :goto_0
 .end method
 
-.method private onTalk()V
+.method private newUserTurn()V
     .locals 3
+
+    .prologue
+    const/4 v2, 0x0
+
+    const/4 v1, 0x0
+
+    .line 660
+    iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->heard:Ljava/lang/StringBuffer;
+
+    invoke-virtual {v0, v1}, Ljava/lang/StringBuffer;->setLength(I)V
+
+    .line 661
+    iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->spokenFinal:Ljava/lang/StringBuffer;
+
+    invoke-virtual {v0, v1}, Ljava/lang/StringBuffer;->setLength(I)V
+
+    .line 662
+    const-string v0, ""
+
+    iput-object v0, p0, Lcom/gemini/chat/LiveActivity;->spokenInterim:Ljava/lang/String;
+
+    .line 663
+    const-string v0, ""
+
+    iput-object v0, p0, Lcom/gemini/chat/LiveActivity;->typedPrefix:Ljava/lang/String;
+
+    .line 664
+    const-wide/16 v0, -0x1
+
+    iput-wide v0, p0, Lcom/gemini/chat/LiveActivity;->userRow:J
+
+    .line 665
+    iput-object v2, p0, Lcom/gemini/chat/LiveActivity;->userView:Landroid/widget/TextView;
+
+    .line 666
+    iput-object v2, p0, Lcom/gemini/chat/LiveActivity;->userText:Ljava/lang/String;
+
+    .line 667
+    return-void
+.end method
+
+.method private onTalk()V
+    .locals 5
 
     .prologue
     const/4 v1, 0x0
 
-    const/4 v2, 0x1
+    const/4 v4, 0x1
 
-    .line 667
+    .line 707
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->session:Lcom/gemini/chat/LiveSession;
 
     if-nez v0, :cond_1
 
-    .line 668
+    .line 708
     const/4 v0, 0x0
 
     iput v0, p0, Lcom/gemini/chat/LiveActivity;->reconnects:I
 
-    .line 669
+    .line 709
     invoke-direct {p0, v1}, Lcom/gemini/chat/LiveActivity;->connect(Ljava/lang/String;)V
 
-    .line 692
+    .line 733
     :cond_0
     :goto_0
     return-void
 
-    .line 672
+    .line 712
     :cond_1
     iget-boolean v0, p0, Lcom/gemini/chat/LiveActivity;->connected:Z
 
     if-eqz v0, :cond_0
 
-    .line 673
+    .line 713
     iget-boolean v0, p0, Lcom/gemini/chat/LiveActivity;->talking:Z
 
     if-eqz v0, :cond_2
 
-    .line 674
-    invoke-direct {p0, v2}, Lcom/gemini/chat/LiveActivity;->stopTalking(Z)V
+    .line 714
+    invoke-direct {p0, v4}, Lcom/gemini/chat/LiveActivity;->stopTalking(Z)V
 
     goto :goto_0
 
-    .line 677
+    .line 717
     :cond_2
     new-instance v0, Lcom/gemini/chat/LiveActivity$Mic;
 
@@ -2035,40 +2149,62 @@
 
     iput-object v0, p0, Lcom/gemini/chat/LiveActivity;->mic:Lcom/gemini/chat/LiveActivity$Mic;
 
-    .line 678
+    .line 718
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->mic:Lcom/gemini/chat/LiveActivity$Mic;
 
     iget-boolean v0, v0, Lcom/gemini/chat/LiveActivity$Mic;->ok:Z
 
     if-nez v0, :cond_3
 
-    .line 679
+    .line 719
     const-string v0, "Microphone not available."
 
-    invoke-static {p0, v0, v2}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
+    invoke-static {p0, v0, v4}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
 
     move-result-object v0
 
     invoke-virtual {v0}, Landroid/widget/Toast;->show()V
 
-    .line 680
+    .line 720
     iput-object v1, p0, Lcom/gemini/chat/LiveActivity;->mic:Lcom/gemini/chat/LiveActivity$Mic;
 
     goto :goto_0
 
-    .line 683
+    .line 723
     :cond_3
     invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->bargeIn()V
 
-    .line 684
+    .line 724
     const-wide/16 v0, 0x0
 
     iput-wide v0, p0, Lcom/gemini/chat/LiveActivity;->micOpenAfter:J
 
-    .line 685
+    .line 725
     invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->openTranscriber()V
 
-    .line 686
+    .line 726
+    iget-wide v0, p0, Lcom/gemini/chat/LiveActivity;->userRow:J
+
+    const-wide/16 v2, -0x1
+
+    cmp-long v0, v0, v2
+
+    if-eqz v0, :cond_4
+
+    invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->newUserTurn()V
+
+    .line 727
+    :cond_4
+    invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->spokenText()Ljava/lang/String;
+
+    move-result-object v0
+
+    invoke-virtual {v0}, Ljava/lang/String;->length()I
+
+    move-result v0
+
+    if-nez v0, :cond_5
+
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->input:Landroid/widget/EditText;
 
     invoke-virtual {v0}, Landroid/widget/EditText;->getText()Landroid/text/Editable;
@@ -2085,28 +2221,29 @@
 
     iput-object v0, p0, Lcom/gemini/chat/LiveActivity;->typedPrefix:Ljava/lang/String;
 
-    .line 687
+    .line 728
+    :cond_5
     iget-boolean v0, p0, Lcom/gemini/chat/LiveActivity;->handsFree:Z
 
-    if-nez v0, :cond_4
+    if-nez v0, :cond_6
 
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->session:Lcom/gemini/chat/LiveSession;
 
     invoke-virtual {v0}, Lcom/gemini/chat/LiveSession;->activityStart()V
 
-    .line 688
-    :cond_4
-    iput-boolean v2, p0, Lcom/gemini/chat/LiveActivity;->talking:Z
+    .line 729
+    :cond_6
+    iput-boolean v4, p0, Lcom/gemini/chat/LiveActivity;->talking:Z
 
-    .line 689
+    .line 730
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->mic:Lcom/gemini/chat/LiveActivity$Mic;
 
     invoke-virtual {v0}, Lcom/gemini/chat/LiveActivity$Mic;->start()V
 
-    .line 690
+    .line 731
     invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->updateButtons()V
 
-    .line 691
+    .line 732
     invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->idleStatus()V
 
     goto :goto_0
@@ -2116,7 +2253,7 @@
     .locals 3
 
     .prologue
-    .line 362
+    .line 370
     iget-boolean v0, p0, Lcom/gemini/chat/LiveActivity;->liveText:Z
 
     if-eqz v0, :cond_0
@@ -2129,12 +2266,12 @@
 
     if-eqz v0, :cond_1
 
-    .line 367
+    .line 375
     :cond_0
     :goto_0
     return-void
 
-    .line 363
+    .line 371
     :cond_1
     new-instance v0, Lcom/gemini/chat/LiveActivity$Transcriber;
 
@@ -2142,7 +2279,7 @@
 
     invoke-direct {v0, p0, v1}, Lcom/gemini/chat/LiveActivity$Transcriber;-><init>(Lcom/gemini/chat/LiveActivity;Lcom/gemini/chat/LiveActivity$1;)V
 
-    .line 364
+    .line 372
     invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->apiKey()Ljava/lang/String;
 
     move-result-object v1
@@ -2155,12 +2292,12 @@
 
     iput-object v1, p0, Lcom/gemini/chat/LiveActivity;->tr:Lcom/gemini/chat/LiveSession;
 
-    .line 365
+    .line 373
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity;->tr:Lcom/gemini/chat/LiveSession;
 
     iput-object v1, v0, Lcom/gemini/chat/LiveActivity$Transcriber;->self:Lcom/gemini/chat/LiveSession;
 
-    .line 366
+    .line 374
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->tr:Lcom/gemini/chat/LiveSession;
 
     invoke-virtual {v0}, Lcom/gemini/chat/LiveSession;->start()V
@@ -2172,12 +2309,12 @@
     .locals 2
 
     .prologue
-    .line 569
+    .line 596
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity;->pendingText:Ljava/util/LinkedList;
 
     monitor-enter v1
 
-    .line 570
+    .line 597
     :try_start_0
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->pendingText:Ljava/util/LinkedList;
 
@@ -2189,7 +2326,7 @@
 
     return v0
 
-    .line 571
+    .line 598
     :catchall_0
     move-exception v0
 
@@ -2206,29 +2343,29 @@
     .prologue
     const/4 v3, 0x0
 
-    .line 350
+    .line 358
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity;->session:Lcom/gemini/chat/LiveSession;
 
-    .line 351
+    .line 359
     if-eqz v1, :cond_0
 
     iget-object v0, v1, Lcom/gemini/chat/LiveSession;->lastHandle:Ljava/lang/String;
 
-    .line 352
+    .line 360
     :goto_0
     if-nez v0, :cond_1
 
-    .line 359
+    .line 367
     :goto_1
     return-void
 
-    .line 351
+    .line 359
     :cond_0
     const/4 v0, 0x0
 
     goto :goto_0
 
-    .line 353
+    .line 361
     :cond_1
     iget v2, p0, Lcom/gemini/chat/LiveActivity;->sessionGen:I
 
@@ -2236,40 +2373,40 @@
 
     iput v2, p0, Lcom/gemini/chat/LiveActivity;->sessionGen:I
 
-    .line 354
+    .line 362
     iget-boolean v2, p0, Lcom/gemini/chat/LiveActivity;->talking:Z
 
     if-eqz v2, :cond_2
 
     invoke-direct {p0, v3}, Lcom/gemini/chat/LiveActivity;->stopTalking(Z)V
 
-    .line 355
+    .line 363
     :cond_2
     iput-boolean v3, p0, Lcom/gemini/chat/LiveActivity;->connected:Z
 
-    .line 356
+    .line 364
     invoke-virtual {v1}, Lcom/gemini/chat/LiveSession;->stop()V
 
-    .line 357
+    .line 365
     iget v1, p0, Lcom/gemini/chat/LiveActivity;->reconnects:I
 
     add-int/lit8 v1, v1, 0x1
 
     iput v1, p0, Lcom/gemini/chat/LiveActivity;->reconnects:I
 
-    .line 358
+    .line 366
     invoke-direct {p0, v0}, Lcom/gemini/chat/LiveActivity;->connect(Ljava/lang/String;)V
 
     goto :goto_1
 .end method
 
-.method private save(Ljava/lang/String;Ljava/lang/String;)V
+.method private save(Ljava/lang/String;Ljava/lang/String;)J
     .locals 7
 
     .prologue
     const/16 v4, 0x19
 
-    .line 627
+    .line 670
     iget-wide v0, p0, Lcom/gemini/chat/LiveActivity;->chatId:J
 
     const-wide/16 v2, -0x1
@@ -2278,7 +2415,7 @@
 
     if-nez v0, :cond_1
 
-    .line 628
+    .line 671
     const/16 v0, 0xa
 
     const/16 v1, 0x20
@@ -2291,7 +2428,7 @@
 
     move-result-object v0
 
-    .line 629
+    .line 672
     invoke-virtual {v0}, Ljava/lang/String;->length()I
 
     move-result v1
@@ -2322,7 +2459,7 @@
 
     move-result-object v0
 
-    .line 630
+    .line 673
     :cond_0
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity;->db:Lcom/gemini/chat/DatabaseHelper;
 
@@ -2332,10 +2469,10 @@
 
     iput-wide v0, p0, Lcom/gemini/chat/LiveActivity;->chatId:J
 
-    .line 631
+    .line 674
     invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->updateTitle()V
 
-    .line 633
+    .line 676
     :cond_1
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity;->db:Lcom/gemini/chat/DatabaseHelper;
 
@@ -2358,10 +2495,10 @@
 
     invoke-virtual/range {v1 .. v6}, Lcom/gemini/chat/DatabaseHelper;->addMessage(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)J
 
-    .line 634
-    return-void
+    move-result-wide v0
 
-    .line 633
+    return-wide v0
+
     :cond_2
     const/4 v6, 0x0
 
@@ -2372,7 +2509,7 @@
     .locals 2
 
     .prologue
-    .line 262
+    .line 270
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->scroll:Landroid/widget/ScrollView;
 
     new-instance v1, Lcom/gemini/chat/LiveActivity$4;
@@ -2381,7 +2518,7 @@
 
     invoke-virtual {v0, v1}, Landroid/widget/ScrollView;->post(Ljava/lang/Runnable;)Z
 
-    .line 267
+    .line 275
     return-void
 .end method
 
@@ -2391,7 +2528,7 @@
     .prologue
     const/4 v3, 0x0
 
-    .line 641
+    .line 684
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->input:Landroid/widget/EditText;
 
     invoke-virtual {v0}, Landroid/widget/EditText;->getText()Landroid/text/Editable;
@@ -2406,7 +2543,7 @@
 
     move-result-object v1
 
-    .line 642
+    .line 685
     invoke-virtual {v1}, Ljava/lang/String;->length()I
 
     move-result v0
@@ -2421,12 +2558,12 @@
 
     if-nez v0, :cond_1
 
-    .line 655
+    .line 695
     :cond_0
     :goto_0
     return-void
 
-    .line 643
+    .line 686
     :cond_1
     const-string v0, "input_method"
 
@@ -2436,7 +2573,7 @@
 
     check-cast v0, Landroid/view/inputmethod/InputMethodManager;
 
-    .line 644
+    .line 687
     if-eqz v0, :cond_2
 
     iget-object v2, p0, Lcom/gemini/chat/LiveActivity;->input:Landroid/widget/EditText;
@@ -2447,7 +2584,7 @@
 
     invoke-virtual {v0, v2, v3}, Landroid/view/inputmethod/InputMethodManager;->hideSoftInputFromWindow(Landroid/os/IBinder;I)Z
 
-    .line 645
+    .line 688
     :cond_2
     iget-boolean v0, p0, Lcom/gemini/chat/LiveActivity;->talking:Z
 
@@ -2455,50 +2592,33 @@
 
     invoke-direct {p0, v3}, Lcom/gemini/chat/LiveActivity;->stopTalking(Z)V
 
-    .line 646
+    .line 689
     :cond_3
-    iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->heard:Ljava/lang/StringBuffer;
+    invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->newUserTurn()V
 
-    invoke-virtual {v0, v3}, Ljava/lang/StringBuffer;->setLength(I)V
-
-    .line 647
-    iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->spokenFinal:Ljava/lang/StringBuffer;
-
-    invoke-virtual {v0, v3}, Ljava/lang/StringBuffer;->setLength(I)V
-
-    .line 648
-    const-string v0, ""
-
-    iput-object v0, p0, Lcom/gemini/chat/LiveActivity;->spokenInterim:Ljava/lang/String;
-
-    .line 649
-    const-string v0, ""
-
-    iput-object v0, p0, Lcom/gemini/chat/LiveActivity;->typedPrefix:Ljava/lang/String;
-
-    .line 650
+    .line 690
     invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->bargeIn()V
 
-    .line 651
+    .line 691
     const-string v0, "user"
 
     const/4 v2, 0x0
 
     invoke-direct {p0, v0, v2, v1}, Lcom/gemini/chat/LiveActivity;->addTurnView(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Landroid/widget/TextView;
 
-    .line 652
+    .line 692
     const-string v0, "user"
 
-    invoke-direct {p0, v0, v1}, Lcom/gemini/chat/LiveActivity;->save(Ljava/lang/String;Ljava/lang/String;)V
+    invoke-direct {p0, v0, v1}, Lcom/gemini/chat/LiveActivity;->save(Ljava/lang/String;Ljava/lang/String;)J
 
-    .line 653
+    .line 693
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->input:Landroid/widget/EditText;
 
     const-string v2, ""
 
     invoke-virtual {v0, v2}, Landroid/widget/EditText;->setText(Ljava/lang/CharSequence;)V
 
-    .line 654
+    .line 694
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->session:Lcom/gemini/chat/LiveSession;
 
     invoke-virtual {v0, v1}, Lcom/gemini/chat/LiveSession;->sendText(Ljava/lang/String;)V
@@ -2510,7 +2630,7 @@
     .locals 1
 
     .prologue
-    .line 226
+    .line 234
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->status:Landroid/widget/TextView;
 
     invoke-virtual {v0}, Landroid/widget/TextView;->getText()Ljava/lang/CharSequence;
@@ -2527,7 +2647,7 @@
 
     invoke-virtual {v0, p1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
 
-    .line 227
+    .line 235
     :cond_0
     return-void
 .end method
@@ -2536,7 +2656,7 @@
     .locals 8
 
     .prologue
-    .line 575
+    .line 602
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->modelShown:Ljava/lang/StringBuffer;
 
     invoke-virtual {v0}, Ljava/lang/StringBuffer;->toString()Ljava/lang/String;
@@ -2547,18 +2667,18 @@
 
     move-result-object v3
 
-    .line 576
+    .line 603
     invoke-virtual {v3}, Ljava/lang/String;->length()I
 
     move-result v0
 
     if-nez v0, :cond_0
 
-    .line 580
+    .line 607
     :goto_0
     return-void
 
-    .line 577
+    .line 604
     :cond_0
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->modelView:Landroid/widget/TextView;
 
@@ -2574,13 +2694,13 @@
 
     iput-object v0, p0, Lcom/gemini/chat/LiveActivity;->modelView:Landroid/widget/TextView;
 
-    .line 579
+    .line 606
     :goto_1
     invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->scrollDown()V
 
     goto :goto_0
 
-    .line 578
+    .line 605
     :cond_1
     iget-object v7, p0, Lcom/gemini/chat/LiveActivity;->modelView:Landroid/widget/TextView;
 
@@ -2605,101 +2725,11 @@
     goto :goto_1
 .end method
 
-.method private stopTalking(Z)V
-    .locals 1
+.method private spokenText()Ljava/lang/String;
+    .locals 2
 
     .prologue
-    .line 696
-    iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->mic:Lcom/gemini/chat/LiveActivity$Mic;
-
-    if-eqz v0, :cond_0
-
-    .line 697
-    iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->mic:Lcom/gemini/chat/LiveActivity$Mic;
-
-    invoke-virtual {v0}, Lcom/gemini/chat/LiveActivity$Mic;->quit()V
-
-    .line 698
-    const/4 v0, 0x0
-
-    iput-object v0, p0, Lcom/gemini/chat/LiveActivity;->mic:Lcom/gemini/chat/LiveActivity$Mic;
-
-    .line 700
-    :cond_0
-    iget-boolean v0, p0, Lcom/gemini/chat/LiveActivity;->talking:Z
-
-    if-eqz v0, :cond_1
-
-    if-eqz p1, :cond_1
-
-    iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->session:Lcom/gemini/chat/LiveSession;
-
-    if-eqz v0, :cond_1
-
-    .line 701
-    iget-boolean v0, p0, Lcom/gemini/chat/LiveActivity;->handsFree:Z
-
-    if-eqz v0, :cond_3
-
-    iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->session:Lcom/gemini/chat/LiveSession;
-
-    invoke-virtual {v0}, Lcom/gemini/chat/LiveSession;->audioStreamEnd()V
-
-    .line 704
-    :cond_1
-    :goto_0
-    iget-boolean v0, p0, Lcom/gemini/chat/LiveActivity;->talking:Z
-
-    if-eqz v0, :cond_2
-
-    iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->tr:Lcom/gemini/chat/LiveSession;
-
-    if-eqz v0, :cond_2
-
-    iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->tr:Lcom/gemini/chat/LiveSession;
-
-    invoke-virtual {v0}, Lcom/gemini/chat/LiveSession;->audioStreamEnd()V
-
-    .line 705
-    :cond_2
-    const/4 v0, 0x0
-
-    iput-boolean v0, p0, Lcom/gemini/chat/LiveActivity;->talking:Z
-
-    .line 706
-    invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->updateButtons()V
-
-    .line 707
-    invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->idleStatus()V
-
-    .line 708
-    return-void
-
-    .line 702
-    :cond_3
-    iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->session:Lcom/gemini/chat/LiveSession;
-
-    invoke-virtual {v0}, Lcom/gemini/chat/LiveSession;->activityEnd()V
-
-    goto :goto_0
-.end method
-
-.method private updateBox()V
-    .locals 3
-
-    .prologue
-    .line 529
-    iget-boolean v0, p0, Lcom/gemini/chat/LiveActivity;->liveText:Z
-
-    if-nez v0, :cond_1
-
-    .line 537
-    :cond_0
-    :goto_0
-    return-void
-
-    .line 530
-    :cond_1
+    .line 540
     new-instance v0, Ljava/lang/StringBuilder;
 
     invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
@@ -2728,13 +2758,17 @@
 
     move-result-object v0
 
-    .line 531
+    .line 541
     invoke-virtual {v0}, Ljava/lang/String;->length()I
 
     move-result v1
 
-    if-nez v1, :cond_2
+    if-lez v1, :cond_0
 
+    :goto_0
+    return-object v0
+
+    :cond_0
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->heard:Ljava/lang/StringBuffer;
 
     invoke-virtual {v0}, Ljava/lang/StringBuffer;->toString()Ljava/lang/String;
@@ -2745,21 +2779,130 @@
 
     move-result-object v0
 
-    .line 532
+    goto :goto_0
+.end method
+
+.method private stopTalking(Z)V
+    .locals 1
+
+    .prologue
+    .line 737
+    iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->mic:Lcom/gemini/chat/LiveActivity$Mic;
+
+    if-eqz v0, :cond_0
+
+    .line 738
+    iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->mic:Lcom/gemini/chat/LiveActivity$Mic;
+
+    invoke-virtual {v0}, Lcom/gemini/chat/LiveActivity$Mic;->quit()V
+
+    .line 739
+    const/4 v0, 0x0
+
+    iput-object v0, p0, Lcom/gemini/chat/LiveActivity;->mic:Lcom/gemini/chat/LiveActivity$Mic;
+
+    .line 741
+    :cond_0
+    iget-boolean v0, p0, Lcom/gemini/chat/LiveActivity;->talking:Z
+
+    if-eqz v0, :cond_1
+
+    if-eqz p1, :cond_1
+
+    iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->session:Lcom/gemini/chat/LiveSession;
+
+    if-eqz v0, :cond_1
+
+    .line 742
+    iget-boolean v0, p0, Lcom/gemini/chat/LiveActivity;->handsFree:Z
+
+    if-eqz v0, :cond_3
+
+    iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->session:Lcom/gemini/chat/LiveSession;
+
+    invoke-virtual {v0}, Lcom/gemini/chat/LiveSession;->audioStreamEnd()V
+
+    .line 745
+    :cond_1
+    :goto_0
+    iget-boolean v0, p0, Lcom/gemini/chat/LiveActivity;->talking:Z
+
+    if-eqz v0, :cond_2
+
+    iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->tr:Lcom/gemini/chat/LiveSession;
+
+    if-eqz v0, :cond_2
+
+    iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->tr:Lcom/gemini/chat/LiveSession;
+
+    invoke-virtual {v0}, Lcom/gemini/chat/LiveSession;->audioStreamEnd()V
+
+    .line 746
     :cond_2
+    const/4 v0, 0x0
+
+    iput-boolean v0, p0, Lcom/gemini/chat/LiveActivity;->talking:Z
+
+    .line 747
+    invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->updateButtons()V
+
+    .line 748
+    invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->idleStatus()V
+
+    .line 749
+    return-void
+
+    .line 743
+    :cond_3
+    iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->session:Lcom/gemini/chat/LiveSession;
+
+    invoke-virtual {v0}, Lcom/gemini/chat/LiveSession;->activityEnd()V
+
+    goto :goto_0
+.end method
+
+.method private updateBox()V
+    .locals 4
+
+    .prologue
+    .line 552
+    iget-boolean v0, p0, Lcom/gemini/chat/LiveActivity;->liveText:Z
+
+    if-eqz v0, :cond_0
+
+    iget-wide v0, p0, Lcom/gemini/chat/LiveActivity;->userRow:J
+
+    const-wide/16 v2, -0x1
+
+    cmp-long v0, v0, v2
+
+    if-eqz v0, :cond_1
+
+    .line 559
+    :cond_0
+    :goto_0
+    return-void
+
+    .line 553
+    :cond_1
+    invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->spokenText()Ljava/lang/String;
+
+    move-result-object v0
+
+    .line 554
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity;->typedPrefix:Ljava/lang/String;
 
     invoke-virtual {v1}, Ljava/lang/String;->length()I
 
     move-result v1
 
-    if-lez v1, :cond_3
+    if-lez v1, :cond_2
 
     invoke-virtual {v0}, Ljava/lang/String;->length()I
 
     move-result v1
 
-    if-lez v1, :cond_3
+    if-lez v1, :cond_2
 
     new-instance v1, Ljava/lang/StringBuilder;
 
@@ -2785,7 +2928,7 @@
 
     move-result-object v0
 
-    .line 533
+    .line 555
     :goto_1
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity;->input:Landroid/widget/EditText;
 
@@ -2799,12 +2942,12 @@
 
     if-nez v1, :cond_0
 
-    .line 534
+    .line 556
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity;->input:Landroid/widget/EditText;
 
     invoke-virtual {v1, v0}, Landroid/widget/EditText;->setText(Ljava/lang/CharSequence;)V
 
-    .line 535
+    .line 557
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity;->input:Landroid/widget/EditText;
 
     invoke-virtual {v0}, Ljava/lang/String;->length()I
@@ -2815,8 +2958,8 @@
 
     goto :goto_0
 
-    .line 532
-    :cond_3
+    .line 554
+    :cond_2
     new-instance v1, Ljava/lang/StringBuilder;
 
     invoke-direct {v1}, Ljava/lang/StringBuilder;-><init>()V
@@ -2844,25 +2987,25 @@
     .prologue
     const/4 v0, 0x1
 
-    .line 230
+    .line 238
     iget-boolean v1, p0, Lcom/gemini/chat/LiveActivity;->connected:Z
 
-    .line 231
+    .line 239
     iget-object v2, p0, Lcom/gemini/chat/LiveActivity;->btnSend:Landroid/widget/Button;
 
     invoke-virtual {v2, v1}, Landroid/widget/Button;->setEnabled(Z)V
 
-    .line 232
+    .line 240
     if-nez v1, :cond_1
 
-    .line 233
+    .line 241
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity;->btnTalk:Landroid/widget/Button;
 
     const-string v2, "Reconnect"
 
     invoke-virtual {v1, v2}, Landroid/widget/Button;->setText(Ljava/lang/CharSequence;)V
 
-    .line 234
+    .line 242
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity;->btnTalk:Landroid/widget/Button;
 
     iget-object v2, p0, Lcom/gemini/chat/LiveActivity;->session:Lcom/gemini/chat/LiveSession;
@@ -2872,23 +3015,23 @@
     :goto_0
     invoke-virtual {v1, v0}, Landroid/widget/Button;->setEnabled(Z)V
 
-    .line 242
+    .line 250
     :goto_1
     return-void
 
-    .line 234
+    .line 242
     :cond_0
     const/4 v0, 0x0
 
     goto :goto_0
 
-    .line 235
+    .line 243
     :cond_1
     iget-boolean v1, p0, Lcom/gemini/chat/LiveActivity;->handsFree:Z
 
     if-eqz v1, :cond_3
 
-    .line 236
+    .line 244
     iget-object v2, p0, Lcom/gemini/chat/LiveActivity;->btnTalk:Landroid/widget/Button;
 
     iget-boolean v1, p0, Lcom/gemini/chat/LiveActivity;->talking:Z
@@ -2900,20 +3043,20 @@
     :goto_2
     invoke-virtual {v2, v1}, Landroid/widget/Button;->setText(Ljava/lang/CharSequence;)V
 
-    .line 237
+    .line 245
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity;->btnTalk:Landroid/widget/Button;
 
     invoke-virtual {v1, v0}, Landroid/widget/Button;->setEnabled(Z)V
 
     goto :goto_1
 
-    .line 236
+    .line 244
     :cond_2
     const-string v1, "Mic: off (tap to talk)"
 
     goto :goto_2
 
-    .line 239
+    .line 247
     :cond_3
     iget-object v2, p0, Lcom/gemini/chat/LiveActivity;->btnTalk:Landroid/widget/Button;
 
@@ -2926,14 +3069,14 @@
     :goto_3
     invoke-virtual {v2, v1}, Landroid/widget/Button;->setText(Ljava/lang/CharSequence;)V
 
-    .line 240
+    .line 248
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity;->btnTalk:Landroid/widget/Button;
 
     invoke-virtual {v1, v0}, Landroid/widget/Button;->setEnabled(Z)V
 
     goto :goto_1
 
-    .line 239
+    .line 247
     :cond_4
     const-string v1, "Talk"
 
@@ -2944,7 +3087,7 @@
     .locals 6
 
     .prologue
-    .line 222
+    .line 230
     new-instance v0, Ljava/lang/StringBuilder;
 
     invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
@@ -2976,10 +3119,10 @@
 
     invoke-virtual {p0, v0}, Lcom/gemini/chat/LiveActivity;->setTitle(Ljava/lang/CharSequence;)V
 
-    .line 223
+    .line 231
     return-void
 
-    .line 222
+    .line 230
     :cond_0
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->db:Lcom/gemini/chat/DatabaseHelper;
 
@@ -2996,14 +3139,14 @@
     .locals 2
 
     .prologue
-    .line 93
+    .line 101
     const-string v0, " -- "
 
     invoke-virtual {p0, v0}, Ljava/lang/String;->indexOf(Ljava/lang/String;)I
 
     move-result v0
 
-    .line 94
+    .line 102
     if-lez v0, :cond_0
 
     const/4 v1, 0x0
@@ -3024,36 +3167,36 @@
     .prologue
     const/4 v0, 0x1
 
-    .line 210
+    .line 218
     iput-boolean v0, p0, Lcom/gemini/chat/LiveActivity;->ending:Z
 
-    .line 212
+    .line 220
     invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->finishUserTurn()V
 
-    .line 213
+    .line 221
     invoke-direct {p0, v0}, Lcom/gemini/chat/LiveActivity;->finishModelTurn(Z)V
 
-    .line 214
+    .line 222
     new-instance v0, Landroid/content/Intent;
 
     invoke-direct {v0}, Landroid/content/Intent;-><init>()V
 
-    .line 215
+    .line 223
     const-string v1, "chat_id"
 
     iget-wide v2, p0, Lcom/gemini/chat/LiveActivity;->chatId:J
 
     invoke-virtual {v0, v1, v2, v3}, Landroid/content/Intent;->putExtra(Ljava/lang/String;J)Landroid/content/Intent;
 
-    .line 216
+    .line 224
     const/4 v1, -0x1
 
     invoke-virtual {p0, v1, v0}, Lcom/gemini/chat/LiveActivity;->setResult(ILandroid/content/Intent;)V
 
-    .line 217
+    .line 225
     invoke-super {p0}, Landroid/app/Activity;->finish()V
 
-    .line 218
+    .line 226
     return-void
 .end method
 
@@ -3071,20 +3214,20 @@
 
     const/4 v6, 0x0
 
-    .line 107
+    .line 115
     invoke-super {p0, p1}, Landroid/app/Activity;->onCreate(Landroid/os/Bundle;)V
 
-    .line 108
+    .line 116
     invoke-static {p0}, Lcom/gemini/chat/MessageFormatter;->applyPrefs(Landroid/content/Context;)V
 
-    .line 109
+    .line 117
     new-instance v0, Lcom/gemini/chat/DatabaseHelper;
 
     invoke-direct {v0, p0}, Lcom/gemini/chat/DatabaseHelper;-><init>(Landroid/content/Context;)V
 
     iput-object v0, p0, Lcom/gemini/chat/LiveActivity;->db:Lcom/gemini/chat/DatabaseHelper;
 
-    .line 110
+    .line 118
     invoke-virtual {p0}, Lcom/gemini/chat/LiveActivity;->getIntent()Landroid/content/Intent;
 
     move-result-object v0
@@ -3099,14 +3242,14 @@
 
     iput-wide v0, p0, Lcom/gemini/chat/LiveActivity;->chatId:J
 
-    .line 111
+    .line 119
     const-string v0, "GeminiPrefs"
 
     invoke-virtual {p0, v0, v6}, Lcom/gemini/chat/LiveActivity;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
 
     move-result-object v0
 
-    .line 112
+    .line 120
     const-string v1, "live_model"
 
     const-string v2, "gemini-3.8-live"
@@ -3117,7 +3260,7 @@
 
     iput-object v1, p0, Lcom/gemini/chat/LiveActivity;->model:Ljava/lang/String;
 
-    .line 113
+    .line 121
     const-string v1, "live_voice"
 
     const-string v2, "Kore"
@@ -3128,7 +3271,7 @@
 
     iput-object v1, p0, Lcom/gemini/chat/LiveActivity;->voice:Ljava/lang/String;
 
-    .line 114
+    .line 122
     const-string v1, "live_hands_free"
 
     invoke-interface {v0, v1, v6}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
@@ -3137,7 +3280,7 @@
 
     iput-boolean v1, p0, Lcom/gemini/chat/LiveActivity;->handsFree:Z
 
-    .line 115
+    .line 123
     const-string v1, "live_muted"
 
     invoke-interface {v0, v1, v6}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
@@ -3146,7 +3289,7 @@
 
     iput-boolean v1, p0, Lcom/gemini/chat/LiveActivity;->muted:Z
 
-    .line 116
+    .line 124
     const-string v1, "live_text"
 
     const/4 v2, 0x1
@@ -3157,15 +3300,15 @@
 
     iput-boolean v0, p0, Lcom/gemini/chat/LiveActivity;->liveText:Z
 
-    .line 117
+    .line 125
     invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->updateTitle()V
 
-    .line 118
+    .line 126
     const/4 v0, 0x3
 
     invoke-virtual {p0, v0}, Lcom/gemini/chat/LiveActivity;->setVolumeControlStream(I)V
 
-    .line 119
+    .line 127
     invoke-virtual {p0}, Lcom/gemini/chat/LiveActivity;->getWindow()Landroid/view/Window;
 
     move-result-object v0
@@ -3174,7 +3317,7 @@
 
     invoke-virtual {v0, v1}, Landroid/view/Window;->addFlags(I)V
 
-    .line 120
+    .line 128
     invoke-virtual {p0}, Lcom/gemini/chat/LiveActivity;->getWindow()Landroid/view/Window;
 
     move-result-object v0
@@ -3183,31 +3326,31 @@
 
     invoke-virtual {v0, v1}, Landroid/view/Window;->setSoftInputMode(I)V
 
-    .line 123
+    .line 131
     new-instance v0, Landroid/widget/LinearLayout;
 
     invoke-direct {v0, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
 
-    .line 124
+    .line 132
     const/4 v1, 0x1
 
     invoke-virtual {v0, v1}, Landroid/widget/LinearLayout;->setOrientation(I)V
 
-    .line 126
+    .line 134
     new-instance v1, Landroid/widget/TextView;
 
     invoke-direct {v1, p0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
 
     iput-object v1, p0, Lcom/gemini/chat/LiveActivity;->status:Landroid/widget/TextView;
 
-    .line 127
+    .line 135
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity;->status:Landroid/widget/TextView;
 
     const/high16 v2, 0x41500000    # 13.0f
 
     invoke-virtual {v1, v2}, Landroid/widget/TextView;->setTextSize(F)V
 
-    .line 128
+    .line 136
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity;->status:Landroid/widget/TextView;
 
     const/high16 v2, 0x41200000    # 10.0f
@@ -3236,14 +3379,14 @@
 
     invoke-virtual {v1, v2, v3, v4, v5}, Landroid/widget/TextView;->setPadding(IIII)V
 
-    .line 129
+    .line 137
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity;->status:Landroid/widget/TextView;
 
     const v2, -0x655f5a
 
     invoke-virtual {v1, v2}, Landroid/widget/TextView;->setTextColor(I)V
 
-    .line 130
+    .line 138
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity;->status:Landroid/widget/TextView;
 
     new-instance v2, Landroid/widget/LinearLayout$LayoutParams;
@@ -3252,28 +3395,28 @@
 
     invoke-virtual {v0, v1, v2}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
 
-    .line 133
+    .line 141
     new-instance v1, Landroid/widget/ScrollView;
 
     invoke-direct {v1, p0}, Landroid/widget/ScrollView;-><init>(Landroid/content/Context;)V
 
     iput-object v1, p0, Lcom/gemini/chat/LiveActivity;->scroll:Landroid/widget/ScrollView;
 
-    .line 134
+    .line 142
     new-instance v1, Landroid/widget/LinearLayout;
 
     invoke-direct {v1, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
 
     iput-object v1, p0, Lcom/gemini/chat/LiveActivity;->turns:Landroid/widget/LinearLayout;
 
-    .line 135
+    .line 143
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity;->turns:Landroid/widget/LinearLayout;
 
     const/4 v2, 0x1
 
     invoke-virtual {v1, v2}, Landroid/widget/LinearLayout;->setOrientation(I)V
 
-    .line 136
+    .line 144
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity;->scroll:Landroid/widget/ScrollView;
 
     iget-object v2, p0, Lcom/gemini/chat/LiveActivity;->turns:Landroid/widget/LinearLayout;
@@ -3284,7 +3427,7 @@
 
     invoke-virtual {v1, v2, v3}, Landroid/widget/ScrollView;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
 
-    .line 138
+    .line 146
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity;->scroll:Landroid/widget/ScrollView;
 
     new-instance v2, Landroid/widget/LinearLayout$LayoutParams;
@@ -3293,15 +3436,15 @@
 
     invoke-virtual {v0, v1, v2}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
 
-    .line 140
+    .line 148
     new-instance v1, Landroid/widget/LinearLayout;
 
     invoke-direct {v1, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
 
-    .line 141
+    .line 149
     invoke-virtual {v1, v6}, Landroid/widget/LinearLayout;->setOrientation(I)V
 
-    .line 142
+    .line 150
     invoke-direct {p0, v8}, Lcom/gemini/chat/LiveActivity;->dp(F)I
 
     move-result v2
@@ -3316,28 +3459,28 @@
 
     invoke-virtual {v1, v2, v3, v4, v6}, Landroid/widget/LinearLayout;->setPadding(IIII)V
 
-    .line 143
+    .line 151
     new-instance v2, Landroid/widget/EditText;
 
     invoke-direct {v2, p0}, Landroid/widget/EditText;-><init>(Landroid/content/Context;)V
 
     iput-object v2, p0, Lcom/gemini/chat/LiveActivity;->input:Landroid/widget/EditText;
 
-    .line 144
+    .line 152
     iget-object v2, p0, Lcom/gemini/chat/LiveActivity;->input:Landroid/widget/EditText;
 
     const-string v3, "Type or talk..."
 
     invoke-virtual {v2, v3}, Landroid/widget/EditText;->setHint(Ljava/lang/CharSequence;)V
 
-    .line 145
+    .line 153
     iget-object v2, p0, Lcom/gemini/chat/LiveActivity;->input:Landroid/widget/EditText;
 
     const/4 v3, 0x3
 
     invoke-virtual {v2, v3}, Landroid/widget/EditText;->setMaxLines(I)V
 
-    .line 146
+    .line 154
     iget-object v2, p0, Lcom/gemini/chat/LiveActivity;->input:Landroid/widget/EditText;
 
     new-instance v3, Landroid/widget/LinearLayout$LayoutParams;
@@ -3346,21 +3489,21 @@
 
     invoke-virtual {v1, v2, v3}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
 
-    .line 147
+    .line 155
     new-instance v2, Landroid/widget/Button;
 
     invoke-direct {v2, p0}, Landroid/widget/Button;-><init>(Landroid/content/Context;)V
 
     iput-object v2, p0, Lcom/gemini/chat/LiveActivity;->btnSend:Landroid/widget/Button;
 
-    .line 148
+    .line 156
     iget-object v2, p0, Lcom/gemini/chat/LiveActivity;->btnSend:Landroid/widget/Button;
 
     const-string v3, "Send"
 
     invoke-virtual {v2, v3}, Landroid/widget/Button;->setText(Ljava/lang/CharSequence;)V
 
-    .line 149
+    .line 157
     iget-object v2, p0, Lcom/gemini/chat/LiveActivity;->btnSend:Landroid/widget/Button;
 
     new-instance v3, Lcom/gemini/chat/LiveActivity$1;
@@ -3369,7 +3512,7 @@
 
     invoke-virtual {v2, v3}, Landroid/widget/Button;->setOnClickListener(Landroid/view/View$OnClickListener;)V
 
-    .line 154
+    .line 162
     iget-object v2, p0, Lcom/gemini/chat/LiveActivity;->btnSend:Landroid/widget/Button;
 
     new-instance v3, Landroid/widget/LinearLayout$LayoutParams;
@@ -3378,22 +3521,22 @@
 
     invoke-virtual {v1, v2, v3}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
 
-    .line 156
+    .line 164
     new-instance v2, Landroid/widget/LinearLayout$LayoutParams;
 
     invoke-direct {v2, v9, v7}, Landroid/widget/LinearLayout$LayoutParams;-><init>(II)V
 
     invoke-virtual {v0, v1, v2}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
 
-    .line 159
+    .line 167
     new-instance v1, Landroid/widget/LinearLayout;
 
     invoke-direct {v1, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
 
-    .line 160
+    .line 168
     invoke-virtual {v1, v6}, Landroid/widget/LinearLayout;->setOrientation(I)V
 
-    .line 161
+    .line 169
     invoke-direct {p0, v8}, Lcom/gemini/chat/LiveActivity;->dp(F)I
 
     move-result v2
@@ -3408,14 +3551,14 @@
 
     invoke-virtual {v1, v2, v6, v3, v4}, Landroid/widget/LinearLayout;->setPadding(IIII)V
 
-    .line 162
+    .line 170
     new-instance v2, Landroid/widget/Button;
 
     invoke-direct {v2, p0}, Landroid/widget/Button;-><init>(Landroid/content/Context;)V
 
     iput-object v2, p0, Lcom/gemini/chat/LiveActivity;->btnTalk:Landroid/widget/Button;
 
-    .line 163
+    .line 171
     iget-object v2, p0, Lcom/gemini/chat/LiveActivity;->btnTalk:Landroid/widget/Button;
 
     new-instance v3, Lcom/gemini/chat/LiveActivity$2;
@@ -3424,7 +3567,7 @@
 
     invoke-virtual {v2, v3}, Landroid/widget/Button;->setOnClickListener(Landroid/view/View$OnClickListener;)V
 
-    .line 168
+    .line 176
     iget-object v2, p0, Lcom/gemini/chat/LiveActivity;->btnTalk:Landroid/widget/Button;
 
     new-instance v3, Landroid/widget/LinearLayout$LayoutParams;
@@ -3433,44 +3576,44 @@
 
     invoke-virtual {v1, v2, v3}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
 
-    .line 169
+    .line 177
     new-instance v2, Landroid/widget/Button;
 
     invoke-direct {v2, p0}, Landroid/widget/Button;-><init>(Landroid/content/Context;)V
 
-    .line 170
+    .line 178
     const-string v3, "End"
 
     invoke-virtual {v2, v3}, Landroid/widget/Button;->setText(Ljava/lang/CharSequence;)V
 
-    .line 171
+    .line 179
     new-instance v3, Lcom/gemini/chat/LiveActivity$3;
 
     invoke-direct {v3, p0}, Lcom/gemini/chat/LiveActivity$3;-><init>(Lcom/gemini/chat/LiveActivity;)V
 
     invoke-virtual {v2, v3}, Landroid/widget/Button;->setOnClickListener(Landroid/view/View$OnClickListener;)V
 
-    .line 176
+    .line 184
     new-instance v3, Landroid/widget/LinearLayout$LayoutParams;
 
     invoke-direct {v3, v6, v7, v10}, Landroid/widget/LinearLayout$LayoutParams;-><init>(IIF)V
 
     invoke-virtual {v1, v2, v3}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
 
-    .line 177
+    .line 185
     new-instance v2, Landroid/widget/LinearLayout$LayoutParams;
 
     invoke-direct {v2, v9, v7}, Landroid/widget/LinearLayout$LayoutParams;-><init>(II)V
 
     invoke-virtual {v0, v1, v2}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
 
-    .line 180
+    .line 188
     invoke-virtual {p0, v0}, Lcom/gemini/chat/LiveActivity;->setContentView(Landroid/view/View;)V
 
-    .line 181
+    .line 189
     invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->loadExisting()V
 
-    .line 182
+    .line 190
     new-instance v0, Lcom/gemini/chat/LiveActivity$Player;
 
     iget-boolean v1, p0, Lcom/gemini/chat/LiveActivity;->muted:Z
@@ -3479,17 +3622,17 @@
 
     iput-object v0, p0, Lcom/gemini/chat/LiveActivity;->player:Lcom/gemini/chat/LiveActivity$Player;
 
-    .line 183
+    .line 191
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->player:Lcom/gemini/chat/LiveActivity$Player;
 
     invoke-virtual {v0}, Lcom/gemini/chat/LiveActivity$Player;->start()V
 
-    .line 184
+    .line 192
     const/4 v0, 0x0
 
     invoke-direct {p0, v0}, Lcom/gemini/chat/LiveActivity;->connect(Ljava/lang/String;)V
 
-    .line 185
+    .line 193
     return-void
 .end method
 
@@ -3499,32 +3642,32 @@
     .prologue
     const/4 v2, 0x1
 
-    .line 195
+    .line 203
     invoke-super {p0}, Landroid/app/Activity;->onDestroy()V
 
-    .line 196
+    .line 204
     iput-boolean v2, p0, Lcom/gemini/chat/LiveActivity;->destroyed:Z
 
-    .line 197
+    .line 205
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->ui:Landroid/os/Handler;
 
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity;->tick:Ljava/lang/Runnable;
 
     invoke-virtual {v0, v1}, Landroid/os/Handler;->removeCallbacks(Ljava/lang/Runnable;)V
 
-    .line 198
+    .line 206
     const/4 v0, 0x0
 
     invoke-direct {p0, v0}, Lcom/gemini/chat/LiveActivity;->stopTalking(Z)V
 
-    .line 199
+    .line 207
     iget v0, p0, Lcom/gemini/chat/LiveActivity;->sessionGen:I
 
     add-int/lit8 v0, v0, 0x1
 
     iput v0, p0, Lcom/gemini/chat/LiveActivity;->sessionGen:I
 
-    .line 200
+    .line 208
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->session:Lcom/gemini/chat/LiveSession;
 
     if-eqz v0, :cond_0
@@ -3533,7 +3676,7 @@
 
     invoke-virtual {v0}, Lcom/gemini/chat/LiveSession;->stop()V
 
-    .line 201
+    .line 209
     :cond_0
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->tr:Lcom/gemini/chat/LiveSession;
 
@@ -3543,24 +3686,24 @@
 
     invoke-virtual {v0}, Lcom/gemini/chat/LiveSession;->stop()V
 
-    .line 202
+    .line 210
     :cond_1
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->player:Lcom/gemini/chat/LiveActivity$Player;
 
     invoke-virtual {v0}, Lcom/gemini/chat/LiveActivity$Player;->quit()V
 
-    .line 203
+    .line 211
     invoke-direct {p0, v2}, Lcom/gemini/chat/LiveActivity;->finishModelTurn(Z)V
 
-    .line 204
+    .line 212
     invoke-direct {p0}, Lcom/gemini/chat/LiveActivity;->finishUserTurn()V
 
-    .line 205
+    .line 213
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity;->db:Lcom/gemini/chat/DatabaseHelper;
 
     invoke-virtual {v0}, Lcom/gemini/chat/DatabaseHelper;->close()V
 
-    .line 206
+    .line 214
     return-void
 .end method
 
@@ -3568,10 +3711,10 @@
     .locals 1
 
     .prologue
-    .line 189
+    .line 197
     invoke-super {p0}, Landroid/app/Activity;->onPause()V
 
-    .line 190
+    .line 198
     iget-boolean v0, p0, Lcom/gemini/chat/LiveActivity;->talking:Z
 
     if-eqz v0, :cond_0
@@ -3580,7 +3723,7 @@
 
     invoke-direct {p0, v0}, Lcom/gemini/chat/LiveActivity;->stopTalking(Z)V
 
-    .line 191
+    .line 199
     :cond_0
     return-void
 .end method

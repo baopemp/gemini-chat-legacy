@@ -55,6 +55,10 @@ com/gemini/chat/MessageFormatter$QuoteBarSpan.smali
 com/gemini/chat/MessageFormatter$RoleBar.smali
 com/gemini/chat/MessageFormatter$RuleSpan.smali
 com/gemini/chat/MessageFormatter.smali
+com/gemini/chat/ReadAloud$1.smali
+com/gemini/chat/ReadAloud$2.smali
+com/gemini/chat/ReadAloud$Listener.smali
+com/gemini/chat/ReadAloud.smali
 com/gemini/chat/ReplyParser.smali
 com/gemini/chat/SettingsActivity$1.smali
 com/gemini/chat/SettingsActivity$2.smali

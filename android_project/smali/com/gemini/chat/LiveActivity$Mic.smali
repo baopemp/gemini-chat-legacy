@@ -39,15 +39,15 @@
 
     const/4 v8, 0x1
 
-    .line 726
+    .line 767
     iput-object p1, p0, Lcom/gemini/chat/LiveActivity$Mic;->this$0:Lcom/gemini/chat/LiveActivity;
 
     invoke-direct {p0}, Ljava/lang/Thread;-><init>()V
 
-    .line 724
+    .line 765
     iput-boolean v8, p0, Lcom/gemini/chat/LiveActivity$Mic;->running:Z
 
-    .line 727
+    .line 768
     const/4 v0, 0x5
 
     new-array v9, v0, [I
@@ -56,7 +56,7 @@
 
     move v6, v7
 
-    .line 728
+    .line 769
     :goto_0
     array-length v0, v9
 
@@ -66,7 +66,7 @@
 
     if-nez v0, :cond_2
 
-    .line 730
+    .line 771
     :try_start_0
     aget v0, v9, v6
 
@@ -78,10 +78,10 @@
 
     move-result v5
 
-    .line 732
+    .line 773
     if-gtz v5, :cond_0
 
-    .line 728
+    .line 769
     :goto_1
     add-int/lit8 v0, v6, 0x1
 
@@ -89,7 +89,7 @@
 
     goto :goto_0
 
-    .line 733
+    .line 774
     :cond_0
     new-instance v0, Landroid/media/AudioRecord;
 
@@ -107,37 +107,37 @@
 
     div-int/lit8 v10, v10, 0x2
 
-    .line 735
+    .line 776
     invoke-static {v5, v10}, Ljava/lang/Math;->max(II)I
 
     move-result v5
 
     invoke-direct/range {v0 .. v5}, Landroid/media/AudioRecord;-><init>(IIIII)V
 
-    .line 736
+    .line 777
     invoke-virtual {v0}, Landroid/media/AudioRecord;->getState()I
 
     move-result v1
 
     if-ne v1, v8, :cond_1
 
-    .line 737
+    .line 778
     iput-object v0, p0, Lcom/gemini/chat/LiveActivity$Mic;->rec:Landroid/media/AudioRecord;
 
-    .line 738
+    .line 779
     aget v0, v9, v6
 
     iput v0, p0, Lcom/gemini/chat/LiveActivity$Mic;->rate:I
 
     goto :goto_1
 
-    .line 742
+    .line 783
     :catch_0
     move-exception v0
 
     goto :goto_1
 
-    .line 740
+    .line 781
     :cond_1
     invoke-virtual {v0}, Landroid/media/AudioRecord;->release()V
     :try_end_0
@@ -145,7 +145,7 @@
 
     goto :goto_1
 
-    .line 745
+    .line 786
     :cond_2
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Mic;->rec:Landroid/media/AudioRecord;
 
@@ -156,10 +156,10 @@
     :cond_3
     iput-boolean v7, p0, Lcom/gemini/chat/LiveActivity$Mic;->ok:Z
 
-    .line 746
+    .line 787
     return-void
 
-    .line 727
+    .line 768
     :array_0
     .array-data 4
         0x3e80
@@ -176,12 +176,12 @@
     .locals 1
 
     .prologue
-    .line 749
+    .line 790
     const/4 v0, 0x0
 
     iput-boolean v0, p0, Lcom/gemini/chat/LiveActivity$Mic;->running:Z
 
-    .line 750
+    .line 791
     return-void
 .end method
 
@@ -189,7 +189,7 @@
     .locals 6
 
     .prologue
-    .line 753
+    .line 794
     iget v0, p0, Lcom/gemini/chat/LiveActivity$Mic;->rate:I
 
     div-int/lit8 v0, v0, 0xa
@@ -198,20 +198,20 @@
 
     new-array v0, v0, [B
 
-    .line 755
+    .line 796
     :try_start_0
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity$Mic;->rec:Landroid/media/AudioRecord;
 
     invoke-virtual {v1}, Landroid/media/AudioRecord;->startRecording()V
 
-    .line 756
+    .line 797
     :cond_0
     :goto_0
     iget-boolean v1, p0, Lcom/gemini/chat/LiveActivity$Mic;->running:Z
 
     if-eqz v1, :cond_2
 
-    .line 757
+    .line 798
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity$Mic;->rec:Landroid/media/AudioRecord;
 
     const/4 v2, 0x0
@@ -222,19 +222,19 @@
 
     move-result v1
 
-    .line 758
+    .line 799
     if-lez v1, :cond_0
 
-    .line 759
+    .line 800
     iget-object v2, p0, Lcom/gemini/chat/LiveActivity$Mic;->this$0:Lcom/gemini/chat/LiveActivity;
 
-    invoke-static {v2}, Lcom/gemini/chat/LiveActivity;->access$4000(Lcom/gemini/chat/LiveActivity;)Z
+    invoke-static {v2}, Lcom/gemini/chat/LiveActivity;->access$4200(Lcom/gemini/chat/LiveActivity;)Z
 
     move-result v2
 
     if-nez v2, :cond_0
 
-    .line 760
+    .line 801
     iget-object v2, p0, Lcom/gemini/chat/LiveActivity$Mic;->this$0:Lcom/gemini/chat/LiveActivity;
 
     invoke-static {v2}, Lcom/gemini/chat/LiveActivity;->access$1400(Lcom/gemini/chat/LiveActivity;)Lcom/gemini/chat/LiveSession;
@@ -247,7 +247,7 @@
 
     move-result-object v3
 
-    .line 761
+    .line 802
     if-eqz v2, :cond_1
 
     const/4 v4, 0x0
@@ -256,7 +256,7 @@
 
     invoke-virtual {v2, v0, v4, v1, v5}, Lcom/gemini/chat/LiveSession;->sendAudio([BIII)V
 
-    .line 762
+    .line 803
     :cond_1
     if-eqz v3, :cond_0
 
@@ -271,11 +271,11 @@
 
     goto :goto_0
 
-    .line 764
+    .line 805
     :catch_0
     move-exception v0
 
-    .line 767
+    .line 808
     :try_start_1
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Mic;->rec:Landroid/media/AudioRecord;
 
@@ -283,17 +283,17 @@
     :try_end_1
     .catch Ljava/lang/Exception; {:try_start_1 .. :try_end_1} :catch_2
 
-    .line 770
+    .line 811
     :goto_1
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Mic;->rec:Landroid/media/AudioRecord;
 
     invoke-virtual {v0}, Landroid/media/AudioRecord;->release()V
 
-    .line 772
+    .line 813
     :goto_2
     return-void
 
-    .line 767
+    .line 808
     :cond_2
     :try_start_2
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Mic;->rec:Landroid/media/AudioRecord;
@@ -302,7 +302,7 @@
     :try_end_2
     .catch Ljava/lang/Exception; {:try_start_2 .. :try_end_2} :catch_3
 
-    .line 770
+    .line 811
     :goto_3
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Mic;->rec:Landroid/media/AudioRecord;
 
@@ -310,11 +310,11 @@
 
     goto :goto_2
 
-    .line 766
+    .line 807
     :catchall_0
     move-exception v0
 
-    .line 767
+    .line 808
     :try_start_3
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity$Mic;->rec:Landroid/media/AudioRecord;
 
@@ -322,16 +322,16 @@
     :try_end_3
     .catch Ljava/lang/Exception; {:try_start_3 .. :try_end_3} :catch_1
 
-    .line 770
+    .line 811
     :goto_4
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity$Mic;->rec:Landroid/media/AudioRecord;
 
     invoke-virtual {v1}, Landroid/media/AudioRecord;->release()V
 
-    .line 771
+    .line 812
     throw v0
 
-    .line 768
+    .line 809
     :catch_1
     move-exception v1
 

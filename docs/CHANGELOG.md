@@ -4,7 +4,37 @@ All notable changes to the Gemini Chat Legacy Android client are documented here
 
 ---
 
-## v0.8.7 (Latest Release) - VersionCode: 87
+## v0.8.8 (Latest Release) - VersionCode: 88
+
+### Read Aloud (new)
+- **Hold a reply → Read Aloud** speaks it with Gemini text-to-speech, in the same voice as Live (Settings → Voice; all 30 voices
+  work, the TTS models use the same voice list as Live). Streamed: playback starts while the rest is still being generated.
+- Interactions API (`POST /v1beta/interactions`, `"stream": true`, `response_format` `audio/l16` 24 kHz), parsed from the SSE
+  `step.delta` audio events. Checked against the real API (gemini-3.8-flash-lite-tts, 41 audio events, 3.3 s for a short sentence).
+- Settings → **Read Aloud model**: `gemini-3.8-flash-lite-tts` (default), `gemini-3.8-flash-tts`, `gemini-3.1-flash-tts-preview`
+  (all free tier per the pricing page, 2026-10-23).
+- Only the readable text is spoken: Markdown markup, emoji codes, code blocks and rules are left out; tables are read as "key: value".
+- **Stop Reading** in the chat menu and at the top of the long-press menu. Leaving the chat stops it. Errors (quota, network,
+  an error event inside the stream) show as a toast; 500/502/503/504 are retried twice before any audio has played.
+
+### Live
+- **Fixed: your spoken message was saved twice, the second copy often garbled** ("ABC" then "Abhi se?"). The turn was saved
+  when the model started answering, and the conversation model's own transcript of your speech, which usually arrives *after*
+  that, was then saved as a second message below the reply. Now a spoken turn is exactly one message: late transcripts of the
+  same speech update it, and the next turn starts only when the mic reopens (hands-free) or you tap Talk.
+- The message uses the transcriber's text (a dedicated speech-to-text model, more accurate than the conversation model's
+  transcript); the model's transcript is only the fallback.
+- Push-to-talk: tapping Talk while unanswered words are still in the box no longer duplicates them.
+
+### Chat
+- **Rename Chat** is now only in the chat list (hold a chat → Rename Chat), not in the chat screen menu.
+- Fixed: with a thought summary present, "Copy Code Block N" copied the wrong block (or crashed on the last one).
+
+### Build
+- `scripts/build_java.sh` stops when javac fails. Before, javac's partial output (classes it wrote before the error) replaced
+  the generated smali and a later `build_apk.sh` produced a broken APK.
+
+## v0.8.7 - VersionCode: 87
 
 ### Live
 - **Your words stream into the text box while you speak** (push-to-talk and hands-free). A second, text-only session to

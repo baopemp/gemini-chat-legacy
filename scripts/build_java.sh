@@ -28,9 +28,13 @@ if [ -f "$LIST" ]; then while read -r f; do [ -n "$f" ] && rm -f "$W/cpsmali/$f"
 java -cp "$C/d2s:$ROOT/tools/apktool.jar" Smali2Dex "$W/cpsmali" "$W/cp.dex" 2>&1 | grep -v "JAVA_TOOL_OPTIONS" || true
 "$C/dex-tools/d2j-dex2jar.sh" -f -o "$W/cp.jar" "$W/cp.dex" >/dev/null 2>&1
 [ -s "$W/cp.jar" ] || { echo "could not build the smali classpath"; exit 1; }
-javac -nowarn -source 8 -target 8 -encoding UTF-8 -bootclasspath "$C/android-7.jar" -classpath "$W/cp.jar" \
-      -d "$W/classes" $(find "$ROOT/java" -name "*.java") 2>&1 | grep -v "^warning: \[options\]\|^[0-9]* warning" || true
-[ -n "$(find "$W/classes" -name '*.class')" ] || { echo "javac failed"; exit 1; }
+# a failed javac can still write some classes: never continue with a partial set (it would drop smali)
+if ! javac -nowarn -source 8 -target 8 -encoding UTF-8 -bootclasspath "$C/android-7.jar" -classpath "$W/cp.jar" \
+      -d "$W/classes" $(find "$ROOT/java" -name "*.java") > "$W/javac.log" 2>&1; then
+    grep -v "^warning: \[options\]\|^[0-9]* warning" "$W/javac.log" || true
+    echo "javac failed: android_project/smali left unchanged"; exit 1
+fi
+grep -v "^warning: \[options\]\|^[0-9]* warning" "$W/javac.log" || true
 (cd "$W/classes" && jar cf "$W/helpers.jar" .)
 "$C/dex-tools/d2j-jar2dex.sh" -f -o "$W/helpers.dex" "$W/helpers.jar" >/dev/null 2>&1
 # baksmali from apktool.jar (same smali dialect as the assembler used by build_apk.sh)

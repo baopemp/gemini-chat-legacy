@@ -242,3 +242,15 @@ LiveActivity ── Mic thread (AudioRecord 16 kHz → 100 ms chunks) ──┐
   no space just inside the dollars, no digit after the closing one; `$$...$$` may span lines. Converted: Greek, operators,
   relations, arrows, `\frac`, `\sqrt`, `\text`, `^`/`_` (superscripts only ¹²³ⁿ, which 2.x fonts draw).
 - **DatabaseHelper.onOpen** adds missing columns (`PRAGMA table_info`); messages are ordered by `id`.
+
+## 13. 0.8.8 additions
+
+- **Read Aloud (`ReadAloud`, a Thread):** `speakable()` renders the reply with `Markdown.parse(text, 0)` (tables become
+  "key: value" lines) and drops EMOJI, CODE_BLOCK, CODE_LANG and RULE spans. The request goes to the Interactions API with
+  `"stream": true` and `response_format {type: audio, mime_type: audio/l16, sample_rate: 24000}`; the voice is the Live voice
+  (`generation_config.speech_config[0].voice`). Each SSE `step.delta` with `delta.type == "audio"` is base64-decoded and written
+  to a `MODE_STREAM` AudioTrack (≥ 1 s buffer; a blocking `write` paces the download; odd bytes carried over). An `error` event
+  aborts with its message. `stopReading()` pauses and flushes the track, then disconnects on a separate thread.
+- **Live user turns:** `finishUserTurn()` saves the spoken turn once (`userRow`) when the model starts answering; transcripts
+  that arrive later (`lateOrBox()`) update that row and view. `newUserTurn()` closes it when the hands-free mic reopens after the
+  reply (`tick`), on Talk, or on a typed send. Text = transcriber (final + interim), falling back to the model's transcript.

@@ -9,3 +9,4 @@ tests/.cache/
 keystore/
 *.keystore
 *.jks
+__pycache__/

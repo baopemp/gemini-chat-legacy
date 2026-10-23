@@ -26,7 +26,7 @@
     .locals 0
 
     .prologue
-    .line 519
+    .line 527
     iput-object p1, p0, Lcom/gemini/chat/LiveActivity$Transcriber$3;->this$1:Lcom/gemini/chat/LiveActivity$Transcriber;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
@@ -40,7 +40,7 @@
     .locals 2
 
     .prologue
-    .line 521
+    .line 529
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Transcriber$3;->this$1:Lcom/gemini/chat/LiveActivity$Transcriber;
 
     iget-object v0, v0, Lcom/gemini/chat/LiveActivity$Transcriber;->this$0:Lcom/gemini/chat/LiveActivity;
@@ -63,7 +63,7 @@
 
     invoke-static {v0, v1}, Lcom/gemini/chat/LiveActivity;->access$3102(Lcom/gemini/chat/LiveActivity;Lcom/gemini/chat/LiveSession;)Lcom/gemini/chat/LiveSession;
 
-    .line 522
+    .line 530
     :cond_0
     return-void
 .end method

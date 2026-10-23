@@ -33,7 +33,7 @@
     .end annotation
 
     .prologue
-    .line 825
+    .line 837
     iput-object p1, p0, Lcom/gemini/chat/ChatActivity$7;->this$0:Lcom/gemini/chat/ChatActivity;
 
     iput p2, p0, Lcom/gemini/chat/ChatActivity$7;->val$y:I
@@ -49,7 +49,7 @@
     .locals 3
 
     .prologue
-    .line 827
+    .line 839
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$7;->this$0:Lcom/gemini/chat/ChatActivity;
 
     invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$2000(Lcom/gemini/chat/ChatActivity;)Landroid/widget/ScrollView;
@@ -62,6 +62,6 @@
 
     invoke-virtual {v0, v1, v2}, Landroid/widget/ScrollView;->scrollTo(II)V
 
-    .line 828
+    .line 840
     return-void
 .end method

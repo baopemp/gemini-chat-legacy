@@ -77,6 +77,14 @@ public class LiveActivity extends Activity {
     // the user's turn: what the model heard, and what the transcriber shows while speaking
     private final StringBuffer heard = new StringBuffer(), spokenFinal = new StringBuffer();
     private String spokenInterim = "", typedPrefix = "";
+    /**
+     * The spoken turn once saved (the model started answering). Transcripts of the same speech can still arrive
+     * after that (the model's own transcript often comes late): they update this message instead of adding a
+     * second one. Closed when the user's next speech starts.
+     */
+    private long userRow = -1, userTs;
+    private TextView userView;
+    private String userText;
     // the model's turn
     private TextView modelView;
     private final StringBuffer modelShown = new StringBuffer();
@@ -427,7 +435,7 @@ public class LiveActivity extends Activity {
                 public void run() {
                     if (!current()) return;
                     heard.append(delta);
-                    updateBox();
+                    lateOrBox();
                 }
             });
         }
@@ -490,7 +498,7 @@ public class LiveActivity extends Activity {
                 public void run() {
                     if (destroyed) return;
                     spokenInterim = text;
-                    updateBox();
+                    lateOrBox();
                 }
             });
         }
@@ -501,7 +509,7 @@ public class LiveActivity extends Activity {
                     if (destroyed) return;
                     spokenFinal.append(text.trim()).append(' ');
                     spokenInterim = "";
-                    updateBox();
+                    lateOrBox();
                 }
             });
         }
@@ -524,11 +532,25 @@ public class LiveActivity extends Activity {
         }
     }
 
-    /** The text box while speaking: typed text, then the user's words (transcriber, or what the model heard). */
+    /**
+     * The user's words: the transcriber's text (a dedicated speech-to-text model, the more accurate one), or what
+     * the conversation model heard if the transcriber got nothing.
+     */
+    private String spokenText() {
+        String t = (spokenFinal.toString() + spokenInterim).trim();
+        return t.length() > 0 ? t : heard.toString().trim();
+    }
+
+    /** New transcript text: updates the saved turn if it is late, otherwise the text box. */
+    private void lateOrBox() {
+        if (userRow != -1) finishUserTurn();
+        else updateBox();
+    }
+
+    /** The text box while speaking: typed text, then the user's words. */
     private void updateBox() {
-        if (!liveText) return;
-        String spoken = (spokenFinal.toString() + spokenInterim).trim();
-        if (spoken.length() == 0) spoken = heard.toString().trim();
+        if (!liveText || userRow != -1) return;
+        String spoken = spokenText();
         String t = typedPrefix.length() > 0 && spoken.length() > 0 ? typedPrefix + " " + spoken : typedPrefix + spoken;
         if (!t.contentEquals(input.getText())) {
             input.setText(t);
@@ -553,6 +575,11 @@ public class LiveActivity extends Activity {
                 finishModelTurn(false);
                 modelTurnActive = false;
                 micOpenAfter = System.currentTimeMillis() + ECHO_TAIL_MS;
+            }
+            // the reply has played and the (hands-free) mic is about to reopen: later speech is a new turn
+            if (userRow != -1 && !modelTurnActive && !modelTurnDone && !playing
+                    && System.currentTimeMillis() >= micOpenAfter) {
+                newUserTurn();
             }
             if (connected) {
                 // one state for the whole reply: short gaps in the audio (slow phone/network) are not "listening"
@@ -604,33 +631,49 @@ public class LiveActivity extends Activity {
         modelTurnDone = false;
     }
 
-    /** The user's spoken turn becomes a message (what the model heard; the transcriber's text if it heard nothing). */
+    /**
+     * The user's spoken turn becomes one message. Called when the model starts answering, and again for transcripts
+     * of the same speech that arrive later: those update the message (never a second one).
+     */
     private void finishUserTurn() {
-        String t = heard.toString().trim();
-        if (t.length() == 0) t = (spokenFinal.toString() + spokenInterim).trim();
-        boolean hadSpeech = t.length() > 0;
-        if (hadSpeech) {
-            addTurnView("user", null, t);
-            save("user", t);
+        String t = spokenText();
+        if (t.length() == 0) return;
+        if (userRow == -1) {
+            userTs = System.currentTimeMillis();
+            userText = t;
+            userView = addTurnView("user", null, t);
+            userRow = save("user", t);
+            if (liveText) {
+                input.setText(typedPrefix); // the spoken words leave the box; anything typed before stays
+                input.setSelection(input.getText().length());
+            }
+            typedPrefix = "";
+        } else if (!t.equals(userText)) {
+            userText = t;
+            if (userView != null) userView.setText(MessageFormatter.format(this, "user", null, t, userTs, null));
+            db.updateMessage(userRow, t);
         }
+    }
+
+    /** The user's next speech (or typed message) starts: the previous spoken turn is closed. */
+    private void newUserTurn() {
         heard.setLength(0);
         spokenFinal.setLength(0);
         spokenInterim = "";
-        if (hadSpeech && liveText) {
-            input.setText(typedPrefix); // the spoken words leave the box; anything typed before stays
-            input.setSelection(input.getText().length());
-        }
         typedPrefix = "";
+        userRow = -1;
+        userView = null;
+        userText = null;
     }
 
-    private void save(String role, String text) {
+    private long save(String role, String text) {
         if (chatId == -1) {
             String title = text.replace('\n', ' ').trim(); // same rule as a typed first message
             if (title.length() > 25) title = title.substring(0, 25) + "...";
             chatId = db.createChat(title);
             updateTitle();
         }
-        db.addMessage(chatId, role, text, "model".equals(role) ? model : null);
+        return db.addMessage(chatId, role, text, "model".equals(role) ? model : null);
     }
 
     // =========================================================================================
@@ -643,10 +686,7 @@ public class LiveActivity extends Activity {
         InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         if (imm != null) imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
         if (talking) stopTalking(false); // the box (typed + spoken words) is sent as text instead
-        heard.setLength(0);
-        spokenFinal.setLength(0);
-        spokenInterim = "";
-        typedPrefix = "";
+        newUserTurn();
         bargeIn();
         addTurnView("user", null, t);
         save("user", t);
@@ -683,7 +723,8 @@ public class LiveActivity extends Activity {
         bargeIn();
         micOpenAfter = 0;
         openTranscriber();
-        typedPrefix = input.getText().toString().trim();
+        if (userRow != -1) newUserTurn(); // the last spoken turn was answered: this is a new one
+        if (spokenText().length() == 0) typedPrefix = input.getText().toString().trim(); // else the box already holds it
         if (!handsFree) session.activityStart();
         talking = true;
         mic.start();

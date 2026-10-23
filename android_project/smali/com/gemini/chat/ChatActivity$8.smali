@@ -26,7 +26,7 @@
     .locals 0
 
     .prologue
-    .line 836
+    .line 848
     iput-object p1, p0, Lcom/gemini/chat/ChatActivity$8;->this$0:Lcom/gemini/chat/ChatActivity;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
@@ -40,7 +40,7 @@
     .locals 3
 
     .prologue
-    .line 838
+    .line 850
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$8;->this$0:Lcom/gemini/chat/ChatActivity;
 
     invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$2000(Lcom/gemini/chat/ChatActivity;)Landroid/widget/ScrollView;
@@ -61,6 +61,6 @@
 
     invoke-virtual {v0, v1, v2}, Landroid/widget/ScrollView;->scrollTo(II)V
 
-    .line 839
+    .line 851
     return-void
 .end method

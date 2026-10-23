@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Environment;
 import android.text.ClipboardManager;
 import android.text.Editable;
@@ -53,13 +54,17 @@ public class ChatActivity extends Activity {
     static final String API = "https://generativelanguage.googleapis.com/v1beta/models/";
 
     private static final int MENU_SETTINGS = 1, MENU_DELETE_CHAT = 2, MENU_ATTACH = 3, MENU_DETACH = 4, MENU_LIVE = 5,
-            MENU_RENAME = 6;
+            MENU_STOP_READING = 6;
     private static final int REQ_IMAGE = 100, REQ_LIVE = 101;
     private static final String HINT_IDLE = "Message Gemini...";
 
     // long-press actions
     private static final int A_COPY = 0, A_COPY_CODE = 1, A_SHARE = 2, A_EDIT = 3, A_REGEN = 4, A_DELETE = 5, A_RETRY = 6,
-            A_THOUGHTS = 7;
+            A_THOUGHTS = 7, A_READ = 8, A_STOP_READ = 9;
+
+    /** "Read Aloud" playback in progress (null when idle). */
+    private ReadAloud reader;
+    private final Handler handler = new Handler();
 
     private Button btnSend;
     private Button btnStop;
@@ -570,8 +575,15 @@ public class ChatActivity extends Activity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        stopReading(); // no audio from a screen that isn't shown
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
+        stopReading();
         cancelTask();
         if (dbHelper != null) dbHelper.close();
     }
@@ -868,7 +880,7 @@ public class ChatActivity extends Activity {
         final String role, model, text, thoughts;
         final ArrayList<String> codeBlocks;
         ArrayList<String> labels;
-        int[] actions;
+        int[] actions, args; // args: the code block of a "Copy Code Block" item
 
         MessageMenu(long id, String role, String model, String text, ArrayList<String> codeBlocks, String thoughts) {
             this.id = id;
@@ -880,18 +892,26 @@ public class ChatActivity extends Activity {
         }
 
         private void add(String label, int action) {
+            add(label, action, 0);
+        }
+
+        private void add(String label, int action, int arg) {
             labels.add(label);
             actions[labels.size() - 1] = action;
+            args[labels.size() - 1] = arg;
         }
 
         public boolean onLongClick(View v) {
             labels = new ArrayList<String>();
-            actions = new int[9 + codeBlocks.size()];
+            actions = new int[12 + codeBlocks.size()];
+            args = new int[actions.length];
             boolean saved = id != -1;
             boolean user = "user".equals(role), reply = "model".equals(role);
+            if (reader != null) add("Stop Reading", A_STOP_READ);
+            if (reply && text.trim().length() > 0 && (reader == null || reader.messageId != id)) add("Read Aloud", A_READ);
             if (thoughts.length() > 0) add("Show Thought Process", A_THOUGHTS);
             add("Copy Entire Message", A_COPY);
-            for (int i = 0; i < codeBlocks.size(); i++) add("Copy Code Block " + (i + 1), A_COPY_CODE);
+            for (int i = 0; i < codeBlocks.size(); i++) add("Copy Code Block " + (i + 1), A_COPY_CODE, i);
             if (saved && user) {
                 add("Regenerate", A_REGEN);
                 add("Edit Message", A_EDIT);
@@ -915,7 +935,13 @@ public class ChatActivity extends Activity {
                     copy(text, "Copied to clipboard");
                     break;
                 case A_COPY_CODE:
-                    copy(codeBlocks.get(which - 1), "Code block copied");
+                    copy(codeBlocks.get(args[which]), "Code block copied");
+                    break;
+                case A_READ:
+                    readAloud(id, text);
+                    break;
+                case A_STOP_READ:
+                    stopReading();
                     break;
                 case A_SHARE: {
                     Intent i = new Intent(Intent.ACTION_SEND);
@@ -942,6 +968,41 @@ public class ChatActivity extends Activity {
                     break;
             }
         }
+    }
+
+    // =========================================================================================
+    // Read Aloud (text-to-speech in the Live voice)
+    // =========================================================================================
+
+    private void readAloud(long msgId, String markdown) {
+        String key = prefs().getString("api_key", "").trim();
+        if (key.length() == 0) {
+            Toast.makeText(this, "Please go to Settings to set API Key", Toast.LENGTH_LONG).show();
+            return;
+        }
+        String say = ReadAloud.speakable(markdown);
+        if (say.length() == 0) {
+            Toast.makeText(this, "Nothing to read in this message.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        stopReading();
+        SharedPreferences sp = prefs();
+        String voice = sp.getString("live_voice", LiveActivity.DEFAULT_VOICE);
+        String model = sp.getString("tts_model", ReadAloud.DEFAULT_MODEL);
+        reader = new ReadAloud(msgId, key, model, voice, say, handler, new ReadAloud.Listener() {
+            public void onDone(ReadAloud r, String error) {
+                if (reader == r) reader = null;
+                if (error != null && !isFinishing()) Toast.makeText(ChatActivity.this, error, Toast.LENGTH_LONG).show();
+            }
+        });
+        reader.start();
+        Toast.makeText(this, "Reading aloud (" + voice + ")...", Toast.LENGTH_SHORT).show();
+    }
+
+    private void stopReading() {
+        ReadAloud r = reader;
+        reader = null;
+        if (r != null) r.stopReading();
     }
 
     /** The model's thought summary, rendered like a reply, in a scrollable dialog. */
@@ -1066,7 +1127,7 @@ public class ChatActivity extends Activity {
         // our own menu-style mic (res/drawable-*/ic_menu_live.png); Android has no public menu mic icon
         int live = getResources().getIdentifier("ic_menu_live", "drawable", getPackageName());
         menu.add(0, MENU_LIVE, 0, "Live Voice").setIcon(live != 0 ? live : android.R.drawable.ic_btn_speak_now);
-        menu.add(0, MENU_RENAME, 0, "Rename Chat").setIcon(android.R.drawable.ic_menu_edit);
+        menu.add(0, MENU_STOP_READING, 0, "Stop Reading").setIcon(android.R.drawable.ic_lock_silent_mode);
         menu.add(0, MENU_SETTINGS, 0, "Settings").setIcon(android.R.drawable.ic_menu_preferences);
         menu.add(0, MENU_DELETE_CHAT, 0, "Delete This Chat").setIcon(android.R.drawable.ic_menu_delete);
         if (Build.VERSION.SDK_INT >= 8) {
@@ -1078,8 +1139,8 @@ public class ChatActivity extends Activity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem rn = menu.findItem(MENU_RENAME);
-        if (rn != null) rn.setVisible(chatId != -1);
+        MenuItem stop = menu.findItem(MENU_STOP_READING);
+        if (stop != null) stop.setVisible(reader != null);
         MenuItem del = menu.findItem(MENU_DELETE_CHAT);
         if (del != null) {
             boolean has = false;
@@ -1131,25 +1192,9 @@ public class ChatActivity extends Activity {
             case MENU_ATTACH:
                 pickImage();
                 return true;
-            case MENU_RENAME: {
-                final EditText et = new EditText(this);
-                et.setSingleLine(true);
-                et.setText(dbHelper.getChatTitle(chatId));
-                et.setSelection(et.getText().length());
-                new AlertDialog.Builder(this).setTitle("Rename Chat").setView(et)
-                        .setPositiveButton("Save", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface d, int w) {
-                                hideKeyboard(et);
-                                String t = et.getText().toString().trim();
-                                if (t.length() == 0) return;
-                                dbHelper.updateChatTitle(chatId, t); // also stops auto-naming for this chat
-                                setTitle(t);
-                            }
-                        })
-                        .setNegativeButton("Cancel", null)
-                        .show();
+            case MENU_STOP_READING:
+                stopReading();
                 return true;
-            }
             case MENU_LIVE: {
                 cancelTask();
                 setUiLoading(false);

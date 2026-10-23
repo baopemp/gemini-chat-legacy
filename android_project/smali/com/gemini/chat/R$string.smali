@@ -17,14 +17,6 @@
 # static fields
 .field public static final app_name:I = 0x7f040000
 
-.field public static final btn_calc:I = 0x7f040003
-
-.field public static final btn_diagnostics:I = 0x7f040001
-
-.field public static final btn_native:I = 0x7f040004
-
-.field public static final btn_ram_test:I = 0x7f040002
-
 
 # direct methods
 .method public constructor <init>()V

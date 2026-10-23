@@ -5,7 +5,7 @@ The build input is the **smali** in `android_project/`, built with apktool. Ther
 Most classes are now written in **Java** (`java/`) and compiled to smali by `scripts/build_java.sh`, against the
 Android 2.1 (API 7) android.jar, so any newer API fails to compile. The rest is still hand-written smali:
 `ChatListActivity`, `ConfigBinder`, `ConfigManager`, `FileExplorerActivity`, `ImageUtil`, `ImageUtilApi8`, `R`, `SafActivity`,
-`TLSSocketFactory`. `java_sources/` is a jadx decompile of the current build, for reading only.
+`TLSSocketFactory`. `java_sources/` holds a jadx decompile of exactly those smali-only classes, for reading only.
 
 - **minSdk 7** (Android 2.1), **targetSdk 14** (Android 4.0), package `com.gemini.chat`
 - No AndroidX, Play Services or Kotlin. APK is about 145 KB.
@@ -21,7 +21,7 @@ Android 2.1 (API 7) android.jar, so any newer API fails to compile. The rest is 
 ├── AGENTS.md                  hard rules (short version of section 3)
 ├── android_project/           apktool project: AndroidManifest.xml, apktool.yml, res/, assets/emoji.tsv, smali/
 ├── java/                      Java sources (see section 2); GENERATED_SMALI.txt lists the smali they produce
-├── java_sources/              jadx decompile of the current APK (reference only, not compilable)
+├── java_sources/              jadx decompile of the smali-only classes (reference only, not compilable)
 ├── keystore/                  signing key (git-ignored, generated on first build if missing)
 ├── tools/                     apktool.jar (2.7.0), uber-apk-signer.jar (1.3.0), src/Dex2Smali.java, src/Smali2Dex.java
 ├── scripts/
@@ -31,7 +31,7 @@ Android 2.1 (API 7) android.jar, so any newer API fails to compile. The rest is 
 │   ├── gen_emoji_table.py     regenerates assets/emoji.tsv from the `emoji` pip package (Unicode emoji list)
 │   ├── check_registers.py     .locals budget + 4-bit register-format violations
 │   ├── check_uninit.py        registers read by invoke before any write (approximate)
-│   ├── check_cursors.py/.sh   Cursor open/close audit
+│   ├── check_cursors.py       Cursor open/close audit
 │   └── check_readers.sh       BufferedReader open/close audit
 ├── tests/
 │   ├── run_tests.sh           dex2jar + JVM bytecode verify + unit tests (no device needed)

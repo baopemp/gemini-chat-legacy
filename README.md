@@ -27,7 +27,7 @@ can't update an installed copy, so you'd have to uninstall first (that deletes c
 |---|---|
 | `android_project/` | apktool project: smali, resources, manifest, `apktool.yml` (version) |
 | `java/` | Java sources of the newer classes (compiled to smali by `scripts/build_java.sh`) |
-| `java_sources/` | jadx decompile of the current APK, for reading only |
+| `java_sources/` | readable jadx decompile of the classes that exist only as hand-written smali (reference, not compilable) |
 | `scripts/` | build script and smali audits |
 | `tests/` | dex2jar-based JVM test suite, Live API harness, emulator mocks |
 | `keystore/` | your signing key (git-ignored, generated on first build) |
@@ -51,4 +51,4 @@ The key is stored in the app's private preferences on the device and is sent onl
 
 ## License
 
-[MIT](LICENSE) © 2026 BaoPump
+[MIT](LICENSE) © 2026 baopemp

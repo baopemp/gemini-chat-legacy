@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Gemini</string>
-    <string name="btn_diagnostics">Device Info</string>
-    <string name="btn_ram_test">Dalvik Heap</string>
-    <string name="btn_calc">Vintage Calc</string>
-    <string name="btn_native">ARMv6 JNI</string>
 </resources>

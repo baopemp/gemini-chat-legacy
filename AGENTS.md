@@ -11,7 +11,7 @@ Full context: `docs/HANDOFF.md`. All paths are relative to the project root.
 3. `./scripts/build_apk.sh` runs the audits, `apktool b`, zipalign and signing → `build/gemini_chat_v<ver>.apk`.
 4. `./tests/run_tests.sh` runs the JVM bytecode verification and unit tests. It must report 0 failures.
 5. Smoke-test on ARM emulators: API 7 (240x320, 120 dpi) and API 19 at least (`tests/emulator/README.md`).
-6. Add a `docs/CHANGELOG.md` entry and regenerate `java_sources/` with jadx from the new APK.
+6. Add a `docs/CHANGELOG.md` entry and if a hand-written smali class changed, regenerate its file in `java_sources/` with jadx.
 
 ## Keystore
 - `keystore/gemini_chat.keystore` is git-ignored and created on the first build if missing (override: `KEYSTORE`, `KS_ALIAS`, `KS_PASS`).

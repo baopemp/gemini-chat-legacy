@@ -30,7 +30,7 @@ All notable changes to the Gemini Chat Legacy Android client are documented here
 - **Fixed resource & state hygiene:** `AutoNamer.maybeStart()` clears `RUNNING` in `catch` if `execute()` throws; `EmojiMap.load()` closes `BufferedReader` in `finally` (`scripts/check_readers.sh` now reports 0 warnings).
 
 ### Documentation & Repository Hygiene
-- Reconciled stale version numbers, APK size (~153 KB), class names (`AutoNamer`, `ChatActivity.MessageMenu`, `ReadAloud`), SQLite columns (`chats.named`, `messages.thoughts`), and contradictory Live/endpoint notes across `README.md`, `AGENTS.md`, `docs/HANDOFF.md`, `docs/ARCHITECTURE.md`, and `scripts/build_java.sh`.
+- Removed internal AI agent/handoff docs (`AGENTS.md`, `docs/HANDOFF.md`) and unused legacy decompile artifacts (`android_project/original/`), refreshed `README.md` with curated screenshots and feature highlights, and reconciled version numbers, APK size (~153 KB), class names (`AutoNamer`, `ChatActivity.MessageMenu`, `ReadAloud`), and SQLite schema notes across `docs/ARCHITECTURE.md` and `scripts/build_java.sh`.
 
 ### Verified
 - **JVM suite (`./tests/run_tests.sh`):** 96/96 classes pass `-Xverify:all`, 120/120 unit tests pass (including full Gemini 4 + `xhigh` matrix, `gemini-flash-latest` `minimal -> low`, and `gemini-3.1-flash-tts-preview` format); all 4 smali audits report 0 issues.

@@ -296,7 +296,9 @@ public class Tests {
                 && "minimal".equals(lvl.invoke(null, "gemini-3.6-flash", "minimal"))
                 && "high".equals(lvl.invoke(null, "gemini-3.6-flash", "xhigh"))
                 && "high".equals(lvl.invoke(null, "gemini-3-flash-preview", "high"))
+                && "low".equals(lvl.invoke(null, "gemini-flash-latest", "minimal"))
                 && "high".equals(lvl.invoke(null, "gemini-flash-latest", "xhigh"))
+                && "minimal".equals(lvl.invoke(null, "gemini-flash-lite-latest", "minimal"))
                 && "low".equals(lvl.invoke(null, "gemini-3.1-pro-preview", "minimal"))
                 && "high".equals(lvl.invoke(null, "gemini-3.1-pro-preview", "xhigh"))
                 && "high".equals(lvl.invoke(null, "gemini-3-pro-preview", "medium"))
@@ -467,6 +469,9 @@ public class Tests {
         check("tts body voice", "Kore".equals(rj.getJSONObject("generation_config").getJSONArray("speech_config").getJSONObject(0).getString("voice")), rb);
         org.json.JSONObject rf = rj.getJSONObject("response_format");
         check("tts body format l16 24k", "audio".equals(rf.getString("type")) && "audio/l16".equals(rf.getString("mime_type")) && rf.getInt("sample_rate") == 24000, rf);
+        org.json.JSONObject rf31 = new org.json.JSONObject((String) m(ra, "requestBody", String.class, String.class, String.class)
+                .invoke(null, "gemini-3.1-flash-tts-preview", "Kore", "Hi")).getJSONObject("response_format");
+        check("tts 3.1 body omits mime_type", "audio".equals(rf31.getString("type")) && !rf31.has("mime_type") && !rf31.has("sample_rate"), rf31);
         Method audioOf = m(ra, "audioOf", String.class);
         check("tts audio delta", "AAEC".equals(audioOf.invoke(null, "{\"index\":0,\"delta\":{\"type\":\"audio\",\"mime_type\":\"audio/l16\",\"data\":\"AAEC\"},\"event_type\":\"step.delta\"}")), "");
         check("tts text delta ignored", audioOf.invoke(null, "{\"index\":1,\"delta\":{\"text\":\"hi\",\"type\":\"text\"},\"event_type\":\"step.delta\"}") == null, "");

@@ -70,7 +70,7 @@
     :cond_0
     const/4 p1, 0x0
 
-    .line 95
+    .line 96
     :cond_1
     :goto_0
     return-object p1
@@ -205,9 +205,18 @@
 
     if-nez v0, :cond_8
 
-    const-string v0, "gemini-3.1-pro"
+    const-string v0, "gemini-flash-latest"
 
     .line 91
+    invoke-virtual {v0, p0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+
+    move-result v0
+
+    if-nez v0, :cond_8
+
+    const-string v0, "gemini-3.1-pro"
+
+    .line 92
     invoke-virtual {p0, v0}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
 
     move-result v0
@@ -224,7 +233,7 @@
 
     const-string v0, "gemini-2.5-"
 
-    .line 92
+    .line 93
     invoke-virtual {p0, v0}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
 
     move-result v0
@@ -234,7 +243,7 @@
     :cond_8
     move v1, v2
 
-    .line 93
+    .line 94
     :cond_9
     const-string v0, "minimal"
 
@@ -248,7 +257,7 @@
 
     const-string p1, "low"
 
-    .line 94
+    .line 95
     :cond_a
     const-string v0, "medium"
 

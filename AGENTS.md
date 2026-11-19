@@ -40,7 +40,7 @@ Full context: `docs/HANDOFF.md`. All paths are relative to the project root.
   (TEXT modality; `interimInputTranscription` while speaking, `inputTranscription` final).
 - Read Aloud: `POST https://generativelanguage.googleapis.com/v1beta/interactions` (Interactions API), body
   `{model, input:[{type:user_input, content:[{type:text,text}]}], response_format:{type:audio, mime_type:audio/l16, sample_rate:24000},
-  generation_config:{speech_config:[{voice}]}, stream:true}`; SSE `step.delta` events with `delta.type == "audio"` carry base64 PCM.
+  generation_config:{speech_config:[{voice}]}, stream:true}` (`gemini-3.1-flash-tts-preview` omits `mime_type`/`sample_rate` and defaults to 24 kHz `audio/l16`); SSE `step.delta` events with `delta.type == "audio"` carry base64 PCM.
   Models: `gemini-3.8-flash-lite-tts` (default), `gemini-3.8-flash-tts`, `gemini-3.1-flash-tts-preview` (scheduled shutdown 2026-12-18); voice = the Live voice.
 - Time grounding (Settings checkbox, default on): `"Current date and time: Thursday, 2026-11-19T13:14:27.381+00:00; Unix: 1795094067381ms"`
   is appended to the system instruction on every request (text and Live). It's the only hidden instruction.

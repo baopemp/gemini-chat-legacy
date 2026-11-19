@@ -11,14 +11,14 @@ All notable changes to the Gemini Chat Legacy Android client are documented here
   (`gemini-4-neon`, `gemini-4-carbon`, `gemini-4-argon`) work via **Custom model...**; updated the custom-model hint and validation
   toast from nonexistent `gemini-3.8-pro` to `gemini-4-neon`.
 - Added **Extra High** (`xhigh`) to Settings → **Thinking level**.
-- Updated `ReplyParser.levelFor` to cover the full 2026-11-19 thinking-level matrix:
+- Updated `ReplyParser.levelFor` to cover the full 2026-11-19 thinking-level matrix (verified against the live API):
   - `gemini-4-hydrogen` / `gemini-4-neon`: keeps `xhigh`, maps `minimal` → `low` (Gemini 4 rejects `minimal` with HTTP 400).
-  - `gemini-4-carbon` / `gemini-4-argon`, `gemini-3.8-flash`, `gemini-3.1-pro-*`, `gemini-2.5-*`: maps `minimal` → `low` and clamps `xhigh` → `high`.
+  - `gemini-4-carbon` / `gemini-4-argon`, `gemini-3.8-flash`, `gemini-flash-latest` (now aliases `gemini-3.8-flash` and rejects `minimal` with HTTP 400), `gemini-3.1-pro-*`, `gemini-2.5-*`: maps `minimal` → `low` and clamps `xhigh` → `high`.
   - `gemini-3-pro-*`: maps `minimal` → `low`, `medium`/`xhigh` → `high`.
-  - `gemini-3.6-flash`, `gemini-3.5-flash-lite`, `gemini-3.1-flash-lite`, `gemini-3-flash-preview`, `*-latest`: clamps `xhigh` → `high`, keeps `minimal`.
+  - `gemini-3.6-flash`, `gemini-3.5-flash-lite`, `gemini-3.1-flash-lite`, `gemini-3-flash-preview`, `gemini-flash-lite-latest`: clamps `xhigh` → `high`, keeps `minimal`.
   - `gemma-4-*`: maps `minimal`/`low` → `minimal`, `medium`/`high`/`xhigh` → `high`.
   - Future models (e.g. `gemini-5-*`): passes `xhigh` through unchanged (still falls back once to model default on 400).
-- Noted scheduled `gemini-3.1-flash-tts-preview` shutdown (`2026-12-18`) in Read Aloud docs/comments (`gemini-3.8-flash-lite-tts` remains default).
+- Fixed Read Aloud on `gemini-3.1-flash-tts-preview`: omits explicit `response_format.mime_type` (`audio/l16`) and `sample_rate` for `gemini-3.1-*` TTS models, which reject explicit `AUDIO_L16` with HTTP 400 while streaming 24 kHz mono `audio/l16` by default when `{"type":"audio"}` is sent. Noted scheduled `gemini-3.1-flash-tts-preview` shutdown (`2026-12-18`) in docs/comments (`gemini-3.8-flash-lite-tts` remains default).
 
 ### Edge-Case Fixes (Full Codebase Audit)
 - **Fixed `NetworkOnMainThreadException` when cancelling a request on Android 3.0+:** `ChatActivity.cancelTask()` now calls `GeminiTask.disconnectAsync()` on a daemon thread instead of calling `HttpURLConnection.disconnect()` on the UI thread.
@@ -33,10 +33,14 @@ All notable changes to the Gemini Chat Legacy Android client are documented here
 - Reconciled stale version numbers, APK size (~153 KB), class names (`AutoNamer`, `ChatActivity.MessageMenu`, `ReadAloud`), SQLite columns (`chats.named`, `messages.thoughts`), and contradictory Live/endpoint notes across `README.md`, `AGENTS.md`, `docs/HANDOFF.md`, `docs/ARCHITECTURE.md`, and `scripts/build_java.sh`.
 
 ### Verified
-- JVM suite (`./tests/run_tests.sh`): 96/96 classes pass `-Xverify:all`, 119/119 unit tests pass (including full Gemini 4 + `xhigh` matrix); all 4 smali audits report 0 issues.
-- Android 2.1 (API 7, 240x320, mock): Settings (`gemini-4-hydrogen` + `Extra High`), streaming + thoughts + auto-naming, Live Voice setup (main + transcriber).
-- Android 4.4.2 (API 19, 480x800, mock): Settings, `Attach Image` menu visibility, Stop mid-request with zero `NetworkOnMainThreadException`, `Thought Process (gemini-4-hydrogen)` dialog (`xhigh`), Read Aloud Interactions request, Live Voice with history handoff.
-- Android 5.0.2 (API 21, 480x800, mock): Material Dark Settings (`gemini-4-hydrogen` + `Extra High`), streaming + auto-naming, **5.0+ Material `RippleDrawable` press highlight** verified visually on message rows (clears previous `Not verified` item), long-press `Message Options`, zero crashes or `VerifyError`.
+- **JVM suite (`./tests/run_tests.sh`):** 96/96 classes pass `-Xverify:all`, 120/120 unit tests pass (including full Gemini 4 + `xhigh` matrix, `gemini-flash-latest` `minimal -> low`, and `gemini-3.1-flash-tts-preview` format); all 4 smali audits report 0 issues.
+- **Real Google API (live free-tier key, 2026-11-19):**
+  - REST streaming (`streamGenerateContent?alt=sse`): HTTP 200 across `gemini-3.8-flash` (`high` thinking + thought summaries, clearing previous `Not verified` item), `gemini-3.6-flash`, `gemini-3.5-flash-lite`, `gemini-3.1-flash-lite`, `gemini-3-flash-preview`, `gemini-flash-lite-latest`, `gemma-4-31b-it` (`minimal` & `high` with thoughts), and `gemma-4-26b-a4b-it`. Confirmed `gemini-4-hydrogen` is free tier and rejects `minimal` (HTTP 400) while accepting `low`..`xhigh` (currently under Google free-tier 503/high-demand queuing); confirmed `gemini-4-neon`/`carbon`/`argon` are paid-tier quota-gated (429 on free key); confirmed `gemini-3.8-flash`, `gemini-flash-latest`, and `gemini-3.5-flash-lite` reject `xhigh` (HTTP 400).
+  - Auto-naming (`AutoNamer` on `gemini-3.5-flash-lite`), Image attachment (`inlineData`) + Time Grounding, and all three Read Aloud TTS models (`gemini-3.8-flash-lite-tts`, `gemini-3.8-flash-tts`, `gemini-3.1-flash-tts-preview`, including full `Markdown -> ReadAloud.speakable()` pipeline) verified HTTP 200.
+  - Live Voice (`LiveSession` + `LiveSocket` via `LiveCheck` / `LiveCheck2`): verified `gemini-3.8-live` (text, chat history handoff, PTT spoken audio), `gemini-3.8-live-extended-thinking` (`low`), `gemini-3.1-flash-live-preview`, session resumption (`resume`), and `gemini-3.5-transcribe-live` (`ptt` & `free`).
+- **Android 2.1 (API 7, 240x320, mock):** Settings (`gemini-4-hydrogen` + `Extra High`), streaming + thoughts + auto-naming, Live Voice setup (main + transcriber).
+- **Android 4.4.2 (API 19, 480x800, mock & real API):** Mock verification of Settings, `Attach Image` menu visibility, Stop mid-request with zero `NetworkOnMainThreadException`, `Thought Process (gemini-4-hydrogen)` dialog (`xhigh`), Read Aloud Interactions request, and Live Voice history handoff; live Google API verification over KitKat TLS 1.2 + SNI (`TLSSocketFactory` + `LiveSocket`) covering real `gemini-3.8-live` voice turns + auto-naming and live REST chat streaming + thoughts + Read Aloud.
+- **Android 5.0.2 (API 21, 480x800, mock):** Material Dark Settings (`gemini-4-hydrogen` + `Extra High`), streaming + auto-naming, **5.0+ Material `RippleDrawable` press highlight** verified visually on message rows (clears previous `Not verified` item), long-press `Message Options`, zero crashes or `VerifyError`.
 
 ## v0.8.8 - VersionCode: 88
 

@@ -66,8 +66,10 @@ final class ReadAloud extends Thread {
         turn.put("content", new JSONArray().put(part));
         JSONObject fmt = new JSONObject();
         fmt.put("type", "audio");
-        fmt.put("mime_type", "audio/l16");
-        fmt.put("sample_rate", RATE);
+        if (model == null || !model.startsWith("gemini-3.1-")) {
+            fmt.put("mime_type", "audio/l16");
+            fmt.put("sample_rate", RATE);
+        }
         JSONObject v = new JSONObject();
         v.put("voice", voice);
         JSONObject gen = new JSONObject();

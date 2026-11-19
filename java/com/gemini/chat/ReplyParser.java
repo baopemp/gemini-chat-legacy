@@ -73,9 +73,9 @@ public final class ReplyParser {
      * to the nearest one it does (ai.google.dev thinking docs, 2026-11-19):
      * - Gemma 4: only "minimal" (off) or "high".
      * - Gemini 4 Hydrogen / Neon: low, medium, high, xhigh (no minimal).
-     * - Gemini 4 Carbon / Argon, 3.8 Flash, 3.1 Pro, 2.5: low, medium, high (no minimal, no xhigh).
+     * - Gemini 4 Carbon / Argon, 3.8 Flash, gemini-flash-latest, 3.1 Pro, 2.5: low, medium, high (no minimal, no xhigh).
      * - Gemini 3 Pro: low, high (no minimal, medium, xhigh).
-     * - Gemini 3.6 Flash, 3.5/3.1 Flash-Lite, 3 Flash, -latest aliases: minimal, low, medium, high (no xhigh).
+     * - Gemini 3.6 Flash, 3.5/3.1 Flash-Lite, 3 Flash, gemini-flash-lite-latest: minimal, low, medium, high (no xhigh).
      */
     public static String levelFor(String model, String level) {
         if (level == null || level.length() == 0) return null;
@@ -88,6 +88,7 @@ public final class ReplyParser {
                 || model.startsWith("gemini-flash-") || model.startsWith("gemini-pro-");
         if ("xhigh".equals(level) && noXhigh) level = "high";
         boolean noMinimal = model.startsWith("gemini-4-") || model.startsWith("gemini-3.8-flash")
+                || "gemini-flash-latest".equals(model)
                 || model.startsWith("gemini-3.1-pro") || model.startsWith("gemini-3-pro")
                 || model.startsWith("gemini-2.5-");
         if ("minimal".equals(level) && noMinimal) level = "low";

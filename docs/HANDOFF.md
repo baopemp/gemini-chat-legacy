@@ -105,12 +105,13 @@ Smali generated from `java/` must not be edited by hand: change the Java source 
 
 ## 6. Current state (0.8.9)
 
-`tests/run_tests.sh`: 96/96 classes pass `-Xverify:all`; 119/119 checks pass. All smali audits (`check_registers`, `check_cursors`, `check_uninit`, `check_readers`) report 0 issues.
+`tests/run_tests.sh`: 96/96 classes pass `-Xverify:all`; 120/120 checks pass. All smali audits (`check_registers`, `check_cursors`, `check_uninit`, `check_readers`) report 0 issues.
 
-0.8.9 (2026-11-19): verified on Android 2.1 (API 7), Android 4.4.2 (API 19), and Android 5.0.2 (API 21) ARM emulators with the mock servers:
-`gemini-4-hydrogen` + `Extra High` (`xhigh`) thinking level in Settings and request payloads, streamed replies with thought summaries and auto-naming,
-Stop button cancellation with zero `NetworkOnMainThreadException` on API 19, `Attach Image` menu visibility on API 19 (fixed inverted `SDK_INT >= 19` guard),
-Read Aloud Interactions API request payload, Live Voice session + transcriber setup and history handoff, and the Android 5.0+ Material `RippleDrawable` press highlight on message rows.
+0.8.9 (2026-11-19): verified against both local mock servers (Android 2.1 API 7, Android 4.4.2 API 19, Android 5.0.2 API 21) and the real Google Gemini API (desktop JVM + Android 4.4.2 KitKat TLS 1.2 + SNI):
+- Live API checks caught and fixed two production discrepancies: `gemini-flash-latest` now aliases `gemini-3.8-flash` and rejects `minimal` with HTTP 400 (added to `noMinimal` in `ReplyParser.levelFor`), and `gemini-3.1-flash-tts-preview` rejects explicit `response_format.mime_type: "audio/l16"` with HTTP 400 (now omitted for `gemini-3.1-*` in `ReadAloud.requestBody`, which still returns 24 kHz mono `audio/l16`).
+- Verified HTTP 200 live across `gemini-3.8-flash` (`high` thinking + thought summaries — clears prior `Not verified` item), `gemini-3.6-flash`, `gemini-3.5-flash-lite`, `gemini-3.1-flash-lite`, `gemini-3-flash-preview`, `gemini-flash-lite-latest`, `gemma-4-31b-it` (`minimal` + `high` thoughts), `gemma-4-26b-a4b-it`, AutoNamer, Image attachment (`inlineData`) + Time Grounding, all three Read Aloud TTS models (`gemini-3.8-flash-lite-tts`, `gemini-3.8-flash-tts`, `gemini-3.1-flash-tts-preview`), and all Live Voice capabilities (`gemini-3.8-live` text/history/PTT audio, `gemini-3.8-live-extended-thinking`, `gemini-3.1-flash-live-preview`, `LiveCheck2 resume`, and `gemini-3.5-transcribe-live` in `ptt` & `free` modes).
+- Verified `gemini-4-hydrogen` is free tier and rejects `minimal` (HTTP 400) while passing validation on `low`/`medium`/`high`/`xhigh` (under Google free-tier 503/high-demand queuing during testing); verified paid Gemini 4 models (`gemini-4-neon`, `gemini-4-carbon`, `gemini-4-argon`) are quota-gated (429) on free keys.
+- Verified Android 2.1/4.4.2/5.0.2 emulators: `gemini-4-hydrogen` + `Extra High` (`xhigh`) Settings and request payloads, Stop cancellation with zero `NetworkOnMainThreadException` on API 19, `Attach Image` menu visibility on API 19, Read Aloud Interactions API, Live Voice over KitKat TLS 1.2 + SNI, and the Android 5.0+ Material `RippleDrawable` press highlight on message rows.
 
 0.8.8 (2026-10-23), Android 2.1 emulator with the mocks: Read Aloud (request body, toast, Stop Reading in both menus, in-stream
 error toast), Settings layout, Rename only in the chat list, Live hands-free and push-to-talk turns saved exactly once (late
@@ -121,16 +122,16 @@ Verified (2026-11-19, see `docs/CHANGELOG.md` for the full list):
 | Where | What passed |
 |---|---|
 | Android 2.1 (API 7), 240x320 / 120 dpi, mock server | `gemini-4-hydrogen` + `xhigh` streaming/thoughts, every long-press action, 503 retry, auto-naming, colors, all Settings sections, Live (text, push-to-talk with emulator mic at 8 kHz, synced transcript, mute, saving, new chat) |
-| Android 4.4.2 (API 19), 480x800 / 240 dpi, mock & real API | `gemini-4-hydrogen` + `xhigh` streaming & Thought Process dialog, Stop mid-stream with zero `NetworkOnMainThreadException`, `Attach Image` menu visibility, Read Aloud Interactions request, Live with history & no-mic handling; (real API in 0.8.6–0.8.7: streaming thoughts, 503 retry, image attach, Live via TLS 1.2 + SNI proxy) |
+| Android 4.4.2 (API 19), 480x800 / 240 dpi, mock & real API | Mock: `gemini-4-hydrogen` + `xhigh` streaming & Thought Process dialog, Stop mid-stream with zero `NetworkOnMainThreadException`, `Attach Image` menu visibility, Read Aloud, Live history handoff. Real Google API over KitKat TLS 1.2 + SNI: `gemini-3.8-live` voice turns + auto-naming, real `gemini-3.5-flash-lite` streaming + thought summaries + Read Aloud |
 | Android 5.0.2 (API 21), 480x800 / 240 dpi, mock server | Material Dark Settings (`gemini-4-hydrogen` + `Extra High`), streaming + auto-naming, **5.0+ Material `RippleDrawable` press animation** on message rows with `RoleBar` intact, long-press `Message Options`, zero `VerifyError`/crashes |
-| Desktop JVM, real Live API (0.8.6–0.8.7) | 3.8-live, 3.8-live-extended-thinking, 3.1-flash-live-preview; text and recorded speech (push-to-talk, hands-free); transcripts; history; resumption + transcriber |
+| Desktop JVM, real Google API (0.8.9, 2026-11-19) | REST streaming across 8 free models incl. `gemini-3.8-flash` (`high` thinking) & Gemma 4, AutoNamer, Image + Time Grounding, all 3 Read Aloud TTS models (incl. fixed `gemini-3.1-flash-tts-preview`), and Live Voice (`3.8-live`, `3.8-live-extended-thinking`, `3.1-flash-live-preview`, `resume`, `3.5-transcribe-live` `ptt`/`free`, PTT spoken audio) |
 
 Real device: the owner confirmed chat works on a **Samsung Galaxy Y (Android 2.3, TLS 1.0)**. His TLS scan (2026-10-03) shows
 Google's endpoint accepts TLS 1.0 (ECDHE and plain RSA AES-CBC-SHA) and serves a `*.googleapis.com` certificate without SNI.
 
 ### Known limitations / open items
 
-- **Not verified:** Read Aloud sound on a real phone (emulators have no audio out), live Google server response for `gemini-4-hydrogen` / `xhigh` and `gemini-3.8-flash` thinking (0.8.9 tests ran against the local mock servers; no Gemini API key in the build environment).
+- **Not verified:** Read Aloud audio playback on physical phone speaker hardware (emulators have no audio out), and a full completed non-503 text reply from `gemini-4-hydrogen` (`minimal -> 400` and `low..xhigh` parameter acceptance were verified live, but Google's free-tier `gemini-4-hydrogen` backend was returning transient 503 high-demand errors during testing).
 - **TTS deprecation note:** `gemini-3.1-flash-tts-preview` is scheduled for shutdown on 2026-12-18 (`gemini-3.8-flash-lite-tts` and `gemini-3.8-flash-tts` remain current).
 - **Live on a phone speaker:** no echo cancellation on old phones. Push-to-talk is the default; hands-free mutes the mic for the
   whole reply + 0.7 s, so you can't interrupt by voice there (tap the mic button or type to interrupt).

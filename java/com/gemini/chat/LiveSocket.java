@@ -56,44 +56,59 @@ public final class LiveSocket {
                 + (u.getRawQuery() != null ? "?" + u.getRawQuery() : "");
 
         Socket raw = new Socket();
-        InetSocketAddress proxy = proxyFor(tls, host, port);
-        if (proxy != null) {
-            raw.connect(proxy, timeoutMs);
-            raw.setSoTimeout(timeoutMs);
-            OutputStream po = raw.getOutputStream();
-            po.write(("CONNECT " + host + ":" + port + " HTTP/1.1\r\nHost: " + host + ":" + port + "\r\n\r\n").getBytes("ISO-8859-1"));
-            po.flush();
-            InputStream pi = raw.getInputStream();
-            String status = readLine(pi);
-            while (readLine(pi).length() > 0) {
-                // skip proxy response headers
-            }
-            if (status.indexOf(" 200") < 0) {
-                raw.close();
-                throw new IOException("Proxy refused CONNECT: " + status);
-            }
-        } else {
-            raw.connect(new InetSocketAddress(host, port), timeoutMs);
-        }
-        raw.setSoTimeout(timeoutMs);
-        raw.setTcpNoDelay(true);
-
         Socket s = raw;
-        if (tls) {
-            SSLSocketFactory f = HttpsURLConnection.getDefaultSSLSocketFactory();
-            SSLSocket ssl = (SSLSocket) f.createSocket(raw, host, port, true);
-            enableSni(ssl, host);
-            ssl.startHandshake();
-            HostnameVerifier hv = hostnameVerifier != null ? hostnameVerifier : HttpsURLConnection.getDefaultHostnameVerifier();
-            if (!hv.verify(host, ssl.getSession())) {
-                ssl.close();
-                throw new IOException("TLS certificate does not match " + host);
+        boolean ok = false;
+        try {
+            InetSocketAddress proxy = proxyFor(tls, host, port);
+            if (proxy != null) {
+                raw.connect(proxy, timeoutMs);
+                raw.setSoTimeout(timeoutMs);
+                OutputStream po = raw.getOutputStream();
+                po.write(("CONNECT " + host + ":" + port + " HTTP/1.1\r\nHost: " + host + ":" + port + "\r\n\r\n").getBytes("ISO-8859-1"));
+                po.flush();
+                InputStream pi = raw.getInputStream();
+                String status = readLine(pi);
+                while (readLine(pi).length() > 0) {
+                    // skip proxy response headers
+                }
+                if (status.indexOf(" 200") < 0) {
+                    throw new IOException("Proxy refused CONNECT: " + status);
+                }
+            } else {
+                raw.connect(new InetSocketAddress(host, port), timeoutMs);
             }
-            s = ssl;
+            raw.setSoTimeout(timeoutMs);
+            raw.setTcpNoDelay(true);
+
+            if (tls) {
+                SSLSocketFactory f = HttpsURLConnection.getDefaultSSLSocketFactory();
+                SSLSocket ssl = (SSLSocket) f.createSocket(raw, host, port, true);
+                s = ssl;
+                enableSni(ssl, host);
+                ssl.startHandshake();
+                HostnameVerifier hv = hostnameVerifier != null ? hostnameVerifier : HttpsURLConnection.getDefaultHostnameVerifier();
+                if (!hv.verify(host, ssl.getSession())) {
+                    throw new IOException("TLS certificate does not match " + host);
+                }
+            }
+            socket = s;
+            in = new BufferedInputStream(s.getInputStream(), 16384);
+            out = s.getOutputStream();
+            ok = true;
+        } finally {
+            if (!ok) {
+                try {
+                    s.close();
+                } catch (Exception ignored) {
+                }
+                if (s != raw) {
+                    try {
+                        raw.close();
+                    } catch (Exception ignored) {
+                    }
+                }
+            }
         }
-        socket = s;
-        in = new BufferedInputStream(s.getInputStream(), 16384);
-        out = s.getOutputStream();
 
         byte[] nonce = new byte[16];
         random.nextBytes(nonce);

@@ -96,6 +96,7 @@ public class LiveActivity extends Activity {
     private volatile long micOpenAfter;
     private static final long ECHO_TAIL_MS = 700;
     private boolean talking; // push-to-talk: recording / hands-free: mic on
+    private boolean acceptTranscript; // false after sendTyped() discards in-flight transcriber events
 
     static String voiceName(String entry) {
         int i = entry.indexOf(" -- ");
@@ -208,8 +209,8 @@ public class LiveActivity extends Activity {
         if (session != null) session.stop();
         if (tr != null) tr.stop();
         player.quit();
-        finishModelTurn(true);
         finishUserTurn();
+        finishModelTurn(true);
         db.close();
     }
 
@@ -496,7 +497,7 @@ public class LiveActivity extends Activity {
         public void onInterimInput(final String text) {
             ui.post(new Runnable() {
                 public void run() {
-                    if (destroyed) return;
+                    if (destroyed || (!acceptTranscript && userRow == -1)) return;
                     spokenInterim = text;
                     lateOrBox();
                 }
@@ -506,7 +507,7 @@ public class LiveActivity extends Activity {
         public void onInputText(final String text) {
             ui.post(new Runnable() {
                 public void run() {
-                    if (destroyed) return;
+                    if (destroyed || (!acceptTranscript && userRow == -1)) return;
                     spokenFinal.append(text.trim()).append(' ');
                     spokenInterim = "";
                     lateOrBox();
@@ -685,6 +686,7 @@ public class LiveActivity extends Activity {
         if (t.length() == 0 || session == null || !connected) return;
         InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         if (imm != null) imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+        acceptTranscript = false;
         if (talking) stopTalking(false); // the box (typed + spoken words) is sent as text instead
         newUserTurn();
         bargeIn();
@@ -726,6 +728,7 @@ public class LiveActivity extends Activity {
         if (userRow != -1) newUserTurn(); // the last spoken turn was answered: this is a new one
         if (spokenText().length() == 0) typedPrefix = input.getText().toString().trim(); // else the box already holds it
         if (!handsFree) session.activityStart();
+        acceptTranscript = true;
         talking = true;
         mic.start();
         updateButtons();
@@ -742,7 +745,7 @@ public class LiveActivity extends Activity {
             if (handsFree) session.audioStreamEnd();
             else session.activityEnd();
         }
-        if (talking && tr != null) tr.audioStreamEnd(); // finalize the box text
+        if (talking && send && tr != null) tr.audioStreamEnd(); // finalize the box text
         talking = false;
         updateButtons();
         idleStatus();

@@ -26,7 +26,7 @@
     .locals 0
 
     .prologue
-    .line 1183
+    .line 1217
     iput-object p1, p0, Lcom/gemini/chat/ChatActivity$15;->this$0:Lcom/gemini/chat/ChatActivity;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
@@ -40,7 +40,12 @@
     .locals 4
 
     .prologue
-    .line 1185
+    .line 1219
+    iget-object v0, p0, Lcom/gemini/chat/ChatActivity$15;->this$0:Lcom/gemini/chat/ChatActivity;
+
+    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$2600(Lcom/gemini/chat/ChatActivity;)V
+
+    .line 1220
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$15;->this$0:Lcom/gemini/chat/ChatActivity;
 
     invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$000(Lcom/gemini/chat/ChatActivity;)Lcom/gemini/chat/DatabaseHelper;
@@ -55,11 +60,11 @@
 
     invoke-virtual {v0, v2, v3}, Lcom/gemini/chat/DatabaseHelper;->deleteChat(J)V
 
-    .line 1186
+    .line 1221
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$15;->this$0:Lcom/gemini/chat/ChatActivity;
 
     invoke-virtual {v0}, Lcom/gemini/chat/ChatActivity;->finish()V
 
-    .line 1187
+    .line 1222
     return-void
 .end method

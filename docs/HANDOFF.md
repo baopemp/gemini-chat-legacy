@@ -8,8 +8,8 @@ Android 2.1 (API 7) android.jar, so any newer API fails to compile. The rest is 
 `TLSSocketFactory`. `java_sources/` holds a jadx decompile of exactly those smali-only classes, for reading only.
 
 - **minSdk 7** (Android 2.1), **targetSdk 14** (Android 4.0), package `com.gemini.chat`
-- No AndroidX, Play Services or Kotlin. APK is about 145 KB.
-- Current version: **0.8.7** (`versionCode 87`)
+- No AndroidX, Play Services or Kotlin. APK is about 153 KB.
+- Current version: **0.8.9** (`versionCode 89`)
 
 ---
 
@@ -36,7 +36,7 @@ Android 2.1 (API 7) android.jar, so any newer API fails to compile. The rest is 
 ├── tests/
 │   ├── run_tests.sh           dex2jar + JVM bytecode verify + unit tests (no device needed)
 │   ├── jvm/                   Tests.java, VerifyAll.java, WsLoopback.java, FakeDb (Cursor double), Environment stub
-│   ├── live/LiveCheck.java    drives LiveSession against the real Live API from a desktop JVM (key from $GEMINI_KEY)
+│   ├── live/                  LiveCheck.java and LiveCheck2.java (drive LiveSession against the real Live API from a desktop JVM; key from $GEMINI_KEY)
 │   └── emulator/              mock Gemini server (SSE), mock Live server (WebSocket), Markdown sample, how-to
 └── docs/ARCHITECTURE.md, docs/CHANGELOG.md
 ```
@@ -67,11 +67,11 @@ Android 2.1 (API 7) android.jar, so any newer API fails to compile. The rest is 
 ./scripts/build_java.sh           # after editing java/ (fetches dex2jar + android-7.jar on first run)
 ./scripts/build_apk.sh            # needs Java 8+; fetches tools on first run if missing
 ./tests/run_tests.sh              # needs Java + git + network to GitHub on first run
-adb install -r build/gemini_chat_v0.8.7.apk
+adb install -r build/gemini_chat_v0.8.9.apk
 GEMINI_KEY=... java ... LiveCheck gemini-3.8-live Kore ptt text "Hello"   # see tests/live/LiveCheck.java
 ```
 
-`build_apk.sh` refuses to build if `versionCode` doesn't match `versionName` (0.8.7 → 87) or if the register or cursor audits fail.
+`build_apk.sh` refuses to build if `versionCode` doesn't match `versionName` (0.8.9 → 89) or if the register or cursor audits fail.
 Smali generated from `java/` must not be edited by hand: change the Java source and rerun `build_java.sh`.
 
 ## 4. Rules
@@ -79,15 +79,18 @@ Smali generated from `java/` must not be edited by hand: change the Java source 
 1. **Keep signing with the same key.** `build_apk.sh` uses `keystore/gemini_chat.keystore` (git-ignored; created on the first build if missing; override with `KEYSTORE`, `KS_ALIAS`, `KS_PASS`). A different key means users must uninstall and lose their chats, so back the keystore up.
    v1 signatures must use **SHA-1** digests, because Android < 4.3 can't verify SHA-256 JAR signatures. uber-apk-signer/apksig picks this automatically from minSdk. Don't switch to plain `jarsigner` defaults.
 2. **API-7 verifier rule.** Never reference an API 8+ class from a class that can load on Android 2.1. Gate with `Build.VERSION.SDK_INT` and put the newer API in its own class (pattern: `ImageUtil` → `ImageUtilApi8`), or use reflection (`Compat`, `LiveSocket.enableSni`). Newer attribute ids are used as raw ints (`MessageFormatter.ATTR_SELECTABLE_ITEM_BACKGROUND`).
-3. **No network on the UI thread** (StrictMode kills it on 3.0+, silently on 2.x). Text: `AsyncTask.doInBackground`. Live: every send goes through `LiveSession`'s writer thread. 0.8.6 hit this: Live text worked on 2.1 and silently failed on 4.4.
+3. **No network on the UI thread** (StrictMode kills it on 3.0+, silently on 2.x). Text: `AsyncTask.doInBackground` (and `disconnectAsync()` on cancel). Live: every send goes through `LiveSession`'s writer thread. 0.8.6 hit this: Live text worked on 2.1 and silently failed on 4.4.
 4. **Close every Cursor and stream on every path**, including the exception path.
-5. **Models:** `SettingsActivity.MODELS` (all models usable without billing per ai.google.dev/gemini-api/docs/pricing, 2026-10-23):
-   `gemini-3.8-flash`, `gemini-3.6-flash`, `gemini-3.5-flash-lite`, `gemini-3.1-flash-lite`, `gemini-3-flash-preview` (legacy),
-   `gemini-flash-latest`, `gemini-flash-lite-latest`, `gemma-4-31b-it`, `gemma-4-26b-a4b-it` (Gemma: thinking minimal/high only).
+5. **Models:** `SettingsActivity.MODELS` (all models usable without billing per ai.google.dev/gemini-api/docs/pricing, 2026-11-19):
+   `gemini-4-hydrogen` (`low|medium|high|xhigh`, default `high`), `gemini-3.8-flash`, `gemini-3.6-flash`, `gemini-3.5-flash-lite`,
+   `gemini-3.1-flash-lite`, `gemini-3-flash-preview` (legacy), `gemini-flash-latest`, `gemini-flash-lite-latest`,
+   `gemma-4-31b-it`, `gemma-4-26b-a4b-it` (Gemma: thinking minimal/high only). Paid Gemini 4 models (`gemini-4-neon`,
+   `gemini-4-carbon`, `gemini-4-argon`) work via "Custom model...".
    Default for new installs: `ChatActivity.DEFAULT_MODEL` = `gemini-3.5-flash-lite`. Live: `LiveActivity.LIVE_MODELS`
    (`gemini-3.8-live` default, `-extended-thinking`, `gemini-3.1-flash-live-preview`). Both pickers have "Custom model...".
+   Thinking levels: Model default, Minimal, Low, Medium, High, Extra High (`xhigh`; `ReplyParser.levelFor` maps unsupported levels per model).
    Re-check the pricing / models / deprecations pages before changing the lists.
-6. **Versioning:** `versionCode` = `versionName` with the dots removed (0.8.7 → 87). Set it only in `apktool.yml`.
+6. **Versioning:** `versionCode` = `versionName` with the dots removed (0.8.9 → 89). Set it only in `apktool.yml`.
 7. **Java:** Java 8 syntax compiles, but no lambdas (no desugaring), no try-with-resources (`addSuppressed`, API 19), no static
    methods in inner classes, nothing missing from android-7.jar. Avoid `String.isEmpty()` (API 9). `AsyncTask.publishProgress`
    is varargs: wrap an array argument as `(Object) array` (0.8.6 crashed on this).
@@ -100,29 +103,35 @@ Smali generated from `java/` must not be edited by hand: change the Java source 
 - If a handler can throw, place it *inside* the outer try range.
 - Check branch direction every time; always rebuild, decompile (`jadx`) and run the tests.
 
-## 6. Current state (0.8.8)
+## 6. Current state (0.8.9)
 
-`tests/run_tests.sh`: 95/95 classes pass `-Xverify:all`; 116/116 checks pass.
+`tests/run_tests.sh`: 96/96 classes pass `-Xverify:all`; 119/119 checks pass. All smali audits (`check_registers`, `check_cursors`, `check_uninit`, `check_readers`) report 0 issues.
+
+0.8.9 (2026-11-19): verified on Android 2.1 (API 7), Android 4.4.2 (API 19), and Android 5.0.2 (API 21) ARM emulators with the mock servers:
+`gemini-4-hydrogen` + `Extra High` (`xhigh`) thinking level in Settings and request payloads, streamed replies with thought summaries and auto-naming,
+Stop button cancellation with zero `NetworkOnMainThreadException` on API 19, `Attach Image` menu visibility on API 19 (fixed inverted `SDK_INT >= 19` guard),
+Read Aloud Interactions API request payload, Live Voice session + transcriber setup and history handoff, and the Android 5.0+ Material `RippleDrawable` press highlight on message rows.
 
 0.8.8 (2026-10-23), Android 2.1 emulator with the mocks: Read Aloud (request body, toast, Stop Reading in both menus, in-stream
 error toast), Settings layout, Rename only in the chat list, Live hands-free and push-to-talk turns saved exactly once (late
 transcripts update the saved turn; DB rows alternate user/model). Real API: one Read Aloud request (flash-lite TTS, 41 audio events).
 The owner confirmed Live works on his Galaxy Y (real mic and speaker) before the duplicate-turn fix. `tests/live/LiveCheck2.java`: resumption + transcriber against the real API.
 
-Verified (2026-10-23, see `docs/CHANGELOG.md` for the full list):
+Verified (2026-11-19, see `docs/CHANGELOG.md` for the full list):
 | Where | What passed |
 |---|---|
-| Android 2.1 (API 7), 240x320 / 120 dpi, mock server | every long-press action, 503 retry, streaming + thinking + thought dialog, auto-naming, colors, all Settings sections, Live (text, push-to-talk with emulator mic at 8 kHz, synced transcript, mute, saving, new chat) |
-| Android 4.4 (API 19), real API | streaming thoughts (3 Flash Preview, 3.6 Flash), 503 → retry → error, image attach/Remove/Change/image-only, Live via system proxy (TLS 1.2 + SNI) with history, no-mic handling |
-| Desktop JVM, real Live API | 3.8-live, 3.8-live-extended-thinking, 3.1-flash-live-preview; text and recorded speech (push-to-talk, hands-free); transcripts; history |
+| Android 2.1 (API 7), 240x320 / 120 dpi, mock server | `gemini-4-hydrogen` + `xhigh` streaming/thoughts, every long-press action, 503 retry, auto-naming, colors, all Settings sections, Live (text, push-to-talk with emulator mic at 8 kHz, synced transcript, mute, saving, new chat) |
+| Android 4.4.2 (API 19), 480x800 / 240 dpi, mock & real API | `gemini-4-hydrogen` + `xhigh` streaming & Thought Process dialog, Stop mid-stream with zero `NetworkOnMainThreadException`, `Attach Image` menu visibility, Read Aloud Interactions request, Live with history & no-mic handling; (real API in 0.8.6–0.8.7: streaming thoughts, 503 retry, image attach, Live via TLS 1.2 + SNI proxy) |
+| Android 5.0.2 (API 21), 480x800 / 240 dpi, mock server | Material Dark Settings (`gemini-4-hydrogen` + `Extra High`), streaming + auto-naming, **5.0+ Material `RippleDrawable` press animation** on message rows with `RoleBar` intact, long-press `Message Options`, zero `VerifyError`/crashes |
+| Desktop JVM, real Live API (0.8.6–0.8.7) | 3.8-live, 3.8-live-extended-thinking, 3.1-flash-live-preview; text and recorded speech (push-to-talk, hands-free); transcripts; history; resumption + transcriber |
 
 Real device: the owner confirmed chat works on a **Samsung Galaxy Y (Android 2.3, TLS 1.0)**. His TLS scan (2026-10-03) shows
 Google's endpoint accepts TLS 1.0 (ECDHE and plain RSA AES-CBC-SHA) and serves a `*.googleapis.com` certificate without SNI.
 
 ### Known limitations / open items
 
-- **Not verified:** Read Aloud sound on a real phone (emulators have no audio out), the 5.0+ ripple
-  (no 5.0 image here), 3.8 Flash thinking (free tier answered 503 every time; same code path as 3.6 Flash).
+- **Not verified:** Read Aloud sound on a real phone (emulators have no audio out), live Google server response for `gemini-4-hydrogen` / `xhigh` and `gemini-3.8-flash` thinking (0.8.9 tests ran against the local mock servers; no Gemini API key in the build environment).
+- **TTS deprecation note:** `gemini-3.1-flash-tts-preview` is scheduled for shutdown on 2026-12-18 (`gemini-3.8-flash-lite-tts` and `gemini-3.8-flash-tts` remain current).
 - **Live on a phone speaker:** no echo cancellation on old phones. Push-to-talk is the default; hands-free mutes the mic for the
   whole reply + 0.7 s, so you can't interrupt by voice there (tap the mic button or type to interrupt).
 - **Live text box streaming** uses a second session (gemini-3.5-transcribe-live): about twice the upload while talking. Off in

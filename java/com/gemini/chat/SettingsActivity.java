@@ -25,17 +25,18 @@ import android.widget.Toast;
  */
 public class SettingsActivity extends Activity {
     /**
-     * Text models usable on the free tier (ai.google.dev pricing page, 2026-10-23; Gemma 4 is "free only"), newest first:
-     * Gemini by version, then the "latest" aliases, then Gemma. The 2.5 family is free but closed to new users;
-     * 3.1 Pro / Gemini 4 need billing. Default: ChatActivity.DEFAULT_MODEL. Anything else: "Custom model...".
+     * Text models usable on the free tier (ai.google.dev pricing page, 2026-11-19; Gemma 4 is "free only"), newest first:
+     * Gemini by version, then the "latest" aliases, then Gemma. The 2.5 family is closed to new users;
+     * 3.1 Pro and Gemini 4 Carbon/Argon/Neon need billing (Hydrogen is free). Default: ChatActivity.DEFAULT_MODEL.
+     * Anything else: "Custom model...".
      */
-    static final String[] MODELS = {"gemini-3.8-flash", "gemini-3.6-flash", "gemini-3.5-flash-lite",
-            "gemini-3.1-flash-lite", "gemini-3-flash-preview", "gemini-flash-latest", "gemini-flash-lite-latest",
-            "gemma-4-31b-it", "gemma-4-26b-a4b-it"};
+    static final String[] MODELS = {"gemini-4-hydrogen", "gemini-3.8-flash", "gemini-3.6-flash",
+            "gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3-flash-preview", "gemini-flash-latest",
+            "gemini-flash-lite-latest", "gemma-4-31b-it", "gemma-4-26b-a4b-it"};
     static final String CUSTOM = "Custom model...";
     static final String PREF_CUSTOM = "custom_model";
-    static final String[] THINKING_LABELS = {"Default", "Minimal", "Low", "Medium", "High"};
-    static final String[] THINKING_VALUES = {"", "minimal", "low", "medium", "high"};
+    static final String[] THINKING_LABELS = {"Default", "Minimal", "Low", "Medium", "High", "Extra High"};
+    static final String[] THINKING_VALUES = {"", "minimal", "low", "medium", "high", "xhigh"};
 
     private EditText etApiKey, etSystemInstruction, etCustomModel, etLiveCustom;
     private Spinner spinnerModel, spTextThinking, spTextSize, spLiveModel, spLiveThinking, spVoice, spTts;
@@ -151,7 +152,7 @@ public class SettingsActivity extends Activity {
 
         // 2. text model: custom id, thinking level, thought process
         spinnerModel.setAdapter(spinner(withCustom(MODELS)).getAdapter());
-        etCustomModel = modelIdField("Model ID, e.g. gemini-3.8-pro");
+        etCustomModel = modelIdField("Model ID, e.g. gemini-4-neon");
         spTextThinking = spinner(THINKING_LABELS);
         cbShowThoughts = check("Show thought process");
         at = col.indexOfChild(spinnerModel) + 1;
@@ -272,7 +273,7 @@ public class SettingsActivity extends Activity {
         } else {
             model = normalizeModel(custom);
             if (model == null) {
-                Toast.makeText(this, custom.length() == 0 ? "Enter a model ID, e.g. gemini-3.8-pro"
+                Toast.makeText(this, custom.length() == 0 ? "Enter a model ID, e.g. gemini-4-neon"
                         : "Invalid model ID (letters, digits, '-', '.', '_' only)", Toast.LENGTH_LONG).show();
                 etCustomModel.requestFocus();
                 return;

@@ -35,7 +35,7 @@
     .end annotation
 
     .prologue
-    .line 1103
+    .line 1137
     iput-object p1, p0, Lcom/gemini/chat/ChatActivity$14;->this$0:Lcom/gemini/chat/ChatActivity;
 
     iput-object p2, p0, Lcom/gemini/chat/ChatActivity$14;->val$et:Landroid/widget/EditText;
@@ -55,25 +55,25 @@
     .prologue
     const/4 v4, 0x1
 
-    .line 1105
+    .line 1139
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$14;->this$0:Lcom/gemini/chat/ChatActivity;
 
     iget-object v1, p0, Lcom/gemini/chat/ChatActivity$14;->val$et:Landroid/widget/EditText;
 
     invoke-static {v0, v1}, Lcom/gemini/chat/ChatActivity;->access$3300(Lcom/gemini/chat/ChatActivity;Landroid/view/View;)V
 
-    .line 1106
+    .line 1140
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$14;->val$et:Landroid/widget/EditText;
 
     invoke-virtual {v0}, Landroid/widget/EditText;->getText()Landroid/text/Editable;
 
     move-result-object v0
 
-    invoke-interface {v0}, Landroid/text/Editable;->toString()Ljava/lang/String;
+    invoke-virtual {v0}, Ljava/lang/Object;->toString()Ljava/lang/String;
 
     move-result-object v0
 
-    .line 1107
+    .line 1141
     invoke-virtual {v0}, Ljava/lang/String;->trim()Ljava/lang/String;
 
     move-result-object v1
@@ -84,7 +84,7 @@
 
     if-nez v1, :cond_0
 
-    .line 1108
+    .line 1142
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$14;->this$0:Lcom/gemini/chat/ChatActivity;
 
     const-string v1, "Empty reply not saved. Use Delete Message instead."
@@ -93,14 +93,14 @@
 
     move-result-object v0
 
-    .line 1109
+    .line 1143
     invoke-virtual {v0}, Landroid/widget/Toast;->show()V
 
-    .line 1114
+    .line 1148
     :goto_0
     return-void
 
-    .line 1112
+    .line 1146
     :cond_0
     iget-object v1, p0, Lcom/gemini/chat/ChatActivity$14;->this$0:Lcom/gemini/chat/ChatActivity;
 
@@ -112,7 +112,7 @@
 
     invoke-virtual {v1, v2, v3, v0}, Lcom/gemini/chat/DatabaseHelper;->updateMessage(JLjava/lang/String;)V
 
-    .line 1113
+    .line 1147
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$14;->this$0:Lcom/gemini/chat/ChatActivity;
 
     invoke-static {v0, v4}, Lcom/gemini/chat/ChatActivity;->access$3000(Lcom/gemini/chat/ChatActivity;Z)V

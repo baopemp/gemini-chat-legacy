@@ -26,7 +26,7 @@
     .locals 0
 
     .prologue
-    .line 562
+    .line 563
     iput-object p1, p0, Lcom/gemini/chat/LiveActivity$5;->this$0:Lcom/gemini/chat/LiveActivity;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
@@ -44,7 +44,7 @@
 
     const/4 v2, 0x0
 
-    .line 564
+    .line 565
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$5;->this$0:Lcom/gemini/chat/LiveActivity;
 
     invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$2400(Lcom/gemini/chat/LiveActivity;)Lcom/gemini/chat/LiveActivity$Player;
@@ -55,7 +55,7 @@
 
     move-result-wide v4
 
-    .line 566
+    .line 567
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$5;->this$0:Lcom/gemini/chat/LiveActivity;
 
     invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$2800(Lcom/gemini/chat/LiveActivity;)Ljava/util/LinkedList;
@@ -66,7 +66,7 @@
 
     move v1, v2
 
-    .line 567
+    .line 568
     :goto_0
     :try_start_0
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$5;->this$0:Lcom/gemini/chat/LiveActivity;
@@ -107,10 +107,10 @@
 
     if-gtz v0, :cond_0
 
-    .line 568
+    .line 569
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$5;->this$0:Lcom/gemini/chat/LiveActivity;
 
-    invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$3200(Lcom/gemini/chat/LiveActivity;)Ljava/lang/StringBuffer;
+    invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$3400(Lcom/gemini/chat/LiveActivity;)Ljava/lang/StringBuffer;
 
     move-result-object v1
 
@@ -136,23 +136,23 @@
 
     move v1, v3
 
-    .line 569
+    .line 570
     goto :goto_0
 
-    .line 571
+    .line 572
     :cond_0
     monitor-exit v6
     :try_end_0
     .catchall {:try_start_0 .. :try_end_0} :catchall_0
 
-    .line 572
+    .line 573
     if-eqz v1, :cond_1
 
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$5;->this$0:Lcom/gemini/chat/LiveActivity;
 
-    invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$3300(Lcom/gemini/chat/LiveActivity;)V
+    invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$3500(Lcom/gemini/chat/LiveActivity;)V
 
-    .line 573
+    .line 574
     :cond_1
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$5;->this$0:Lcom/gemini/chat/LiveActivity;
 
@@ -164,7 +164,7 @@
 
     move-result v1
 
-    .line 574
+    .line 575
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$5;->this$0:Lcom/gemini/chat/LiveActivity;
 
     invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$2700(Lcom/gemini/chat/LiveActivity;)Z
@@ -177,23 +177,23 @@
 
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$5;->this$0:Lcom/gemini/chat/LiveActivity;
 
-    invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$3400(Lcom/gemini/chat/LiveActivity;)Z
+    invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$3600(Lcom/gemini/chat/LiveActivity;)Z
 
     move-result v0
 
     if-eqz v0, :cond_2
 
-    .line 575
+    .line 576
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$5;->this$0:Lcom/gemini/chat/LiveActivity;
 
     invoke-static {v0, v2}, Lcom/gemini/chat/LiveActivity;->access$1900(Lcom/gemini/chat/LiveActivity;Z)V
 
-    .line 576
+    .line 577
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$5;->this$0:Lcom/gemini/chat/LiveActivity;
 
     invoke-static {v0, v2}, Lcom/gemini/chat/LiveActivity;->access$2302(Lcom/gemini/chat/LiveActivity;Z)Z
 
-    .line 577
+    .line 578
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$5;->this$0:Lcom/gemini/chat/LiveActivity;
 
     invoke-static {}, Ljava/lang/System;->currentTimeMillis()J
@@ -204,13 +204,13 @@
 
     add-long/2addr v2, v4
 
-    invoke-static {v0, v2, v3}, Lcom/gemini/chat/LiveActivity;->access$3502(Lcom/gemini/chat/LiveActivity;J)J
+    invoke-static {v0, v2, v3}, Lcom/gemini/chat/LiveActivity;->access$3702(Lcom/gemini/chat/LiveActivity;J)J
 
-    .line 580
+    .line 581
     :cond_2
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$5;->this$0:Lcom/gemini/chat/LiveActivity;
 
-    invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$3600(Lcom/gemini/chat/LiveActivity;)J
+    invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$3000(Lcom/gemini/chat/LiveActivity;)J
 
     move-result-wide v2
 
@@ -238,14 +238,14 @@
 
     if-nez v1, :cond_3
 
-    .line 581
+    .line 582
     invoke-static {}, Ljava/lang/System;->currentTimeMillis()J
 
     move-result-wide v2
 
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$5;->this$0:Lcom/gemini/chat/LiveActivity;
 
-    invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$3500(Lcom/gemini/chat/LiveActivity;)J
+    invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$3700(Lcom/gemini/chat/LiveActivity;)J
 
     move-result-wide v4
 
@@ -253,12 +253,12 @@
 
     if-ltz v0, :cond_3
 
-    .line 582
+    .line 583
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$5;->this$0:Lcom/gemini/chat/LiveActivity;
 
-    invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$3700(Lcom/gemini/chat/LiveActivity;)V
+    invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$3800(Lcom/gemini/chat/LiveActivity;)V
 
-    .line 584
+    .line 585
     :cond_3
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$5;->this$0:Lcom/gemini/chat/LiveActivity;
 
@@ -268,7 +268,7 @@
 
     if-eqz v0, :cond_5
 
-    .line 586
+    .line 587
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$5;->this$0:Lcom/gemini/chat/LiveActivity;
 
     invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$2300(Lcom/gemini/chat/LiveActivity;)Z
@@ -284,7 +284,7 @@
 
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$5;->this$0:Lcom/gemini/chat/LiveActivity;
 
-    invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$3800(Lcom/gemini/chat/LiveActivity;)Z
+    invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$3900(Lcom/gemini/chat/LiveActivity;)Z
 
     move-result v0
 
@@ -295,7 +295,7 @@
     :goto_1
     invoke-static {v2, v0}, Lcom/gemini/chat/LiveActivity;->access$2200(Lcom/gemini/chat/LiveActivity;Ljava/lang/String;)V
 
-    .line 588
+    .line 589
     :goto_2
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$5;->this$0:Lcom/gemini/chat/LiveActivity;
 
@@ -303,7 +303,7 @@
 
     move-result-object v0
 
-    .line 589
+    .line 590
     if-eqz v0, :cond_5
 
     iget-boolean v0, v0, Lcom/gemini/chat/LiveSession;->goAway:Z
@@ -330,9 +330,9 @@
 
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$5;->this$0:Lcom/gemini/chat/LiveActivity;
 
-    invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$3900(Lcom/gemini/chat/LiveActivity;)V
+    invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$4000(Lcom/gemini/chat/LiveActivity;)V
 
-    .line 591
+    .line 592
     :cond_5
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$5;->this$0:Lcom/gemini/chat/LiveActivity;
 
@@ -344,10 +344,10 @@
 
     invoke-virtual {v0, p0, v2, v3}, Landroid/os/Handler;->postDelayed(Ljava/lang/Runnable;J)Z
 
-    .line 592
+    .line 593
     return-void
 
-    .line 571
+    .line 572
     :catchall_0
     move-exception v0
 
@@ -358,13 +358,13 @@
 
     throw v0
 
-    .line 586
+    .line 587
     :cond_6
     const-string v0, "Model is speaking..."
 
     goto :goto_1
 
-    .line 587
+    .line 588
     :cond_7
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$5;->this$0:Lcom/gemini/chat/LiveActivity;
 

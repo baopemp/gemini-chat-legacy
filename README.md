@@ -1,6 +1,6 @@
 # Gemini Chat: Legacy Android Client
 
-A native Gemini API chat client for Android 2.1+ (API 7), about 145 KB, with no external libraries.
+A native Gemini API chat client for Android 2.1+ (API 7), about 153 KB, with no external libraries.
 Supports streamed replies with thought summaries, Gemini Live voice chat (mic + speaker, your words typed into the box as you
 speak, synced transcripts, 30 voices, auto-reconnect), Read Aloud for replies in the same voice, readable LaTeX math, adjustable text size,
 editing/regenerating/deleting messages, chat history in SQLite, auto-named chats, system instructions, optional time grounding,
@@ -13,7 +13,7 @@ and chat/settings backup and restore.
 
 ```bash
 ./scripts/build_apk.sh                         # Java 8+ required
-adb install -r build/gemini_chat_v0.8.8.apk    # -r keeps chats and settings
+adb install -r build/gemini_chat_v0.8.9.apk    # -r keeps chats and settings
 ./tests/run_tests.sh                           # optional: JVM verification + unit tests
 ```
 

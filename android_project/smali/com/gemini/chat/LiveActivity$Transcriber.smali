@@ -28,7 +28,7 @@
     .locals 0
 
     .prologue
-    .line 487
+    .line 488
     iput-object p1, p0, Lcom/gemini/chat/LiveActivity$Transcriber;->this$0:Lcom/gemini/chat/LiveActivity;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
@@ -40,7 +40,7 @@
     .locals 0
 
     .prologue
-    .line 487
+    .line 488
     invoke-direct {p0, p1}, Lcom/gemini/chat/LiveActivity$Transcriber;-><init>(Lcom/gemini/chat/LiveActivity;)V
 
     return-void
@@ -52,7 +52,7 @@
     .locals 0
 
     .prologue
-    .line 494
+    .line 495
     return-void
 .end method
 
@@ -60,7 +60,7 @@
     .locals 2
 
     .prologue
-    .line 527
+    .line 528
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Transcriber;->this$0:Lcom/gemini/chat/LiveActivity;
 
     invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$1200(Lcom/gemini/chat/LiveActivity;)Landroid/os/Handler;
@@ -73,7 +73,7 @@
 
     invoke-virtual {v0, v1}, Landroid/os/Handler;->post(Ljava/lang/Runnable;)Z
 
-    .line 532
+    .line 533
     return-void
 .end method
 
@@ -81,7 +81,7 @@
     .locals 2
 
     .prologue
-    .line 507
+    .line 508
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Transcriber;->this$0:Lcom/gemini/chat/LiveActivity;
 
     invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$1200(Lcom/gemini/chat/LiveActivity;)Landroid/os/Handler;
@@ -94,7 +94,7 @@
 
     invoke-virtual {v0, v1}, Landroid/os/Handler;->post(Ljava/lang/Runnable;)Z
 
-    .line 515
+    .line 516
     return-void
 .end method
 
@@ -102,7 +102,7 @@
     .locals 2
 
     .prologue
-    .line 497
+    .line 498
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Transcriber;->this$0:Lcom/gemini/chat/LiveActivity;
 
     invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$1200(Lcom/gemini/chat/LiveActivity;)Landroid/os/Handler;
@@ -115,7 +115,7 @@
 
     invoke-virtual {v0, v1}, Landroid/os/Handler;->post(Ljava/lang/Runnable;)Z
 
-    .line 504
+    .line 505
     return-void
 .end method
 
@@ -123,7 +123,7 @@
     .locals 0
 
     .prologue
-    .line 524
+    .line 525
     return-void
 .end method
 
@@ -131,7 +131,7 @@
     .locals 0
 
     .prologue
-    .line 518
+    .line 519
     return-void
 .end method
 
@@ -139,7 +139,7 @@
     .locals 0
 
     .prologue
-    .line 491
+    .line 492
     return-void
 .end method
 
@@ -147,6 +147,6 @@
     .locals 0
 
     .prologue
-    .line 521
+    .line 522
     return-void
 .end method

@@ -26,7 +26,7 @@
     .locals 0
 
     .prologue
-    .line 476
+    .line 477
     iput-object p1, p0, Lcom/gemini/chat/LiveActivity$Main$6;->this$1:Lcom/gemini/chat/LiveActivity$Main;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
@@ -40,7 +40,7 @@
     .locals 2
 
     .prologue
-    .line 478
+    .line 479
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Main$6;->this$1:Lcom/gemini/chat/LiveActivity$Main;
 
     invoke-static {v0}, Lcom/gemini/chat/LiveActivity$Main;->access$700(Lcom/gemini/chat/LiveActivity$Main;)Z
@@ -49,11 +49,11 @@
 
     if-nez v0, :cond_0
 
-    .line 481
+    .line 482
     :goto_0
     return-void
 
-    .line 479
+    .line 480
     :cond_0
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Main$6;->this$1:Lcom/gemini/chat/LiveActivity$Main;
 
@@ -63,7 +63,7 @@
 
     invoke-static {v0, v1}, Lcom/gemini/chat/LiveActivity;->access$1900(Lcom/gemini/chat/LiveActivity;Z)V
 
-    .line 480
+    .line 481
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Main$6;->this$1:Lcom/gemini/chat/LiveActivity$Main;
 
     iget-object v0, v0, Lcom/gemini/chat/LiveActivity$Main;->this$0:Lcom/gemini/chat/LiveActivity;

@@ -33,7 +33,7 @@
     .end annotation
 
     .prologue
-    .line 1020
+    .line 1050
     iput-object p1, p0, Lcom/gemini/chat/ChatActivity$10;->this$0:Lcom/gemini/chat/ChatActivity;
 
     iput-object p2, p0, Lcom/gemini/chat/ChatActivity$10;->val$thoughts:Ljava/lang/String;
@@ -49,7 +49,7 @@
     .locals 3
 
     .prologue
-    .line 1022
+    .line 1052
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$10;->this$0:Lcom/gemini/chat/ChatActivity;
 
     iget-object v1, p0, Lcom/gemini/chat/ChatActivity$10;->val$thoughts:Ljava/lang/String;
@@ -58,6 +58,6 @@
 
     invoke-static {v0, v1, v2}, Lcom/gemini/chat/ChatActivity;->access$2400(Lcom/gemini/chat/ChatActivity;Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 1023
+    .line 1053
     return-void
 .end method

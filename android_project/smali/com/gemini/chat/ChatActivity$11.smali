@@ -33,7 +33,7 @@
     .end annotation
 
     .prologue
-    .line 1054
+    .line 1086
     iput-object p1, p0, Lcom/gemini/chat/ChatActivity$11;->this$0:Lcom/gemini/chat/ChatActivity;
 
     iput-wide p2, p0, Lcom/gemini/chat/ChatActivity$11;->val$msgId:J
@@ -49,7 +49,7 @@
     .locals 4
 
     .prologue
-    .line 1056
+    .line 1088
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$11;->this$0:Lcom/gemini/chat/ChatActivity;
 
     invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$000(Lcom/gemini/chat/ChatActivity;)Lcom/gemini/chat/DatabaseHelper;
@@ -60,13 +60,13 @@
 
     invoke-virtual {v0, v2, v3}, Lcom/gemini/chat/DatabaseHelper;->deleteMessage(J)V
 
-    .line 1057
+    .line 1089
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$11;->this$0:Lcom/gemini/chat/ChatActivity;
 
     const/4 v1, 0x1
 
     invoke-static {v0, v1}, Lcom/gemini/chat/ChatActivity;->access$3000(Lcom/gemini/chat/ChatActivity;Z)V
 
-    .line 1058
+    .line 1090
     return-void
 .end method

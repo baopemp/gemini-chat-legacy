@@ -254,6 +254,22 @@ public class ChatActivity extends Activity {
             }
         }
 
+        /** Closing a TLS socket can write to the network: never call synchronously on the UI thread. */
+        void disconnectAsync() {
+            final HttpURLConnection c = conn;
+            if (c == null) return;
+            Thread t = new Thread(new Runnable() {
+                public void run() {
+                    try {
+                        c.disconnect();
+                    } catch (Exception ignored) {
+                    }
+                }
+            });
+            t.setDaemon(true);
+            t.start();
+        }
+
         /** params: apiKey, model, user system instruction, thinking level ("" = default), "1" = show thoughts */
         @Override
         protected String doInBackground(String... p) {
@@ -273,6 +289,8 @@ public class ChatActivity extends Activity {
             for (int attempt = 0; attempt <= MAX_RETRIES; attempt++) {
                 if (isCancelled()) return null;
                 if (attempt > 0) {
+                    partialText = "";
+                    partialThoughts = "";
                     publishProgress(Integer.valueOf(attempt));
                     try {
                         Thread.sleep(2000L << (attempt - 1)); // 2 s, 4 s
@@ -407,7 +425,7 @@ public class ChatActivity extends Activity {
 
         @Override
         protected void onPostExecute(String result) {
-            if (isCancelled()) return;
+            if (isCancelled() || isFinishing()) return;
             currentTask = null;
             removeStreaming();
             setUiLoading(false);
@@ -552,6 +570,7 @@ public class ChatActivity extends Activity {
                         String th = t.includeThoughts ? t.partialThoughts.trim() : "";
                         long id = dbHelper.addMessage(t.currentChatId, "model", text, t.usedModel, th);
                         addMessageToChat(id, "model", t.usedModel, text, System.currentTimeMillis(), th);
+                        Compat.invalidateMenu(ChatActivity.this);
                     } else {
                         addMessageToChat(-1L, "system", null, "Request stopped by user.", System.currentTimeMillis());
                     }
@@ -593,7 +612,7 @@ public class ChatActivity extends Activity {
         GeminiTask t = currentTask;
         if (t != null) {
             t.cancel(true);
-            t.disconnect();
+            t.disconnectAsync();
             currentTask = null;
         }
     }
@@ -615,13 +634,16 @@ public class ChatActivity extends Activity {
         if (imm != null) imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
     }
 
+    private boolean hasApiKey() {
+        if (prefs().getString("api_key", "").trim().length() > 0) return true;
+        Toast.makeText(this, "Please go to Settings to set API Key", Toast.LENGTH_LONG).show();
+        return false;
+    }
+
     private void send() {
         hideKeyboard(etInput);
         String text = etInput.getText().toString().trim();
-        if (prefs().getString("api_key", "").trim().length() == 0) {
-            Toast.makeText(this, "Please go to Settings to set API Key", Toast.LENGTH_LONG).show();
-            return;
-        }
+        if (!hasApiKey()) return;
         if (text.length() == 0 && pendingImage == null) return;
         if (chatId == -1) {
             String title = text.length() == 0 ? "Image" : text.replace('\n', ' ').trim();
@@ -811,6 +833,7 @@ public class ChatActivity extends Activity {
     private void loadMessages(boolean keepScroll) {
         final int y = scrollChat.getScrollY();
         layoutChat.removeAllViews();
+        streamView = null;
         boolean any = false;
         Cursor c = null;
         try {
@@ -991,18 +1014,25 @@ public class ChatActivity extends Activity {
         String model = sp.getString("tts_model", ReadAloud.DEFAULT_MODEL);
         reader = new ReadAloud(msgId, key, model, voice, say, handler, new ReadAloud.Listener() {
             public void onDone(ReadAloud r, String error) {
-                if (reader == r) reader = null;
+                if (reader == r) {
+                    reader = null;
+                    Compat.invalidateMenu(ChatActivity.this);
+                }
                 if (error != null && !isFinishing()) Toast.makeText(ChatActivity.this, error, Toast.LENGTH_LONG).show();
             }
         });
         reader.start();
+        Compat.invalidateMenu(this);
         Toast.makeText(this, "Reading aloud (" + voice + ")...", Toast.LENGTH_SHORT).show();
     }
 
     private void stopReading() {
         ReadAloud r = reader;
         reader = null;
-        if (r != null) r.stopReading();
+        if (r != null) {
+            r.stopReading();
+            Compat.invalidateMenu(this);
+        }
     }
 
     /** The model's thought summary, rendered like a reply, in a scrollable dialog. */
@@ -1036,6 +1066,8 @@ public class ChatActivity extends Activity {
      * Reply: drop it (and everything after it) and ask again from the messages before it.
      */
     private void regenerate(long msgId, String role) {
+        if (!hasApiKey()) return;
+        stopReading();
         if ("user".equals(role)) dbHelper.deleteMessagesAfter(chatId, msgId);
         else dbHelper.deleteMessagesFrom(chatId, msgId);
         if (lastSavedRole() == null) {
@@ -1084,6 +1116,8 @@ public class ChatActivity extends Activity {
                     hideKeyboard(et);
                     String s = et.getText().toString().trim();
                     if (s.length() == 0 && !hasImage) return;
+                    if (!hasApiKey()) return;
+                    stopReading();
                     dbHelper.updateMessage(msgId, s);
                     dbHelper.deleteMessagesAfter(chatId, msgId);
                     loadMessages(false);
@@ -1158,7 +1192,7 @@ public class ChatActivity extends Activity {
         }
         MenuItem attach = menu.findItem(MENU_ATTACH);
         if (attach != null) {
-            attach.setVisible(Build.VERSION.SDK_INT < 19 || Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()));
+            attach.setVisible(Build.VERSION.SDK_INT >= 19 || Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()));
             attach.setTitle(pendingImage == null ? "Attach Image" : "Change Image");
         }
         MenuItem detach = menu.findItem(MENU_DETACH);
@@ -1182,6 +1216,7 @@ public class ChatActivity extends Activity {
                         .setMessage("Are you sure you want to delete this chat?")
                         .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface d, int w) {
+                                stopReading();
                                 dbHelper.deleteChat(chatId);
                                 finish();
                             }
@@ -1196,6 +1231,7 @@ public class ChatActivity extends Activity {
                 stopReading();
                 return true;
             case MENU_LIVE: {
+                stopReading();
                 cancelTask();
                 setUiLoading(false);
                 Intent i = new Intent(this, LiveActivity.class);

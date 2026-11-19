@@ -242,15 +242,19 @@ public class Tests {
                 && !(Boolean) retryable.invoke(null, 429) && !(Boolean) retryable.invoke(null, 400)
                 && !(Boolean) retryable.invoke(null, 200), "");
 
-        // 0.8.6: model list order / default / custom model ids
+        // 0.8.9: model list order / default / custom model ids / thinking levels
         Class<?> sa = Class.forName("com.gemini.chat.SettingsActivity");
         String[] models = (String[]) field2(sa, "MODELS");
-        check("free models in order", Arrays.asList(models).equals(Arrays.asList("gemini-3.8-flash", "gemini-3.6-flash",
-                "gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3-flash-preview", "gemini-flash-latest",
-                "gemini-flash-lite-latest", "gemma-4-31b-it", "gemma-4-26b-a4b-it")), Arrays.toString(models));
+        check("free models in order", Arrays.asList(models).equals(Arrays.asList("gemini-4-hydrogen", "gemini-3.8-flash",
+                "gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3-flash-preview",
+                "gemini-flash-latest", "gemini-flash-lite-latest", "gemma-4-31b-it", "gemma-4-26b-a4b-it")), Arrays.toString(models));
+        String[] tVals = (String[]) field2(sa, "THINKING_VALUES");
+        String[] tLabs = (String[]) field2(sa, "THINKING_LABELS");
+        check("thinking levels include xhigh", Arrays.asList(tVals).equals(Arrays.asList("", "minimal", "low", "medium", "high", "xhigh"))
+                && Arrays.asList(tLabs).equals(Arrays.asList("Default", "Minimal", "Low", "Medium", "High", "Extra High")), Arrays.toString(tVals));
         check("default model 3.5-flash-lite", "gemini-3.5-flash-lite".equals(field2(ca, "DEFAULT_MODEL")), field2(ca, "DEFAULT_MODEL"));
         Method norm = m(sa, "normalizeModel", String.class);
-        check("custom model: models/ prefix stripped", "gemini-3.8-pro".equals(norm.invoke(null, " models/gemini-3.8-pro ")), "");
+        check("custom model: models/ prefix stripped", "gemini-4-neon".equals(norm.invoke(null, " models/gemini-4-neon ")), "");
         check("custom model: plain id kept", "gemini-2.5-pro-preview-06-05".equals(norm.invoke(null, "gemini-2.5-pro-preview-06-05")), "");
         check("custom model: rejects empty/space/slash", norm.invoke(null, "  ") == null && norm.invoke(null, "gemini 3") == null
                 && norm.invoke(null, "a/b") == null && norm.invoke(null, (Object) null) == null, "");
@@ -275,10 +279,33 @@ public class Tests {
         check("thought without summary -> note", "_The model thought (209 tokens) but sent no summary for this reply._".equals(m(rp, "thoughtsForDisplay").invoke(pNo))
                 && "**Plan** think more.".equals(m(rp, "thoughtsForDisplay").invoke(parser)), m(rp, "thoughtsForDisplay").invoke(pNo));
         Method lvl = m(rp, "levelFor", String.class, String.class);
-        check("thinking level mapping", lvl.invoke(null, "gemini-3.8-flash", "") == null && "low".equals(lvl.invoke(null, "gemini-3.8-flash", "minimal"))
-                && "minimal".equals(lvl.invoke(null, "gemini-3.6-flash", "minimal")) && "high".equals(lvl.invoke(null, "gemini-3-flash-preview", "high"))
-                && "minimal".equals(lvl.invoke(null, "gemma-4-31b-it", "low")) && "high".equals(lvl.invoke(null, "gemma-4-26b-a4b-it", "medium"))
-                && lvl.invoke(null, "gemma-4-31b-it", "") == null, "");
+        check("thinking level mapping: Gemini 4 Hydrogen/Neon", lvl.invoke(null, "gemini-4-hydrogen", "") == null
+                && "low".equals(lvl.invoke(null, "gemini-4-hydrogen", "minimal"))
+                && "medium".equals(lvl.invoke(null, "gemini-4-hydrogen", "medium"))
+                && "high".equals(lvl.invoke(null, "gemini-4-hydrogen", "high"))
+                && "xhigh".equals(lvl.invoke(null, "gemini-4-hydrogen", "xhigh"))
+                && "low".equals(lvl.invoke(null, "gemini-4-neon", "minimal"))
+                && "xhigh".equals(lvl.invoke(null, "gemini-4-neon", "xhigh")), "");
+        check("thinking level mapping: Gemini 4 Carbon/Argon", "low".equals(lvl.invoke(null, "gemini-4-carbon", "minimal"))
+                && "high".equals(lvl.invoke(null, "gemini-4-carbon", "xhigh"))
+                && "low".equals(lvl.invoke(null, "gemini-4-argon", "minimal"))
+                && "high".equals(lvl.invoke(null, "gemini-4-argon", "xhigh")), "");
+        check("thinking level mapping: Gemini 3 / 2.5 / Gemma 4", lvl.invoke(null, "gemini-3.8-flash", "") == null
+                && "low".equals(lvl.invoke(null, "gemini-3.8-flash", "minimal"))
+                && "high".equals(lvl.invoke(null, "gemini-3.8-flash", "xhigh"))
+                && "minimal".equals(lvl.invoke(null, "gemini-3.6-flash", "minimal"))
+                && "high".equals(lvl.invoke(null, "gemini-3.6-flash", "xhigh"))
+                && "high".equals(lvl.invoke(null, "gemini-3-flash-preview", "high"))
+                && "high".equals(lvl.invoke(null, "gemini-flash-latest", "xhigh"))
+                && "low".equals(lvl.invoke(null, "gemini-3.1-pro-preview", "minimal"))
+                && "high".equals(lvl.invoke(null, "gemini-3.1-pro-preview", "xhigh"))
+                && "high".equals(lvl.invoke(null, "gemini-3-pro-preview", "medium"))
+                && "low".equals(lvl.invoke(null, "gemini-2.5-pro", "minimal"))
+                && "minimal".equals(lvl.invoke(null, "gemma-4-31b-it", "low"))
+                && "high".equals(lvl.invoke(null, "gemma-4-26b-a4b-it", "medium"))
+                && "high".equals(lvl.invoke(null, "gemma-4-26b-a4b-it", "xhigh"))
+                && lvl.invoke(null, "gemma-4-31b-it", "") == null
+                && "xhigh".equals(lvl.invoke(null, "gemini-5-pro", "xhigh")), "");
         Object t3 = U.allocateInstance(gt);
         setField(gt, t3, "this$0", act);
         setField(gt, t3, "thinkingLevel", "medium");

@@ -26,7 +26,7 @@
     .locals 0
 
     .prologue
-    .line 183
+    .line 184
     iput-object p1, p0, Lcom/gemini/chat/SettingsActivity$1;->this$0:Lcom/gemini/chat/SettingsActivity;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
@@ -49,12 +49,12 @@
     .end annotation
 
     .prologue
-    .line 185
+    .line 186
     iget-object v0, p0, Lcom/gemini/chat/SettingsActivity$1;->this$0:Lcom/gemini/chat/SettingsActivity;
 
     invoke-static {v0}, Lcom/gemini/chat/SettingsActivity;->access$000(Lcom/gemini/chat/SettingsActivity;)V
 
-    .line 186
+    .line 187
     return-void
 .end method
 
@@ -69,6 +69,6 @@
     .end annotation
 
     .prologue
-    .line 189
+    .line 190
     return-void
 .end method

@@ -51,45 +51,51 @@
 .end method
 
 .method public static levelFor(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
-    .locals 1
+    .locals 4
 
     .prologue
-    .line 77
+    const/4 v2, 0x1
+
+    const/4 v1, 0x0
+
+    .line 81
     if-eqz p1, :cond_0
 
     invoke-virtual {p1}, Ljava/lang/String;->length()I
 
     move-result v0
 
-    if-nez v0, :cond_1
+    if-nez v0, :cond_2
 
     :cond_0
-    const/4 v0, 0x0
+    const/4 p1, 0x0
+
+    .line 95
+    :cond_1
+    :goto_0
+    return-object p1
 
     .line 82
-    :goto_0
-    return-object v0
+    :cond_2
+    if-eqz p0, :cond_1
 
-    .line 78
-    :cond_1
-    if-eqz p0, :cond_4
-
+    .line 83
     const-string v0, "gemma-"
 
     invoke-virtual {p0, v0}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
 
     move-result v0
 
-    if-eqz v0, :cond_4
+    if-eqz v0, :cond_5
 
-    .line 79
+    .line 84
     const-string v0, "minimal"
 
     invoke-virtual {v0, p1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
 
     move-result v0
 
-    if-nez v0, :cond_2
+    if-nez v0, :cond_3
 
     const-string v0, "low"
 
@@ -97,29 +103,99 @@
 
     move-result v0
 
-    if-eqz v0, :cond_3
-
-    :cond_2
-    const-string v0, "minimal"
-
-    goto :goto_0
+    if-eqz v0, :cond_4
 
     :cond_3
-    const-string v0, "high"
+    const-string v0, "minimal"
+
+    :goto_1
+    move-object p1, v0
 
     goto :goto_0
 
-    .line 81
     :cond_4
-    const-string v0, "minimal"
+    const-string v0, "high"
 
-    invoke-virtual {v0, p1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    goto :goto_1
+
+    .line 86
+    :cond_5
+    const-string v0, "gemini-4-carbon"
+
+    invoke-virtual {p0, v0}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
 
     move-result v0
 
-    if-eqz v0, :cond_5
+    if-nez v0, :cond_6
 
-    if-eqz p0, :cond_5
+    const-string v0, "gemini-4-argon"
+
+    invoke-virtual {p0, v0}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
+
+    move-result v0
+
+    if-nez v0, :cond_6
+
+    const-string v0, "gemini-3"
+
+    .line 87
+    invoke-virtual {p0, v0}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
+
+    move-result v0
+
+    if-nez v0, :cond_6
+
+    const-string v0, "gemini-2"
+
+    invoke-virtual {p0, v0}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
+
+    move-result v0
+
+    if-nez v0, :cond_6
+
+    const-string v0, "gemini-flash-"
+
+    .line 88
+    invoke-virtual {p0, v0}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
+
+    move-result v0
+
+    if-nez v0, :cond_6
+
+    const-string v0, "gemini-pro-"
+
+    invoke-virtual {p0, v0}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
+
+    move-result v0
+
+    if-eqz v0, :cond_b
+
+    :cond_6
+    move v0, v2
+
+    .line 89
+    :goto_2
+    const-string v3, "xhigh"
+
+    invoke-virtual {v3, p1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+
+    move-result v3
+
+    if-eqz v3, :cond_7
+
+    if-eqz v0, :cond_7
+
+    const-string p1, "high"
+
+    .line 90
+    :cond_7
+    const-string v0, "gemini-4-"
+
+    invoke-virtual {p0, v0}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
+
+    move-result v0
+
+    if-nez v0, :cond_8
 
     const-string v0, "gemini-3.8-flash"
 
@@ -127,17 +203,78 @@
 
     move-result v0
 
-    if-eqz v0, :cond_5
+    if-nez v0, :cond_8
 
-    const-string v0, "low"
+    const-string v0, "gemini-3.1-pro"
 
-    goto :goto_0
+    .line 91
+    invoke-virtual {p0, v0}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
 
-    :cond_5
-    move-object v0, p1
+    move-result v0
 
-    .line 82
-    goto :goto_0
+    if-nez v0, :cond_8
+
+    const-string v0, "gemini-3-pro"
+
+    invoke-virtual {p0, v0}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
+
+    move-result v0
+
+    if-nez v0, :cond_8
+
+    const-string v0, "gemini-2.5-"
+
+    .line 92
+    invoke-virtual {p0, v0}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
+
+    move-result v0
+
+    if-eqz v0, :cond_9
+
+    :cond_8
+    move v1, v2
+
+    .line 93
+    :cond_9
+    const-string v0, "minimal"
+
+    invoke-virtual {v0, p1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+
+    move-result v0
+
+    if-eqz v0, :cond_a
+
+    if-eqz v1, :cond_a
+
+    const-string p1, "low"
+
+    .line 94
+    :cond_a
+    const-string v0, "medium"
+
+    invoke-virtual {v0, p1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+
+    move-result v0
+
+    if-eqz v0, :cond_1
+
+    const-string v0, "gemini-3-pro"
+
+    invoke-virtual {p0, v0}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
+
+    move-result v0
+
+    if-eqz v0, :cond_1
+
+    const-string p1, "high"
+
+    goto/16 :goto_0
+
+    :cond_b
+    move v0, v1
+
+    .line 88
+    goto :goto_2
 .end method
 
 

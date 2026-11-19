@@ -26,7 +26,7 @@
     .locals 0
 
     .prologue
-    .line 992
+    .line 1015
     iput-object p1, p0, Lcom/gemini/chat/ChatActivity$9;->this$0:Lcom/gemini/chat/ChatActivity;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
@@ -40,7 +40,7 @@
     .locals 2
 
     .prologue
-    .line 994
+    .line 1017
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$9;->this$0:Lcom/gemini/chat/ChatActivity;
 
     invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$2200(Lcom/gemini/chat/ChatActivity;)Lcom/gemini/chat/ReadAloud;
@@ -49,13 +49,19 @@
 
     if-ne v0, p1, :cond_0
 
+    .line 1018
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$9;->this$0:Lcom/gemini/chat/ChatActivity;
 
     const/4 v1, 0x0
 
     invoke-static {v0, v1}, Lcom/gemini/chat/ChatActivity;->access$2202(Lcom/gemini/chat/ChatActivity;Lcom/gemini/chat/ReadAloud;)Lcom/gemini/chat/ReadAloud;
 
-    .line 995
+    .line 1019
+    iget-object v0, p0, Lcom/gemini/chat/ChatActivity$9;->this$0:Lcom/gemini/chat/ChatActivity;
+
+    invoke-static {v0}, Lcom/gemini/chat/Compat;->invalidateMenu(Landroid/app/Activity;)V
+
+    .line 1021
     :cond_0
     if-eqz p2, :cond_1
 
@@ -77,7 +83,7 @@
 
     invoke-virtual {v0}, Landroid/widget/Toast;->show()V
 
-    .line 996
+    .line 1022
     :cond_1
     return-void
 .end method

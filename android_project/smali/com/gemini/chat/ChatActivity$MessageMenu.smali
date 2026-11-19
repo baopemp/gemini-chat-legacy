@@ -77,15 +77,15 @@
     .end annotation
 
     .prologue
-    .line 885
+    .line 908
     iput-object p1, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->this$0:Lcom/gemini/chat/ChatActivity;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 
-    .line 886
+    .line 909
     iput-wide p2, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->id:J
 
-    .line 887
+    .line 910
     if-nez p8, :cond_0
 
     const-string p8, ""
@@ -93,13 +93,13 @@
     :cond_0
     iput-object p8, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->thoughts:Ljava/lang/String;
 
-    .line 888
+    .line 911
     iput-object p4, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->role:Ljava/lang/String;
 
-    .line 889
+    .line 912
     iput-object p5, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->model:Ljava/lang/String;
 
-    .line 890
+    .line 913
     if-nez p6, :cond_1
 
     const-string p6, ""
@@ -107,10 +107,10 @@
     :cond_1
     iput-object p6, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->text:Ljava/lang/String;
 
-    .line 891
+    .line 914
     iput-object p7, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->codeBlocks:Ljava/util/ArrayList;
 
-    .line 892
+    .line 915
     return-void
 .end method
 
@@ -118,12 +118,12 @@
     .locals 1
 
     .prologue
-    .line 895
+    .line 918
     const/4 v0, 0x0
 
     invoke-direct {p0, p1, p2, v0}, Lcom/gemini/chat/ChatActivity$MessageMenu;->add(Ljava/lang/String;II)V
 
-    .line 896
+    .line 919
     return-void
 .end method
 
@@ -131,12 +131,12 @@
     .locals 2
 
     .prologue
-    .line 899
+    .line 922
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->labels:Ljava/util/ArrayList;
 
     invoke-virtual {v0, p1}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
 
-    .line 900
+    .line 923
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->actions:[I
 
     iget-object v1, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->labels:Ljava/util/ArrayList;
@@ -149,7 +149,7 @@
 
     aput p2, v0, v1
 
-    .line 901
+    .line 924
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->args:[I
 
     iget-object v1, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->labels:Ljava/util/ArrayList;
@@ -162,7 +162,7 @@
 
     aput p3, v0, v1
 
-    .line 902
+    .line 925
     return-void
 .end method
 
@@ -172,18 +172,18 @@
     .locals 7
 
     .prologue
-    .line 933
+    .line 956
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->actions:[I
 
     aget v0, v0, p2
 
     packed-switch v0, :pswitch_data_0
 
-    .line 970
+    .line 993
     :goto_0
     return-void
 
-    .line 935
+    .line 958
     :pswitch_0
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->this$0:Lcom/gemini/chat/ChatActivity;
 
@@ -195,7 +195,7 @@
 
     goto :goto_0
 
-    .line 938
+    .line 961
     :pswitch_1
     iget-object v1, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->this$0:Lcom/gemini/chat/ChatActivity;
 
@@ -217,7 +217,7 @@
 
     goto :goto_0
 
-    .line 941
+    .line 964
     :pswitch_2
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->this$0:Lcom/gemini/chat/ChatActivity;
 
@@ -229,7 +229,7 @@
 
     goto :goto_0
 
-    .line 944
+    .line 967
     :pswitch_3
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->this$0:Lcom/gemini/chat/ChatActivity;
 
@@ -237,7 +237,7 @@
 
     goto :goto_0
 
-    .line 947
+    .line 970
     :pswitch_4
     new-instance v0, Landroid/content/Intent;
 
@@ -245,19 +245,19 @@
 
     invoke-direct {v0, v1}, Landroid/content/Intent;-><init>(Ljava/lang/String;)V
 
-    .line 948
+    .line 971
     const-string v1, "text/plain"
 
     invoke-virtual {v0, v1}, Landroid/content/Intent;->setType(Ljava/lang/String;)Landroid/content/Intent;
 
-    .line 949
+    .line 972
     const-string v1, "android.intent.extra.TEXT"
 
     iget-object v2, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->text:Ljava/lang/String;
 
     invoke-virtual {v0, v1, v2}, Landroid/content/Intent;->putExtra(Ljava/lang/String;Ljava/lang/String;)Landroid/content/Intent;
 
-    .line 950
+    .line 973
     iget-object v1, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->this$0:Lcom/gemini/chat/ChatActivity;
 
     const-string v2, "Share Message"
@@ -270,7 +270,7 @@
 
     goto :goto_0
 
-    .line 954
+    .line 977
     :pswitch_5
     iget-object v1, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->this$0:Lcom/gemini/chat/ChatActivity;
 
@@ -286,7 +286,7 @@
 
     goto :goto_0
 
-    .line 957
+    .line 980
     :pswitch_6
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->this$0:Lcom/gemini/chat/ChatActivity;
 
@@ -298,7 +298,7 @@
 
     goto :goto_0
 
-    .line 960
+    .line 983
     :pswitch_7
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->this$0:Lcom/gemini/chat/ChatActivity;
 
@@ -308,7 +308,7 @@
 
     goto :goto_0
 
-    .line 963
+    .line 986
     :pswitch_8
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->this$0:Lcom/gemini/chat/ChatActivity;
 
@@ -316,14 +316,14 @@
 
     invoke-static {v0, v1}, Lcom/gemini/chat/ChatActivity;->access$3000(Lcom/gemini/chat/ChatActivity;Z)V
 
-    .line 964
+    .line 987
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->this$0:Lcom/gemini/chat/ChatActivity;
 
     invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$3100(Lcom/gemini/chat/ChatActivity;)V
 
     goto :goto_0
 
-    .line 967
+    .line 990
     :pswitch_9
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->this$0:Lcom/gemini/chat/ChatActivity;
 
@@ -335,7 +335,7 @@
 
     goto/16 :goto_0
 
-    .line 933
+    .line 956
     :pswitch_data_0
     .packed-switch 0x0
         :pswitch_0
@@ -363,14 +363,14 @@
 
     const/4 v2, 0x0
 
-    .line 905
+    .line 928
     new-instance v0, Ljava/util/ArrayList;
 
     invoke-direct {v0}, Ljava/util/ArrayList;-><init>()V
 
     iput-object v0, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->labels:Ljava/util/ArrayList;
 
-    .line 906
+    .line 929
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->codeBlocks:Ljava/util/ArrayList;
 
     invoke-virtual {v0}, Ljava/util/ArrayList;->size()I
@@ -383,7 +383,7 @@
 
     iput-object v0, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->actions:[I
 
-    .line 907
+    .line 930
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->actions:[I
 
     array-length v0, v0
@@ -392,7 +392,7 @@
 
     iput-object v0, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->args:[I
 
-    .line 908
+    .line 931
     iget-wide v4, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->id:J
 
     const-wide/16 v6, -0x1
@@ -403,7 +403,7 @@
 
     move v0, v1
 
-    .line 909
+    .line 932
     :goto_0
     const-string v3, "user"
 
@@ -421,7 +421,7 @@
 
     move-result v4
 
-    .line 910
+    .line 933
     iget-object v5, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->this$0:Lcom/gemini/chat/ChatActivity;
 
     invoke-static {v5}, Lcom/gemini/chat/ChatActivity;->access$2200(Lcom/gemini/chat/ChatActivity;)Lcom/gemini/chat/ReadAloud;
@@ -436,7 +436,7 @@
 
     invoke-direct {p0, v5, v6}, Lcom/gemini/chat/ChatActivity$MessageMenu;->add(Ljava/lang/String;I)V
 
-    .line 911
+    .line 934
     :cond_0
     if-eqz v4, :cond_2
 
@@ -481,7 +481,7 @@
 
     invoke-direct {p0, v5, v6}, Lcom/gemini/chat/ChatActivity$MessageMenu;->add(Ljava/lang/String;I)V
 
-    .line 912
+    .line 935
     :cond_2
     iget-object v5, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->thoughts:Ljava/lang/String;
 
@@ -497,13 +497,13 @@
 
     invoke-direct {p0, v5, v6}, Lcom/gemini/chat/ChatActivity$MessageMenu;->add(Ljava/lang/String;I)V
 
-    .line 913
+    .line 936
     :cond_3
     const-string v5, "Copy Entire Message"
 
     invoke-direct {p0, v5, v2}, Lcom/gemini/chat/ChatActivity$MessageMenu;->add(Ljava/lang/String;I)V
 
-    .line 914
+    .line 937
     :goto_1
     iget-object v5, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->codeBlocks:Ljava/util/ArrayList;
 
@@ -542,26 +542,26 @@
     :cond_4
     move v0, v2
 
-    .line 908
+    .line 931
     goto/16 :goto_0
 
-    .line 915
+    .line 938
     :cond_5
     if-eqz v0, :cond_a
 
     if-eqz v3, :cond_a
 
-    .line 916
+    .line 939
     const-string v2, "Regenerate"
 
     invoke-direct {p0, v2, v11}, Lcom/gemini/chat/ChatActivity$MessageMenu;->add(Ljava/lang/String;I)V
 
-    .line 917
+    .line 940
     const-string v2, "Edit Message"
 
     invoke-direct {p0, v2, v10}, Lcom/gemini/chat/ChatActivity$MessageMenu;->add(Ljava/lang/String;I)V
 
-    .line 922
+    .line 945
     :cond_6
     :goto_2
     if-nez v3, :cond_7
@@ -572,7 +572,7 @@
 
     invoke-direct {p0, v2, v3}, Lcom/gemini/chat/ChatActivity$MessageMenu;->add(Ljava/lang/String;I)V
 
-    .line 923
+    .line 946
     :cond_7
     if-nez v0, :cond_8
 
@@ -604,7 +604,7 @@
 
     invoke-direct {p0, v2, v3}, Lcom/gemini/chat/ChatActivity$MessageMenu;->add(Ljava/lang/String;I)V
 
-    .line 924
+    .line 947
     :cond_8
     if-eqz v0, :cond_9
 
@@ -614,7 +614,7 @@
 
     invoke-direct {p0, v0, v2}, Lcom/gemini/chat/ChatActivity$MessageMenu;->add(Ljava/lang/String;I)V
 
-    .line 925
+    .line 948
     :cond_9
     new-instance v0, Landroid/app/AlertDialog$Builder;
 
@@ -624,7 +624,7 @@
 
     const-string v2, "Message Options"
 
-    .line 926
+    .line 949
     invoke-virtual {v0, v2}, Landroid/app/AlertDialog$Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 
     move-result-object v2
@@ -633,7 +633,7 @@
 
     iget-object v3, p0, Lcom/gemini/chat/ChatActivity$MessageMenu;->labels:Ljava/util/ArrayList;
 
-    .line 927
+    .line 950
     invoke-virtual {v3}, Ljava/util/ArrayList;->size()I
 
     move-result v3
@@ -650,24 +650,24 @@
 
     move-result-object v0
 
-    .line 928
+    .line 951
     invoke-virtual {v0}, Landroid/app/AlertDialog$Builder;->show()Landroid/app/AlertDialog;
 
-    .line 929
+    .line 952
     return v1
 
-    .line 918
+    .line 941
     :cond_a
     if-eqz v0, :cond_6
 
     if-eqz v4, :cond_6
 
-    .line 919
+    .line 942
     const-string v2, "Edit Message"
 
     invoke-direct {p0, v2, v10}, Lcom/gemini/chat/ChatActivity$MessageMenu;->add(Ljava/lang/String;I)V
 
-    .line 920
+    .line 943
     const-string v2, "Regenerate"
 
     invoke-direct {p0, v2, v11}, Lcom/gemini/chat/ChatActivity$MessageMenu;->add(Ljava/lang/String;I)V

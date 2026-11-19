@@ -33,7 +33,7 @@
     .end annotation
 
     .prologue
-    .line 497
+    .line 498
     iput-object p1, p0, Lcom/gemini/chat/LiveActivity$Transcriber$1;->this$1:Lcom/gemini/chat/LiveActivity$Transcriber;
 
     iput-object p2, p0, Lcom/gemini/chat/LiveActivity$Transcriber$1;->val$text:Ljava/lang/String;
@@ -46,10 +46,10 @@
 
 # virtual methods
 .method public run()V
-    .locals 2
+    .locals 4
 
     .prologue
-    .line 499
+    .line 500
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Transcriber$1;->this$1:Lcom/gemini/chat/LiveActivity$Transcriber;
 
     iget-object v0, v0, Lcom/gemini/chat/LiveActivity$Transcriber;->this$0:Lcom/gemini/chat/LiveActivity;
@@ -58,23 +58,48 @@
 
     move-result v0
 
-    if-eqz v0, :cond_0
+    if-nez v0, :cond_0
 
-    .line 502
+    iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Transcriber$1;->this$1:Lcom/gemini/chat/LiveActivity$Transcriber;
+
+    iget-object v0, v0, Lcom/gemini/chat/LiveActivity$Transcriber;->this$0:Lcom/gemini/chat/LiveActivity;
+
+    invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$2900(Lcom/gemini/chat/LiveActivity;)Z
+
+    move-result v0
+
+    if-nez v0, :cond_1
+
+    iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Transcriber$1;->this$1:Lcom/gemini/chat/LiveActivity$Transcriber;
+
+    iget-object v0, v0, Lcom/gemini/chat/LiveActivity$Transcriber;->this$0:Lcom/gemini/chat/LiveActivity;
+
+    invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$3000(Lcom/gemini/chat/LiveActivity;)J
+
+    move-result-wide v0
+
+    const-wide/16 v2, -0x1
+
+    cmp-long v0, v0, v2
+
+    if-nez v0, :cond_1
+
+    .line 503
+    :cond_0
     :goto_0
     return-void
 
-    .line 500
-    :cond_0
+    .line 501
+    :cond_1
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Transcriber$1;->this$1:Lcom/gemini/chat/LiveActivity$Transcriber;
 
     iget-object v0, v0, Lcom/gemini/chat/LiveActivity$Transcriber;->this$0:Lcom/gemini/chat/LiveActivity;
 
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity$Transcriber$1;->val$text:Ljava/lang/String;
 
-    invoke-static {v0, v1}, Lcom/gemini/chat/LiveActivity;->access$2902(Lcom/gemini/chat/LiveActivity;Ljava/lang/String;)Ljava/lang/String;
+    invoke-static {v0, v1}, Lcom/gemini/chat/LiveActivity;->access$3102(Lcom/gemini/chat/LiveActivity;Ljava/lang/String;)Ljava/lang/String;
 
-    .line 501
+    .line 502
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Transcriber$1;->this$1:Lcom/gemini/chat/LiveActivity$Transcriber;
 
     iget-object v0, v0, Lcom/gemini/chat/LiveActivity$Transcriber;->this$0:Lcom/gemini/chat/LiveActivity;

@@ -28,15 +28,15 @@
     .locals 0
 
     .prologue
-    .line 381
+    .line 382
     iput-object p1, p0, Lcom/gemini/chat/LiveActivity$Main;->this$0:Lcom/gemini/chat/LiveActivity;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 
-    .line 382
+    .line 383
     iput p2, p0, Lcom/gemini/chat/LiveActivity$Main;->gen:I
 
-    .line 383
+    .line 384
     return-void
 .end method
 
@@ -44,7 +44,7 @@
     .locals 1
 
     .prologue
-    .line 378
+    .line 379
     invoke-direct {p0}, Lcom/gemini/chat/LiveActivity$Main;->current()Z
 
     move-result v0
@@ -56,7 +56,7 @@
     .locals 2
 
     .prologue
-    .line 386
+    .line 387
     iget v0, p0, Lcom/gemini/chat/LiveActivity$Main;->gen:I
 
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity$Main;->this$0:Lcom/gemini/chat/LiveActivity;
@@ -92,7 +92,7 @@
     .locals 2
 
     .prologue
-    .line 428
+    .line 429
     iget v0, p0, Lcom/gemini/chat/LiveActivity$Main;->gen:I
 
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity$Main;->this$0:Lcom/gemini/chat/LiveActivity;
@@ -103,11 +103,11 @@
 
     if-eq v0, v1, :cond_0
 
-    .line 431
+    .line 432
     :goto_0
     return-void
 
-    .line 429
+    .line 430
     :cond_0
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Main;->this$0:Lcom/gemini/chat/LiveActivity;
 
@@ -115,7 +115,7 @@
 
     invoke-static {v0, v1}, Lcom/gemini/chat/LiveActivity;->access$2302(Lcom/gemini/chat/LiveActivity;Z)Z
 
-    .line 430
+    .line 431
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Main;->this$0:Lcom/gemini/chat/LiveActivity;
 
     invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$2400(Lcom/gemini/chat/LiveActivity;)Lcom/gemini/chat/LiveActivity$Player;
@@ -131,7 +131,7 @@
     .locals 2
 
     .prologue
-    .line 404
+    .line 405
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Main;->this$0:Lcom/gemini/chat/LiveActivity;
 
     invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$1200(Lcom/gemini/chat/LiveActivity;)Landroid/os/Handler;
@@ -144,7 +144,7 @@
 
     invoke-virtual {v0, v1}, Landroid/os/Handler;->post(Ljava/lang/Runnable;)Z
 
-    .line 425
+    .line 426
     return-void
 .end method
 
@@ -152,7 +152,7 @@
     .locals 2
 
     .prologue
-    .line 434
+    .line 435
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Main;->this$0:Lcom/gemini/chat/LiveActivity;
 
     invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$1200(Lcom/gemini/chat/LiveActivity;)Landroid/os/Handler;
@@ -165,7 +165,7 @@
 
     invoke-virtual {v0, v1}, Landroid/os/Handler;->post(Ljava/lang/Runnable;)Z
 
-    .line 441
+    .line 442
     return-void
 .end method
 
@@ -173,7 +173,7 @@
     .locals 0
 
     .prologue
-    .line 444
+    .line 445
     return-void
 .end method
 
@@ -181,7 +181,7 @@
     .locals 2
 
     .prologue
-    .line 474
+    .line 475
     iget v0, p0, Lcom/gemini/chat/LiveActivity$Main;->gen:I
 
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity$Main;->this$0:Lcom/gemini/chat/LiveActivity;
@@ -192,11 +192,11 @@
 
     if-eq v0, v1, :cond_0
 
-    .line 483
+    .line 484
     :goto_0
     return-void
 
-    .line 475
+    .line 476
     :cond_0
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Main;->this$0:Lcom/gemini/chat/LiveActivity;
 
@@ -206,7 +206,7 @@
 
     invoke-virtual {v0}, Lcom/gemini/chat/LiveActivity$Player;->flush()V
 
-    .line 476
+    .line 477
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Main;->this$0:Lcom/gemini/chat/LiveActivity;
 
     invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$1200(Lcom/gemini/chat/LiveActivity;)Landroid/os/Handler;
@@ -226,7 +226,7 @@
     .locals 4
 
     .prologue
-    .line 447
+    .line 448
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Main;->this$0:Lcom/gemini/chat/LiveActivity;
 
     invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$2400(Lcom/gemini/chat/LiveActivity;)Lcom/gemini/chat/LiveActivity$Player;
@@ -237,14 +237,14 @@
 
     move-result-wide v0
 
-    .line 448
+    .line 449
     iget-object v2, p0, Lcom/gemini/chat/LiveActivity$Main;->this$0:Lcom/gemini/chat/LiveActivity;
 
     const/4 v3, 0x1
 
     invoke-static {v2, v3}, Lcom/gemini/chat/LiveActivity;->access$2302(Lcom/gemini/chat/LiveActivity;Z)Z
 
-    .line 449
+    .line 450
     iget-object v2, p0, Lcom/gemini/chat/LiveActivity$Main;->this$0:Lcom/gemini/chat/LiveActivity;
 
     invoke-static {v2}, Lcom/gemini/chat/LiveActivity;->access$1200(Lcom/gemini/chat/LiveActivity;)Landroid/os/Handler;
@@ -257,7 +257,7 @@
 
     invoke-virtual {v2, v3}, Landroid/os/Handler;->post(Ljava/lang/Runnable;)Z
 
-    .line 459
+    .line 460
     return-void
 .end method
 
@@ -265,7 +265,7 @@
     .locals 2
 
     .prologue
-    .line 390
+    .line 391
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Main;->this$0:Lcom/gemini/chat/LiveActivity;
 
     invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$1200(Lcom/gemini/chat/LiveActivity;)Landroid/os/Handler;
@@ -278,7 +278,7 @@
 
     invoke-virtual {v0, v1}, Landroid/os/Handler;->post(Ljava/lang/Runnable;)Z
 
-    .line 401
+    .line 402
     return-void
 .end method
 
@@ -286,7 +286,7 @@
     .locals 2
 
     .prologue
-    .line 462
+    .line 463
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Main;->this$0:Lcom/gemini/chat/LiveActivity;
 
     invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$1200(Lcom/gemini/chat/LiveActivity;)Landroid/os/Handler;
@@ -299,6 +299,6 @@
 
     invoke-virtual {v0, v1}, Landroid/os/Handler;->post(Ljava/lang/Runnable;)Z
 
-    .line 471
+    .line 472
     return-void
 .end method

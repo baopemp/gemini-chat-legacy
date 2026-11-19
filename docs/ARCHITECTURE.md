@@ -10,7 +10,7 @@ Gemini Chat is an ultra-lightweight, highly optimized native Android client engi
 - **Target SDK Version:** API 14 (Android 4.0 Ice Cream Sandwich)
 - **Runtime Environment:** Dalvik Virtual Machine (DVM)
 - **Hardware Profile:** Tested and guaranteed to operate smoothly on 256MB RAM legacy smartphones (ARMv5, ARMv6, ARMv7, and x86 architectures).
-- **Zero Heavy Modern Dependencies:** No AndroidX, no Jetpack, no Google Play Services, no Kotlin runtime, no multi-megabyte third-party libraries. The entire app binary is under 150 KB.
+- **Zero Heavy Modern Dependencies:** No AndroidX, no Jetpack, no Google Play Services, no Kotlin runtime, no multi-megabyte third-party libraries. The entire app binary is about 153 KB.
 
 ---
 
@@ -29,9 +29,9 @@ On Android 2.1 (API 7), the Dalvik class verifier scans all classes during class
 
 ### Avoiding `NetworkOnMainThreadException`
 - On Android 3.0+ (Honeycomb) and Android 4.0+ (ICS), performing any network operations on the main UI thread immediately throws `android.os.NetworkOnMainThreadException`.
-- All HTTP/HTTPS requests (API key verification, Gemini chat completions, model listing) are strictly executed inside `AsyncTask.doInBackground()`.
+- All HTTP/HTTPS requests (Gemini streaming chat completions, auto-naming, and Read Aloud TTS) are strictly executed off the UI thread (`AsyncTask.doInBackground()` or dedicated threads).
 - Thread synchronization is handled via `AsyncTask.onPreExecute()` (showing loaders) and `AsyncTask.onPostExecute()` (binding results to UI).
-- Dedicated cancel support: `ChatActivity` includes a "Stop" button that invokes `currentTask.cancel(true)` to abort running streams and sockets immediately.
+- Dedicated cancel support: `ChatActivity` includes a "Stop" button that invokes `currentTask.cancel(true)` and disconnects the `HttpURLConnection` on a background daemon thread (`disconnectAsync()`) so Android 3.0+ never hits `NetworkOnMainThreadException`.
 - Live (WebSocket): the reader thread receives; **every send** (text, audio, activity events, history, close) goes through
   `LiveSession`'s writer thread, because `LiveActivity` calls them from the UI thread. On 2.x a UI-thread send works, on 3.0+
   StrictMode throws, so this must not regress.
@@ -72,13 +72,15 @@ The application implements a dual-layer storage subsystem:
     - `id` (INTEGER PRIMARY KEY AUTOINCREMENT)
     - `title` (TEXT)
     - `timestamp` (INTEGER, last activity; the list is sorted by it, newest first)
+    - `named` (INTEGER, 0 until auto-named or manually renamed)
   - `messages`:
     - `id` (INTEGER PRIMARY KEY AUTOINCREMENT)
     - `chat_id` (INTEGER, foreign key to `chats.id`)
     - `role` (TEXT: "user", "model", or "system")
     - `model` (TEXT: stores model identifier, or for attachments, inline base64 string `data:image/...`)
     - `content` (TEXT: message body markdown)
-    - `timestamp` (INTEGER: Unix epoch timestamp in milliseconds)
+    - `thoughts` (TEXT: optional thought summary captured from `"thought": true` parts)
+    - `timestamp` (INTEGER: Unix epoch timestamp in milliseconds; messages are ordered by `id`)
 
 ### Cursor Hygiene & Memory Protection
 On 256MB devices, unclosed database cursors lead directly to SQLite connection leaks and out-of-memory errors. Cursors are closed on every path. `getChats()`/`getMessages()` return their cursor to the caller (the chat list uses `startManagingCursor`). `scripts/check_cursors.py` audits this.
@@ -88,7 +90,7 @@ On 256MB devices, unclosed database cursors lead directly to SQLite connection l
 ## 7. Message Rendering: Markdown, Emoji, Layout (0.8.5)
 
 `ChatActivity.addMessageToChat` builds one `TextView` per message:
-`MessageFormatter.format(...)` → text, `MessageFormatter.styleView(...)` → row style, `ChatActivity$6` → long-press menu.
+`MessageFormatter.format(...)` → text, `MessageFormatter.styleView(...)` → row style, `ChatActivity.MessageMenu` → long-press menu.
 
 ### `Markdown` (pure Java, unit-tested on the JVM)
 Parses into a `Doc` = plain text + typed ranges (`BOLD`, `CODE_BLOCK`, `LIST_ITEM(level, marker)`, …) + raw code blocks.
@@ -117,8 +119,8 @@ When enabled (`GeminiPrefs/time_grounding`, default true), `GeminiTask` appends
 
 ## 8. Gemini API Integration & Payload Structure
 
-### REST endpoint (checked against ai.google.dev, 2026-10-22)
-`POST https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent`
+### REST endpoint (checked against ai.google.dev, 2026-11-19)
+`POST https://generativelanguage.googleapis.com/v1beta/models/{model}:streamGenerateContent?alt=sse` (and `:generateContent` for `AutoNamer`)
 Headers: `Content-Type: application/json; charset=utf-8`, `x-goog-api-key: {apiKey}`.
 Timeouts: 30 s connect, 180 s read.
 
@@ -143,8 +145,8 @@ Timeouts: 30 s connect, 180 s read.
 - HTTP errors → `Error <code>: <error.message>`.
 - Failures set `GeminiTask.failed`. They're shown as a System message and not saved.
 
-### Models offered in Settings (see section 9 for streaming; 0.8.6 default: gemini-3.5-flash-lite, plus Custom model...)
-`gemini-3.8-flash` (default), `gemini-3.6-flash`, `gemini-3.5-flash-lite`, `gemini-3.1-flash-lite`, `gemini-3-flash-preview`.
+### Models offered in Settings (free tier per pricing page, 2026-11-19; default: `gemini-3.5-flash-lite`, plus Custom model...)
+`gemini-4-hydrogen`, `gemini-3.8-flash`, `gemini-3.6-flash`, `gemini-3.5-flash-lite`, `gemini-3.1-flash-lite`, `gemini-3-flash-preview`, `gemini-flash-latest`, `gemini-flash-lite-latest`, `gemma-4-31b-it`, `gemma-4-26b-a4b-it`. Paid Gemini 4 models (`gemini-4-neon`, `gemini-4-carbon`, `gemini-4-argon`) can be selected via Custom model.
 
 ---
 
@@ -158,10 +160,8 @@ Timeouts: 30 s connect, 180 s read.
   once answer text arrives. The row is removed when the task ends or is cancelled, and replaced by the saved message.
 
 ### Thinking
-- `generationConfig.thinkingConfig.thinkingLevel` from Settings (empty = model default; `ReplyParser.levelFor` maps "minimal" to "low"
-  on 3.8 Flash), `includeThoughts` from "Show thought process".
-- Levels per the Gemini docs (2026-10): 3.8 Flash low/medium*/high; 3.6 Flash minimal/low/medium*/high; 3.5 and 3.1 Flash-Lite
-  minimal*/low/medium/high; 3 Flash minimal/low/medium/high* (* = default). Thinking can't be turned off on Gemini 3.
+- `generationConfig.thinkingConfig.thinkingLevel` from Settings (empty = model default; `ReplyParser.levelFor` maps unsupported levels per model: `minimal` → `low` on Gemini 4, 3.8 Flash, 3.1 Pro, 3 Pro, and 2.5; `xhigh` kept on `gemini-4-hydrogen`, `gemini-4-neon`, and unknown future models, clamped to `high` on models that cap at `high`; Gemma 4 maps to `minimal`/`high` only), `includeThoughts` from "Show thought process".
+- Levels per the Gemini docs (2026-11-19): `gemini-4-hydrogen` / `gemini-4-neon` `low`/`medium`/`high`*/`xhigh`; `gemini-4-carbon` / `gemini-4-argon` `low`/`medium`*/`high`; 3.8 Flash `low`/`medium`*/`high`; 3.6 Flash `minimal`/`low`/`medium`*/`high`; 3.5 and 3.1 Flash-Lite `minimal`*/`low`/`medium`/`high`; 3 Flash `minimal`/`low`/`medium`/`high`*; Gemma 4 `minimal`/`high` (* = default). Thinking can't be turned off on Gemini 3/4.
 - Thought parts (`"thought": true`) are collected apart from the answer and stored in `messages.thoughts`. If the model thought
   (`usageMetadata.thoughtsTokenCount > 0`) but sent no summary, a short note is stored instead. Long-press → Show Thought Process.
 
@@ -170,7 +170,7 @@ Timeouts: 30 s connect, 180 s read.
   the state. 429 is never retried.
 
 ### Auto-naming
-- After a successful reply, if Settings → Auto-name chats is on and `chats.named = 0`, `TitleTask` sends the first user message and
+- After a successful reply, if Settings → Auto-name chats is on and `chats.named = 0`, `AutoNamer` sends the first user message and
   first reply (each cut to 1,500 chars) to `gemini-3.5-flash-lite` (non-streaming, `thinkingLevel: minimal`) and asks for a 2-6 word
   title. `cleanTitle` strips markdown/quotes/"Title:", keeps the first line, caps it at 40 chars. On success the title is saved and
   `named = 1`; on any failure nothing changes and it is tried again after the next reply.
@@ -218,16 +218,14 @@ LiveActivity ── Mic thread (AudioRecord 16 kHz → 100 ms chunks) ──┐
   for 1.5 s) or Settings → Mute voice: text is shown at once.
 - **Saving:** a user turn (spoken transcript or typed text) is saved when the model starts answering; a model turn when its audio has
   finished (or on interrupt/close), with `model` = the live model id. The chat id goes back to `ChatActivity` in the result Intent.
-- **Limits (Google):** audio-only sessions 15 min without compression, connections about 10 min (`goAway`); then "Disconnected" +
-  Reconnect. Session resumption is not implemented.
+- **Limits (Google):** audio-only sessions 15 min without compression, connections about 10 min (`goAway`); automatic resumption was added in 0.8.7 (see section 12).
 
 ## 12. 0.8.7 additions
 
 - **Live text box (`LiveActivity.Transcriber`):** `LiveSession.transcriber()` opens `gemini-3.5-transcribe-live` (setup: TEXT
   modality, `inputAudioTranscription{}`, its own voice detection) when the conversation is ready; the Mic thread sends every chunk
   to both sessions. `interimInputTranscription.text` (cumulative for the current utterance) and final `inputTranscription.text`
-  are shown as `typedPrefix + finals + interim`. The user turn is finalized when the model starts answering: the row uses what the
-  model heard (its own `inputTranscription`), falling back to the transcriber's text.
+  are shown as `typedPrefix + finals + interim`. Since 0.8.8 (see section 13), the saved user turn prefers the transcriber's text and falls back to the model's `inputTranscription`.
 - **Echo gate:** `modelTurnActive` is set by the first audio/text of a reply and cleared when the turn is complete and played;
   `micOpenAfter` adds 0.7 s. `micMuted()` (hands-free only) checks both plus `Player.isPlaying()`.
 - **Player jitter buffer:** from silence, writing to the AudioTrack waits for 0.3 s of queued audio, the end of the turn
@@ -254,3 +252,14 @@ LiveActivity ── Mic thread (AudioRecord 16 kHz → 100 ms chunks) ──┐
 - **Live user turns:** `finishUserTurn()` saves the spoken turn once (`userRow`) when the model starts answering; transcripts
   that arrive later (`lateOrBox()`) update that row and view. `newUserTurn()` closes it when the hands-free mic reopens after the
   reply (`tick`), on Talk, or on a typed send. Text = transcriber (final + interim), falling back to the model's transcript.
+
+## 14. 0.8.9 additions
+
+- **Gemini 4 series support:** Added `gemini-4-hydrogen` (free tier) at the top of `SettingsActivity.MODELS`, added `"Extra High"` (`xhigh`) to `SettingsActivity.THINKING_LABELS`/`THINKING_VALUES`, and updated `ReplyParser.levelFor` for the full 2026-11-19 thinking-level matrix (`gemini-4-hydrogen`/`gemini-4-neon`, `gemini-4-carbon`/`gemini-4-argon`, Gemini 3.x, Gemini 2.5, Gemma 4, and unknown future models).
+- **Edge-case hardening:**
+  - `ChatActivity.GeminiTask.disconnectAsync()` disconnects canceled HTTP streams on a daemon thread (fixing `NetworkOnMainThreadException` on Android 3.0+ when tapping Stop or leaving during a request), resets `partialText`/`partialThoughts` on retry, and guards `onPostExecute()` against cancelled/finishing activities.
+  - `ChatActivity` now validates `hasApiKey()` before deleting/mutating messages on Regenerate or Edit → Resend, resets `streamView = null` on `loadMessages()`, stops Read Aloud on Regenerate / Edit → Resend / Live / Delete Chat, invalidates the options menu on Stop / Read Aloud start & stop, and fixes the inverted `SDK_INT >= 19` guard for `MENU_ATTACH`.
+  - `ReadAloud` disconnects `HttpURLConnection` in `finally` on every path and guards `play()` against concurrent `stopReading()` races before `AudioTrack.play()`.
+  - `LiveActivity` fixes `onDestroy()` turn-save ordering (`finishUserTurn()` before `finishModelTurn(true)`) and guards `acceptTranscript` so stale transcriber callbacks cannot refill the cleared input box after tapping Send while talking.
+  - `LiveSocket` closes pre-assigned raw/TLS sockets in `finally` if proxy CONNECT, TLS handshake, or hostname verification throws.
+  - `AutoNamer` clears `RUNNING` in `catch` if `execute()` throws; `EmojiMap.load()` closes its `BufferedReader` in `finally`.

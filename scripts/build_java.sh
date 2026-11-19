@@ -3,7 +3,7 @@
 #   javac (-source/-target 8, bootclasspath = Android 2.1 / API 7 android.jar)  -> catches any API 8+ use
 #   dx 30.0.2 (via dex2jar's d2j-jar2dex, DEX 035)  ->  baksmali (bundled in tools/apktool.jar, tools/src/Dex2Smali.java)
 # Run this after editing anything in java/, then ./scripts/build_apk.sh.
-# The hand-written smali (R, SettingsActivity, ImageUtil, ...) is assembled and converted to a jar first, so the Java code can
+# The hand-written smali (R, ChatListActivity, ImageUtil, ...) is assembled and converted to a jar first, so the Java code can
 # use it (javac -classpath); R.* ids are compile-time constants and get inlined.
 # Classes generated from java/ (do not hand-edit their smali):
 #   listed in java/GENERATED_SMALI.txt (rewritten on every run; stale files from the previous run are deleted)

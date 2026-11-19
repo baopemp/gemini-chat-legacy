@@ -37,7 +37,7 @@
     .end annotation
 
     .prologue
-    .line 1082
+    .line 1114
     iput-object p1, p0, Lcom/gemini/chat/ChatActivity$12;->this$0:Lcom/gemini/chat/ChatActivity;
 
     iput-object p2, p0, Lcom/gemini/chat/ChatActivity$12;->val$et:Landroid/widget/EditText;
@@ -57,21 +57,21 @@
     .locals 6
 
     .prologue
-    .line 1084
+    .line 1116
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$12;->this$0:Lcom/gemini/chat/ChatActivity;
 
     iget-object v1, p0, Lcom/gemini/chat/ChatActivity$12;->val$et:Landroid/widget/EditText;
 
     invoke-static {v0, v1}, Lcom/gemini/chat/ChatActivity;->access$3300(Lcom/gemini/chat/ChatActivity;Landroid/view/View;)V
 
-    .line 1085
+    .line 1117
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$12;->val$et:Landroid/widget/EditText;
 
     invoke-virtual {v0}, Landroid/widget/EditText;->getText()Landroid/text/Editable;
 
     move-result-object v0
 
-    invoke-interface {v0}, Landroid/text/Editable;->toString()Ljava/lang/String;
+    invoke-virtual {v0}, Ljava/lang/Object;->toString()Ljava/lang/String;
 
     move-result-object v0
 
@@ -79,23 +79,38 @@
 
     move-result-object v0
 
-    .line 1086
+    .line 1118
     invoke-virtual {v0}, Ljava/lang/String;->length()I
 
     move-result v1
 
-    if-nez v1, :cond_0
+    if-nez v1, :cond_1
 
     iget-boolean v1, p0, Lcom/gemini/chat/ChatActivity$12;->val$hasImage:Z
 
-    if-nez v1, :cond_0
+    if-nez v1, :cond_1
 
-    .line 1091
+    .line 1125
+    :cond_0
     :goto_0
     return-void
 
-    .line 1087
-    :cond_0
+    .line 1119
+    :cond_1
+    iget-object v1, p0, Lcom/gemini/chat/ChatActivity$12;->this$0:Lcom/gemini/chat/ChatActivity;
+
+    invoke-static {v1}, Lcom/gemini/chat/ChatActivity;->access$3400(Lcom/gemini/chat/ChatActivity;)Z
+
+    move-result v1
+
+    if-eqz v1, :cond_0
+
+    .line 1120
+    iget-object v1, p0, Lcom/gemini/chat/ChatActivity$12;->this$0:Lcom/gemini/chat/ChatActivity;
+
+    invoke-static {v1}, Lcom/gemini/chat/ChatActivity;->access$2600(Lcom/gemini/chat/ChatActivity;)V
+
+    .line 1121
     iget-object v1, p0, Lcom/gemini/chat/ChatActivity$12;->this$0:Lcom/gemini/chat/ChatActivity;
 
     invoke-static {v1}, Lcom/gemini/chat/ChatActivity;->access$000(Lcom/gemini/chat/ChatActivity;)Lcom/gemini/chat/DatabaseHelper;
@@ -106,7 +121,7 @@
 
     invoke-virtual {v1, v2, v3, v0}, Lcom/gemini/chat/DatabaseHelper;->updateMessage(JLjava/lang/String;)V
 
-    .line 1088
+    .line 1122
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$12;->this$0:Lcom/gemini/chat/ChatActivity;
 
     invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$000(Lcom/gemini/chat/ChatActivity;)Lcom/gemini/chat/DatabaseHelper;
@@ -123,14 +138,14 @@
 
     invoke-virtual {v0, v2, v3, v4, v5}, Lcom/gemini/chat/DatabaseHelper;->deleteMessagesAfter(JJ)V
 
-    .line 1089
+    .line 1123
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$12;->this$0:Lcom/gemini/chat/ChatActivity;
 
     const/4 v1, 0x0
 
     invoke-static {v0, v1}, Lcom/gemini/chat/ChatActivity;->access$3000(Lcom/gemini/chat/ChatActivity;Z)V
 
-    .line 1090
+    .line 1124
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$12;->this$0:Lcom/gemini/chat/ChatActivity;
 
     invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$3100(Lcom/gemini/chat/ChatActivity;)V

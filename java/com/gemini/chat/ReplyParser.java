@@ -70,15 +70,28 @@ public final class ReplyParser {
 
     /**
      * thinkingConfig.thinkingLevel for a model, or null for the model's default. Levels a model doesn't accept are moved
-     * to the nearest one it does: 3.8 Flash has no "minimal" (Gemini thinking docs); Gemma 4 only takes "minimal"
-     * (thinking off) or "high" (tested 2026-10-23: "low" -> 400 "Thinking level is not supported for this model").
+     * to the nearest one it does (ai.google.dev thinking docs, 2026-11-19):
+     * - Gemma 4: only "minimal" (off) or "high".
+     * - Gemini 4 Hydrogen / Neon: low, medium, high, xhigh (no minimal).
+     * - Gemini 4 Carbon / Argon, 3.8 Flash, 3.1 Pro, 2.5: low, medium, high (no minimal, no xhigh).
+     * - Gemini 3 Pro: low, high (no minimal, medium, xhigh).
+     * - Gemini 3.6 Flash, 3.5/3.1 Flash-Lite, 3 Flash, -latest aliases: minimal, low, medium, high (no xhigh).
      */
     public static String levelFor(String model, String level) {
         if (level == null || level.length() == 0) return null;
-        if (model != null && model.startsWith("gemma-")) {
+        if (model == null) return level;
+        if (model.startsWith("gemma-")) {
             return "minimal".equals(level) || "low".equals(level) ? "minimal" : "high";
         }
-        if ("minimal".equals(level) && model != null && model.startsWith("gemini-3.8-flash")) return "low";
+        boolean noXhigh = model.startsWith("gemini-4-carbon") || model.startsWith("gemini-4-argon")
+                || model.startsWith("gemini-3") || model.startsWith("gemini-2")
+                || model.startsWith("gemini-flash-") || model.startsWith("gemini-pro-");
+        if ("xhigh".equals(level) && noXhigh) level = "high";
+        boolean noMinimal = model.startsWith("gemini-4-") || model.startsWith("gemini-3.8-flash")
+                || model.startsWith("gemini-3.1-pro") || model.startsWith("gemini-3-pro")
+                || model.startsWith("gemini-2.5-");
+        if ("minimal".equals(level) && noMinimal) level = "low";
+        if ("medium".equals(level) && model.startsWith("gemini-3-pro")) level = "high";
         return level;
     }
 }

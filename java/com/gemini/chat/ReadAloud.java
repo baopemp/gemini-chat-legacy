@@ -20,7 +20,8 @@ import java.net.URL;
  * "Read aloud": speaks a reply with Gemini text-to-speech, in the voice chosen for Live.
  * Interactions API, streamed (SSE): {@code step.delta} events with {@code delta.type == "audio"} carry base64
  * 24 kHz mono 16-bit PCM ({@code audio/l16}), written to an AudioTrack as they arrive.
- * Docs: ai.google.dev/gemini-api/docs/speech-generation (checked 2026-10-23; all three models are on the free tier).
+ * Docs: ai.google.dev/gemini-api/docs/speech-generation (checked 2026-11-19; all three models are on the free tier;
+ * gemini-3.1-flash-tts-preview shuts down 2026-12-18).
  */
 final class ReadAloud extends Thread {
     static final String URL_INTERACTIONS = "https://generativelanguage.googleapis.com/v1beta/interactions";
@@ -199,9 +200,10 @@ final class ReadAloud extends Thread {
 
     /** One attempt. 0 = audio streamed to the end; otherwise the HTTP status (message in lastError). */
     private int request() throws Exception {
+        HttpURLConnection c = null;
         BufferedReader in = null;
         try {
-            HttpURLConnection c = (HttpURLConnection) new URL(URL_INTERACTIONS).openConnection();
+            c = (HttpURLConnection) new URL(URL_INTERACTIONS).openConnection();
             conn = c;
             c.setConnectTimeout(30000);
             c.setReadTimeout(120000);
@@ -243,6 +245,12 @@ final class ReadAloud extends Thread {
                 } catch (Exception ignored) {
                 }
             }
+            if (c != null) {
+                try {
+                    c.disconnect();
+                } catch (Exception ignored) {
+                }
+            }
             conn = null;
         }
     }
@@ -263,19 +271,25 @@ final class ReadAloud extends Thread {
         System.arraycopy(pcm, 0, b, o, b.length - o);
         carry = (n & 1) != 0 ? pcm[pcm.length - 1] & 0xFF : -1;
         if (b.length == 0) return;
-        if (track == null) {
+        AudioTrack t = track;
+        if (t == null) {
             int min = AudioTrack.getMinBufferSize(RATE, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT);
-            AudioTrack t = new AudioTrack(AudioManager.STREAM_MUSIC, RATE, AudioFormat.CHANNEL_CONFIGURATION_MONO,
+            t = new AudioTrack(AudioManager.STREAM_MUSIC, RATE, AudioFormat.CHANNEL_CONFIGURATION_MONO,
                     AudioFormat.ENCODING_PCM_16BIT, Math.max(min, RATE * 2), AudioTrack.MODE_STREAM); // >= 1 s
             if (t.getState() != AudioTrack.STATE_INITIALIZED) {
                 t.release();
                 throw new IllegalStateException("Error: audio output not available");
             }
+            if (stopped) {
+                t.release();
+                return;
+            }
             track = t;
             t.play();
         }
-        track.write(b, 0, b.length);
-        written += b.length / 2;
+        if (stopped) return;
+        int w = t.write(b, 0, b.length);
+        if (w > 0) written += w / 2;
     }
 
     /** Waits until the queued audio has played (gives up if the output stops moving). */

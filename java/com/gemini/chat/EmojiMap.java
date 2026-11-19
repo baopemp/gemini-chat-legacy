@@ -49,21 +49,25 @@ public final class EmojiMap {
     /** Loads "emoji\tname" lines. Public for the JVM tests. */
     public static synchronized void load(InputStream in) throws IOException {
         BufferedReader r = new BufferedReader(new InputStreamReader(in, "UTF-8"), 8192);
-        HashMap<String, String> m = new HashMap<String, String>(7000);
-        boolean[] st = new boolean[65536];
-        int ml = 0;
-        String line;
-        while ((line = r.readLine()) != null) {
-            int tab = line.indexOf('\t');
-            if (tab <= 0 || tab == line.length() - 1) continue;
-            String key = line.substring(0, tab);
-            m.put(key, line.substring(tab + 1));
-            st[key.charAt(0)] = true;
-            if (key.length() > ml) ml = key.length();
+        try {
+            HashMap<String, String> m = new HashMap<String, String>(7000);
+            boolean[] st = new boolean[65536];
+            int ml = 0;
+            String line;
+            while ((line = r.readLine()) != null) {
+                int tab = line.indexOf('\t');
+                if (tab <= 0 || tab == line.length() - 1) continue;
+                String key = line.substring(0, tab);
+                m.put(key, line.substring(tab + 1));
+                st[key.charAt(0)] = true;
+                if (key.length() > ml) ml = key.length();
+            }
+            map = m;
+            startUnits = st;
+            maxLen = ml;
+        } finally {
+            r.close();
         }
-        map = m;
-        startUnits = st;
-        maxLen = ml;
     }
 
     public static boolean isLoaded() {

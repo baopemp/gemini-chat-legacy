@@ -51,6 +51,7 @@ final class AutoNamer extends AsyncTask<String, Void, String> {
             RUNNING.add(id);
             new AutoNamer(db, chatId, key, cb).execute(ex[0], ex[1]);
         } catch (Exception ignored) {
+            RUNNING.remove(id);
         }
     }
 

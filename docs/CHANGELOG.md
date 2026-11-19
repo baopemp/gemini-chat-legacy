@@ -4,43 +4,24 @@ All notable changes to the Gemini Chat Legacy Android client are documented here
 
 ---
 
-## v0.8.9 (Latest Release) - VersionCode: 89
+## v0.8.9 - VersionCode: 89
 
-### Gemini 4 Series & Thinking Level Updates (API checked 2026-11-19)
-- Added **`gemini-4-hydrogen`** (free tier) at the top of the Settings → **Model** selector (newest first). Paid Gemini 4 models
-  (`gemini-4-neon`, `gemini-4-carbon`, `gemini-4-argon`) work via **Custom model...**; updated the custom-model hint and validation
-  toast from nonexistent `gemini-3.8-pro` to `gemini-4-neon`.
-- Added **Extra High** (`xhigh`) to Settings → **Thinking level**.
-- Updated `ReplyParser.levelFor` to cover the full 2026-11-19 thinking-level matrix (verified against the live API):
-  - `gemini-4-hydrogen` / `gemini-4-neon`: keeps `xhigh`, maps `minimal` → `low` (Gemini 4 rejects `minimal` with HTTP 400).
-  - `gemini-4-carbon` / `gemini-4-argon`, `gemini-3.8-flash`, `gemini-flash-latest` (now aliases `gemini-3.8-flash` and rejects `minimal` with HTTP 400), `gemini-3.1-pro-*`, `gemini-2.5-*`: maps `minimal` → `low` and clamps `xhigh` → `high`.
-  - `gemini-3-pro-*`: maps `minimal` → `low`, `medium`/`xhigh` → `high`.
-  - `gemini-3.6-flash`, `gemini-3.5-flash-lite`, `gemini-3.1-flash-lite`, `gemini-3-flash-preview`, `gemini-flash-lite-latest`: clamps `xhigh` → `high`, keeps `minimal`.
-  - `gemma-4-*`: maps `minimal`/`low` → `minimal`, `medium`/`high`/`xhigh` → `high`.
-  - Future models (e.g. `gemini-5-*`): passes `xhigh` through unchanged (still falls back once to model default on 400).
-- Fixed Read Aloud on `gemini-3.1-flash-tts-preview`: omits explicit `response_format.mime_type` (`audio/l16`) and `sample_rate` for `gemini-3.1-*` TTS models, which reject explicit `AUDIO_L16` with HTTP 400 while streaming 24 kHz mono `audio/l16` by default when `{"type":"audio"}` is sent. Noted scheduled `gemini-3.1-flash-tts-preview` shutdown (`2026-12-18`) in docs/comments (`gemini-3.8-flash-lite-tts` remains default).
+### Models
+- Added `gemini-4-hydrogen` (free tier) at the top of Settings → Model. Paid Gemini 4 models (`gemini-4-neon`, `gemini-4-carbon`, `gemini-4-argon`) work via Custom model... (updated the custom model hint to `gemini-4-neon`).
+- Added Extra High (`xhigh`) to Settings → Thinking level.
+- Updated thinking-level mapping for Gemini 4, Gemini 3.x, `gemini-flash-latest` (which now aliases `gemini-3.8-flash` and rejects `minimal`), and Gemma 4 so unsupported levels automatically step to the nearest valid level.
 
-### Edge-Case Fixes (Full Codebase Audit)
-- **Fixed `NetworkOnMainThreadException` when cancelling a request on Android 3.0+:** `ChatActivity.cancelTask()` now calls `GeminiTask.disconnectAsync()` on a daemon thread instead of calling `HttpURLConnection.disconnect()` on the UI thread.
-- **Fixed retry partial buffer leakage & stale UI races:** `GeminiTask.doInBackground()` resets `partialText` / `partialThoughts` on retry attempts; `onPostExecute()` returns early if cancelled or finishing; `loadMessages()` clears `streamView = null`.
-- **Fixed destructive action without API key:** `Regenerate` and `Edit → Resend` now verify `hasApiKey()` before deleting or mutating saved SQLite messages.
-- **Fixed inverted `Attach Image` menu guard on API 19+:** `ChatActivity.onPrepareOptionsMenu()` now checks `Build.VERSION.SDK_INT >= 19 || sdMounted()` (matching `ConfigBinder` and SAF on KitKat+), rather than hiding `Attach Image` on API 19+ when no legacy external SD card is mounted.
-- **Fixed Read Aloud lifecycle & menu sync:** `ReadAloud.request()` disconnects `HttpURLConnection` in `finally` on all paths; `play()` guards against concurrent `stopReading()` races before `AudioTrack.play()`; `ChatActivity` stops Read Aloud on Regenerate, Edit → Resend, Live Voice, and Delete Chat, and calls `Compat.invalidateMenu()` when starting/stopping Read Aloud or saving a stopped partial reply.
-- **Fixed Live Voice edge cases:** `LiveActivity.onDestroy()` now saves `finishUserTurn()` before `finishModelTurn(true)` (matching `finish()`); tapping Send while speaking sets `acceptTranscript = false` and skips `tr.audioStreamEnd()` so late transcriber callbacks cannot refill the cleared input box; `LiveSocket` closes pre-assigned raw/TLS sockets in `finally` if proxy CONNECT, TLS handshake, or hostname verification throws.
-- **Fixed resource & state hygiene:** `AutoNamer.maybeStart()` clears `RUNNING` in `catch` if `execute()` throws; `EmojiMap.load()` closes `BufferedReader` in `finally` (`scripts/check_readers.sh` now reports 0 warnings).
+### Read Aloud
+- Fixed Read Aloud on `gemini-3.1-flash-tts-preview` by omitting explicit `audio/l16` / `sample_rate` fields for `gemini-3.1-*` models (which reject explicit `AUDIO_L16` and stream 24 kHz PCM by default).
+- Stopping Read Aloud, deleting a chat, regenerating, editing, or opening Live Voice now cleanly stops active playback and refreshes the menu state.
 
-### Documentation & Repository Hygiene
-- Removed internal AI agent/handoff docs (`AGENTS.md`, `docs/HANDOFF.md`) and unused legacy decompile artifacts (`android_project/original/`), refreshed `README.md` with curated screenshots and feature highlights, and reconciled version numbers, APK size (~153 KB), class names (`AutoNamer`, `ChatActivity.MessageMenu`, `ReadAloud`), and SQLite schema notes across `docs/ARCHITECTURE.md` and `scripts/build_java.sh`.
-
-### Verified
-- **JVM suite (`./tests/run_tests.sh`):** 96/96 classes pass `-Xverify:all`, 120/120 unit tests pass (including full Gemini 4 + `xhigh` matrix, `gemini-flash-latest` `minimal -> low`, and `gemini-3.1-flash-tts-preview` format); all 4 smali audits report 0 issues.
-- **Real Google API (live free-tier key, 2026-11-19):**
-  - REST streaming (`streamGenerateContent?alt=sse`): HTTP 200 across `gemini-3.8-flash` (`high` thinking + thought summaries, clearing previous `Not verified` item), `gemini-3.6-flash`, `gemini-3.5-flash-lite`, `gemini-3.1-flash-lite`, `gemini-3-flash-preview`, `gemini-flash-lite-latest`, `gemma-4-31b-it` (`minimal` & `high` with thoughts), and `gemma-4-26b-a4b-it`. Confirmed `gemini-4-hydrogen` is free tier and rejects `minimal` (HTTP 400) while accepting `low`..`xhigh` (currently under Google free-tier 503/high-demand queuing); confirmed `gemini-4-neon`/`carbon`/`argon` are paid-tier quota-gated (429 on free key); confirmed `gemini-3.8-flash`, `gemini-flash-latest`, and `gemini-3.5-flash-lite` reject `xhigh` (HTTP 400).
-  - Auto-naming (`AutoNamer` on `gemini-3.5-flash-lite`), Image attachment (`inlineData`) + Time Grounding, and all three Read Aloud TTS models (`gemini-3.8-flash-lite-tts`, `gemini-3.8-flash-tts`, `gemini-3.1-flash-tts-preview`, including full `Markdown -> ReadAloud.speakable()` pipeline) verified HTTP 200.
-  - Live Voice (`LiveSession` + `LiveSocket` via `LiveCheck` / `LiveCheck2`): verified `gemini-3.8-live` (text, chat history handoff, PTT spoken audio), `gemini-3.8-live-extended-thinking` (`low`), `gemini-3.1-flash-live-preview`, session resumption (`resume`), and `gemini-3.5-transcribe-live` (`ptt` & `free`).
-- **Android 2.1 (API 7, 240x320, mock):** Settings (`gemini-4-hydrogen` + `Extra High`), streaming + thoughts + auto-naming, Live Voice setup (main + transcriber).
-- **Android 4.4.2 (API 19, 480x800, mock & real API):** Mock verification of Settings, `Attach Image` menu visibility, Stop mid-request with zero `NetworkOnMainThreadException`, `Thought Process (gemini-4-hydrogen)` dialog (`xhigh`), Read Aloud Interactions request, and Live Voice history handoff; live Google API verification over KitKat TLS 1.2 + SNI (`TLSSocketFactory` + `LiveSocket`) covering real `gemini-3.8-live` voice turns + auto-naming and live REST chat streaming + thoughts + Read Aloud.
-- **Android 5.0.2 (API 21, 480x800, mock):** Material Dark Settings (`gemini-4-hydrogen` + `Extra High`), streaming + auto-naming, **5.0+ Material `RippleDrawable` press highlight** verified visually on message rows (clears previous `Not verified` item), long-press `Message Options`, zero crashes or `VerifyError`.
+### Fixes
+- Fixed `NetworkOnMainThreadException` on Android 3.0+ when tapping Stop or leaving a chat mid-request by disconnecting the HTTP stream on a background thread.
+- Fixed the Attach Image menu item being hidden on Android 4.4+ when no legacy external SD card was mounted.
+- Regenerate and Edit → Resend now check that an API key is set before modifying or deleting saved messages.
+- Fixed retry attempts keeping leftover partial text or thoughts from an earlier failed chunk, and guarded against stale UI updates after cancelling or closing a chat.
+- Fixed Live Voice turn-saving order when the screen closes, prevented late speech transcripts from refilling the input box after tapping Send, and closed sockets cleanly on failed TLS/proxy handshakes.
+- Cleaned up internal documentation and unused legacy build files from the repository.
 
 ## v0.8.8 - VersionCode: 88
 

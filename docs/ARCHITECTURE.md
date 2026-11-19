@@ -10,7 +10,7 @@ Gemini Chat is an ultra-lightweight, highly optimized native Android client engi
 - **Target SDK Version:** API 14 (Android 4.0 Ice Cream Sandwich)
 - **Runtime Environment:** Dalvik Virtual Machine (DVM)
 - **Hardware Profile:** Tested and guaranteed to operate smoothly on 256MB RAM legacy smartphones (ARMv5, ARMv6, ARMv7, and x86 architectures).
-- **Zero Heavy Modern Dependencies:** No AndroidX, no Jetpack, no Google Play Services, no Kotlin runtime, no multi-megabyte third-party libraries. The entire app binary is about 153 KB.
+- **Zero Heavy Modern Dependencies:** No AndroidX, no Jetpack, no Google Play Services, no Kotlin runtime, and no multi-megabyte third-party libraries.
 
 ---
 

@@ -64,40 +64,40 @@
     .prologue
     const/4 v7, 0x1
 
-    .line 840
+    .line 940
     iput-object p1, p0, Lcom/gemini/chat/LiveActivity$Player;->this$0:Lcom/gemini/chat/LiveActivity;
 
     invoke-direct {p0}, Ljava/lang/Thread;-><init>()V
 
-    .line 824
+    .line 924
     new-instance v0, Ljava/util/LinkedList;
 
     invoke-direct {v0}, Ljava/util/LinkedList;-><init>()V
 
     iput-object v0, p0, Lcom/gemini/chat/LiveActivity$Player;->queue:Ljava/util/LinkedList;
 
-    .line 826
+    .line 926
     iput-boolean v7, p0, Lcom/gemini/chat/LiveActivity$Player;->running:Z
 
-    .line 827
+    .line 927
     const/4 v0, -0x1
 
     iput v0, p0, Lcom/gemini/chat/LiveActivity$Player;->carry:I
 
-    .line 833
+    .line 933
     const-wide/16 v0, -0x1
 
     iput-wide v0, p0, Lcom/gemini/chat/LiveActivity$Player;->lastHead:J
 
-    .line 841
+    .line 941
     if-eqz p2, :cond_1
 
-    .line 854
+    .line 954
     :cond_0
     :goto_0
     return-void
 
-    .line 843
+    .line 943
     :cond_1
     const/16 v0, 0x5dc0
 
@@ -110,10 +110,10 @@
 
     move-result v5
 
-    .line 845
+    .line 945
     if-lez v5, :cond_0
 
-    .line 846
+    .line 946
     new-instance v0, Landroid/media/AudioTrack;
 
     const/4 v1, 0x3
@@ -126,7 +126,7 @@
 
     const/16 v6, 0x5dc0
 
-    .line 848
+    .line 948
     invoke-static {v5, v6}, Ljava/lang/Math;->max(II)I
 
     move-result v5
@@ -135,7 +135,7 @@
 
     invoke-direct/range {v0 .. v6}, Landroid/media/AudioTrack;-><init>(IIIIII)V
 
-    .line 849
+    .line 949
     invoke-virtual {v0}, Landroid/media/AudioTrack;->getState()I
 
     move-result v1
@@ -146,13 +146,13 @@
 
     goto :goto_0
 
-    .line 852
+    .line 952
     :catch_0
     move-exception v0
 
     goto :goto_0
 
-    .line 850
+    .line 950
     :cond_2
     invoke-virtual {v0}, Landroid/media/AudioTrack;->release()V
     :try_end_0
@@ -167,25 +167,25 @@
     .locals 1
 
     .prologue
-    .line 912
+    .line 1012
     monitor-enter p0
 
-    .line 913
+    .line 1013
     const/4 v0, 0x1
 
     :try_start_0
     iput-boolean v0, p0, Lcom/gemini/chat/LiveActivity$Player;->turnEnded:Z
 
-    .line 914
+    .line 1014
     invoke-virtual {p0}, Ljava/lang/Object;->notifyAll()V
 
-    .line 915
+    .line 1015
     monitor-exit p0
 
-    .line 916
+    .line 1016
     return-void
 
-    .line 915
+    .line 1015
     :catchall_0
     move-exception v0
 
@@ -204,10 +204,10 @@
 
     const/4 v1, 0x0
 
-    .line 861
+    .line 961
     monitor-enter p0
 
-    .line 862
+    .line 962
     :try_start_0
     array-length v3, p1
 
@@ -220,15 +220,15 @@
     :goto_0
     add-int/2addr v2, v3
 
-    .line 863
+    .line 963
     and-int/lit8 v3, v2, -0x2
 
     new-array v3, v3, [B
 
-    .line 864
+    .line 964
     const/4 v4, 0x0
 
-    .line 865
+    .line 965
     iget v5, p0, Lcom/gemini/chat/LiveActivity$Player;->carry:I
 
     if-ltz v5, :cond_5
@@ -243,18 +243,18 @@
 
     aput-byte v1, v3, v4
 
-    .line 866
+    .line 966
     :goto_1
     array-length v1, v3
 
     sub-int/2addr v1, v0
 
-    .line 867
+    .line 967
     const/4 v4, 0x0
 
     invoke-static {p1, v4, v3, v0, v1}, Ljava/lang/System;->arraycopy(Ljava/lang/Object;ILjava/lang/Object;II)V
 
-    .line 868
+    .line 968
     and-int/lit8 v0, v2, 0x1
 
     if-eqz v0, :cond_1
@@ -270,36 +270,36 @@
     :goto_2
     iput v0, p0, Lcom/gemini/chat/LiveActivity$Player;->carry:I
 
-    .line 869
+    .line 969
     array-length v0, v3
 
     if-nez v0, :cond_2
 
     monitor-exit p0
 
-    .line 884
+    .line 984
     :goto_3
     return-void
 
     :cond_0
     move v2, v1
 
-    .line 862
+    .line 962
     goto :goto_0
 
-    .line 868
+    .line 968
     :cond_1
     const/4 v0, -0x1
 
     goto :goto_2
 
-    .line 870
+    .line 970
     :cond_2
     iget-wide v0, p0, Lcom/gemini/chat/LiveActivity$Player;->received:J
 
     iput-wide v0, p0, Lcom/gemini/chat/LiveActivity$Player;->chunkStart:J
 
-    .line 871
+    .line 971
     iget-wide v0, p0, Lcom/gemini/chat/LiveActivity$Player;->received:J
 
     array-length v2, v3
@@ -312,22 +312,22 @@
 
     iput-wide v0, p0, Lcom/gemini/chat/LiveActivity$Player;->received:J
 
-    .line 872
+    .line 972
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Player;->track:Landroid/media/AudioTrack;
 
     if-nez v0, :cond_3
 
-    .line 873
+    .line 973
     iget-wide v0, p0, Lcom/gemini/chat/LiveActivity$Player;->received:J
 
     iput-wide v0, p0, Lcom/gemini/chat/LiveActivity$Player;->written:J
 
-    .line 874
+    .line 974
     monitor-exit p0
 
     goto :goto_3
 
-    .line 883
+    .line 983
     :catchall_0
     move-exception v0
 
@@ -337,7 +337,7 @@
 
     throw v0
 
-    .line 876
+    .line 976
     :cond_3
     :try_start_1
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Player;->queue:Ljava/util/LinkedList;
@@ -358,25 +358,25 @@
 
     if-gtz v0, :cond_4
 
-    .line 877
+    .line 977
     invoke-static {}, Ljava/lang/System;->currentTimeMillis()J
 
     move-result-wide v0
 
     iput-wide v0, p0, Lcom/gemini/chat/LiveActivity$Player;->firstQueuedAt:J
 
-    .line 878
+    .line 978
     const/4 v0, 0x0
 
     iput-boolean v0, p0, Lcom/gemini/chat/LiveActivity$Player;->turnEnded:Z
 
-    .line 880
+    .line 980
     :cond_4
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Player;->queue:Ljava/util/LinkedList;
 
     invoke-virtual {v0, v3}, Ljava/util/LinkedList;->add(Ljava/lang/Object;)Z
 
-    .line 881
+    .line 981
     iget-wide v0, p0, Lcom/gemini/chat/LiveActivity$Player;->queuedFrames:J
 
     array-length v2, v3
@@ -389,10 +389,10 @@
 
     iput-wide v0, p0, Lcom/gemini/chat/LiveActivity$Player;->queuedFrames:J
 
-    .line 882
+    .line 982
     invoke-virtual {p0}, Ljava/lang/Object;->notifyAll()V
 
-    .line 883
+    .line 983
     monitor-exit p0
     :try_end_1
     .catchall {:try_start_1 .. :try_end_1} :catchall_0
@@ -409,33 +409,40 @@
     .locals 2
 
     .prologue
-    .line 920
+    .line 1020
+    iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Player;->this$0:Lcom/gemini/chat/LiveActivity;
+
+    const/4 v1, 0x0
+
+    invoke-static {v0, v1}, Lcom/gemini/chat/LiveActivity;->access$4202(Lcom/gemini/chat/LiveActivity;I)I
+
+    .line 1021
     monitor-enter p0
 
-    .line 921
+    .line 1022
     :try_start_0
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Player;->queue:Ljava/util/LinkedList;
 
     invoke-virtual {v0}, Ljava/util/LinkedList;->clear()V
 
-    .line 922
+    .line 1023
     const-wide/16 v0, 0x0
 
     iput-wide v0, p0, Lcom/gemini/chat/LiveActivity$Player;->queuedFrames:J
 
-    .line 923
+    .line 1024
     iget v0, p0, Lcom/gemini/chat/LiveActivity$Player;->generation:I
 
     add-int/lit8 v0, v0, 0x1
 
     iput v0, p0, Lcom/gemini/chat/LiveActivity$Player;->generation:I
 
-    .line 924
+    .line 1025
     const/4 v0, -0x1
 
     iput v0, p0, Lcom/gemini/chat/LiveActivity$Player;->carry:I
 
-    .line 925
+    .line 1026
     const-wide/16 v0, 0x0
 
     iput-wide v0, p0, Lcom/gemini/chat/LiveActivity$Player;->written:J
@@ -444,30 +451,30 @@
 
     iput-wide v0, p0, Lcom/gemini/chat/LiveActivity$Player;->received:J
 
-    .line 926
+    .line 1027
     const-wide/16 v0, -0x1
 
     iput-wide v0, p0, Lcom/gemini/chat/LiveActivity$Player;->lastHead:J
 
-    .line 927
+    .line 1028
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Player;->track:Landroid/media/AudioTrack;
     :try_end_0
     .catchall {:try_start_0 .. :try_end_0} :catchall_0
 
     if-eqz v0, :cond_0
 
-    .line 929
+    .line 1030
     :try_start_1
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Player;->track:Landroid/media/AudioTrack;
 
     invoke-virtual {v0}, Landroid/media/AudioTrack;->pause()V
 
-    .line 930
+    .line 1031
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Player;->track:Landroid/media/AudioTrack;
 
     invoke-virtual {v0}, Landroid/media/AudioTrack;->flush()V
 
-    .line 931
+    .line 1032
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Player;->track:Landroid/media/AudioTrack;
 
     invoke-virtual {v0}, Landroid/media/AudioTrack;->play()V
@@ -475,7 +482,7 @@
     .catch Ljava/lang/Exception; {:try_start_1 .. :try_end_1} :catch_0
     .catchall {:try_start_1 .. :try_end_1} :catchall_0
 
-    .line 934
+    .line 1035
     :goto_0
     :try_start_2
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Player;->track:Landroid/media/AudioTrack;
@@ -486,14 +493,14 @@
 
     iput v0, p0, Lcom/gemini/chat/LiveActivity$Player;->headAtFlush:I
 
-    .line 936
+    .line 1037
     :cond_0
     monitor-exit p0
 
-    .line 937
+    .line 1038
     return-void
 
-    .line 936
+    .line 1037
     :catchall_0
     move-exception v0
 
@@ -503,7 +510,7 @@
 
     throw v0
 
-    .line 932
+    .line 1033
     :catch_0
     move-exception v0
 
@@ -516,20 +523,20 @@
     .prologue
     const/4 v0, 0x0
 
-    .line 904
+    .line 1004
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity$Player;->track:Landroid/media/AudioTrack;
 
     if-nez v1, :cond_0
 
-    .line 906
+    .line 1006
     :goto_0
     return v0
 
-    .line 905
+    .line 1005
     :cond_0
     monitor-enter p0
 
-    .line 906
+    .line 1006
     :try_start_0
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity$Player;->queue:Ljava/util/LinkedList;
 
@@ -557,7 +564,7 @@
 
     goto :goto_0
 
-    .line 907
+    .line 1007
     :catchall_0
     move-exception v0
 
@@ -572,7 +579,7 @@
     .locals 2
 
     .prologue
-    .line 857
+    .line 957
     monitor-enter p0
 
     :try_start_0
@@ -598,23 +605,23 @@
     .prologue
     const-wide v4, 0xffffffffL
 
-    .line 888
+    .line 988
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Player;->track:Landroid/media/AudioTrack;
 
-    .line 889
+    .line 989
     if-nez v0, :cond_0
 
     const-wide v0, 0x7fffffffffffffffL
 
-    .line 899
+    .line 999
     :goto_0
     return-wide v0
 
-    .line 890
+    .line 990
     :cond_0
     monitor-enter p0
 
-    .line 891
+    .line 991
     :try_start_0
     invoke-virtual {v0}, Landroid/media/AudioTrack;->getPlaybackHeadPosition()I
 
@@ -632,25 +639,25 @@
 
     sub-long/2addr v0, v2
 
-    .line 892
+    .line 992
     invoke-static {}, Ljava/lang/System;->currentTimeMillis()J
 
     move-result-wide v2
 
-    .line 893
+    .line 993
     iget-wide v4, p0, Lcom/gemini/chat/LiveActivity$Player;->lastHead:J
 
     cmp-long v4, v0, v4
 
     if-eqz v4, :cond_2
 
-    .line 894
+    .line 994
     iput-wide v0, p0, Lcom/gemini/chat/LiveActivity$Player;->lastHead:J
 
-    .line 895
+    .line 995
     iput-wide v2, p0, Lcom/gemini/chat/LiveActivity$Player;->lastMove:J
 
-    .line 899
+    .line 999
     :cond_1
     iget-wide v2, p0, Lcom/gemini/chat/LiveActivity$Player;->written:J
 
@@ -662,7 +669,7 @@
 
     goto :goto_0
 
-    .line 900
+    .line 1000
     :catchall_0
     move-exception v0
 
@@ -672,7 +679,7 @@
 
     throw v0
 
-    .line 896
+    .line 996
     :cond_2
     :try_start_1
     iget-wide v4, p0, Lcom/gemini/chat/LiveActivity$Player;->written:J
@@ -691,7 +698,7 @@
 
     if-lez v2, :cond_1
 
-    .line 897
+    .line 997
     iget-wide v0, p0, Lcom/gemini/chat/LiveActivity$Player;->written:J
 
     monitor-exit p0
@@ -702,28 +709,33 @@
 .end method
 
 .method quit()V
-    .locals 1
+    .locals 2
 
     .prologue
-    .line 940
-    const/4 v0, 0x0
+    const/4 v1, 0x0
 
-    iput-boolean v0, p0, Lcom/gemini/chat/LiveActivity$Player;->running:Z
+    .line 1041
+    iput-boolean v1, p0, Lcom/gemini/chat/LiveActivity$Player;->running:Z
 
-    .line 941
+    .line 1042
+    iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Player;->this$0:Lcom/gemini/chat/LiveActivity;
+
+    invoke-static {v0, v1}, Lcom/gemini/chat/LiveActivity;->access$4202(Lcom/gemini/chat/LiveActivity;I)I
+
+    .line 1043
     monitor-enter p0
 
-    .line 942
+    .line 1044
     :try_start_0
     invoke-virtual {p0}, Ljava/lang/Object;->notifyAll()V
 
-    .line 943
+    .line 1045
     monitor-exit p0
 
-    .line 944
+    .line 1046
     return-void
 
-    .line 943
+    .line 1045
     :catchall_0
     move-exception v0
 
@@ -735,33 +747,44 @@
 .end method
 
 .method public run()V
-    .locals 6
+    .locals 8
 
     .prologue
-    .line 947
+    const/4 v2, 0x0
+
+    .line 1049
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Player;->track:Landroid/media/AudioTrack;
 
     if-nez v0, :cond_0
 
-    .line 990
+    .line 1101
     :goto_0
     return-void
 
-    .line 949
+    .line 1051
     :cond_0
+    const/16 v0, -0x10
+
     :try_start_0
+    invoke-static {v0}, Landroid/os/Process;->setThreadPriority(I)V
+    :try_end_0
+    .catch Ljava/lang/Throwable; {:try_start_0 .. :try_end_0} :catch_1
+
+    .line 1055
+    :goto_1
+    :try_start_1
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Player;->track:Landroid/media/AudioTrack;
 
     invoke-virtual {v0}, Landroid/media/AudioTrack;->play()V
 
-    .line 950
+    .line 1056
     monitor-enter p0
-    :try_end_0
-    .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_0
-    .catchall {:try_start_0 .. :try_end_0} :catchall_2
+    :try_end_1
+    .catch Ljava/lang/Exception; {:try_start_1 .. :try_end_1} :catch_0
+    .catchall {:try_start_1 .. :try_end_1} :catchall_2
 
-    .line 951
-    :try_start_1
+    .line 1057
+    :try_start_2
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Player;->track:Landroid/media/AudioTrack;
 
     invoke-virtual {v0}, Landroid/media/AudioTrack;->getPlaybackHeadPosition()I
@@ -770,27 +793,27 @@
 
     iput v0, p0, Lcom/gemini/chat/LiveActivity$Player;->headAtFlush:I
 
-    .line 952
+    .line 1058
     monitor-exit p0
-    :try_end_1
-    .catchall {:try_start_1 .. :try_end_1} :catchall_1
+    :try_end_2
+    .catchall {:try_start_2 .. :try_end_2} :catchall_1
 
-    .line 953
-    :goto_1
-    :try_start_2
+    .line 1059
+    :goto_2
+    :try_start_3
     iget-boolean v0, p0, Lcom/gemini/chat/LiveActivity$Player;->running:Z
 
     if-eqz v0, :cond_2
 
-    .line 956
+    .line 1062
     monitor-enter p0
-    :try_end_2
-    .catch Ljava/lang/Exception; {:try_start_2 .. :try_end_2} :catch_0
-    .catchall {:try_start_2 .. :try_end_2} :catchall_2
+    :try_end_3
+    .catch Ljava/lang/Exception; {:try_start_3 .. :try_end_3} :catch_0
+    .catchall {:try_start_3 .. :try_end_3} :catchall_2
 
-    .line 957
-    :goto_2
-    :try_start_3
+    .line 1063
+    :goto_3
+    :try_start_4
     iget-boolean v0, p0, Lcom/gemini/chat/LiveActivity$Player;->running:Z
 
     if-eqz v0, :cond_1
@@ -803,128 +826,150 @@
 
     if-eqz v0, :cond_1
 
+    .line 1064
+    iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Player;->this$0:Lcom/gemini/chat/LiveActivity;
+
+    const/4 v1, 0x0
+
+    invoke-static {v0, v1}, Lcom/gemini/chat/LiveActivity;->access$4202(Lcom/gemini/chat/LiveActivity;I)I
+
+    .line 1065
     const-wide/16 v0, 0xc8
 
     invoke-virtual {p0, v0, v1}, Ljava/lang/Object;->wait(J)V
 
-    goto :goto_2
+    goto :goto_3
 
-    .line 968
+    .line 1077
     :catchall_0
     move-exception v0
 
     monitor-exit p0
-    :try_end_3
-    .catchall {:try_start_3 .. :try_end_3} :catchall_0
-
-    :try_start_4
-    throw v0
     :try_end_4
-    .catch Ljava/lang/Exception; {:try_start_4 .. :try_end_4} :catch_0
-    .catchall {:try_start_4 .. :try_end_4} :catchall_2
+    .catchall {:try_start_4 .. :try_end_4} :catchall_0
 
-    .line 982
+    :try_start_5
+    throw v0
+    :try_end_5
+    .catch Ljava/lang/Exception; {:try_start_5 .. :try_end_5} :catch_0
+    .catchall {:try_start_5 .. :try_end_5} :catchall_2
+
+    .line 1092
     :catch_0
     move-exception v0
 
-    .line 985
-    :try_start_5
+    .line 1094
+    iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Player;->this$0:Lcom/gemini/chat/LiveActivity;
+
+    invoke-static {v0, v2}, Lcom/gemini/chat/LiveActivity;->access$4202(Lcom/gemini/chat/LiveActivity;I)I
+
+    .line 1096
+    :try_start_6
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Player;->track:Landroid/media/AudioTrack;
 
     invoke-virtual {v0}, Landroid/media/AudioTrack;->stop()V
-    :try_end_5
-    .catch Ljava/lang/Exception; {:try_start_5 .. :try_end_5} :catch_2
+    :try_end_6
+    .catch Ljava/lang/Exception; {:try_start_6 .. :try_end_6} :catch_3
 
-    .line 988
-    :goto_3
+    .line 1099
+    :goto_4
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Player;->track:Landroid/media/AudioTrack;
 
     invoke-virtual {v0}, Landroid/media/AudioTrack;->release()V
 
     goto :goto_0
 
-    .line 952
+    .line 1058
     :catchall_1
     move-exception v0
 
-    :try_start_6
-    monitor-exit p0
-    :try_end_6
-    .catchall {:try_start_6 .. :try_end_6} :catchall_1
-
     :try_start_7
-    throw v0
+    monitor-exit p0
     :try_end_7
-    .catch Ljava/lang/Exception; {:try_start_7 .. :try_end_7} :catch_0
-    .catchall {:try_start_7 .. :try_end_7} :catchall_2
+    .catchall {:try_start_7 .. :try_end_7} :catchall_1
 
-    .line 984
+    :try_start_8
+    throw v0
+    :try_end_8
+    .catch Ljava/lang/Exception; {:try_start_8 .. :try_end_8} :catch_0
+    .catchall {:try_start_8 .. :try_end_8} :catchall_2
+
+    .line 1094
     :catchall_2
     move-exception v0
 
-    .line 985
-    :try_start_8
+    iget-object v1, p0, Lcom/gemini/chat/LiveActivity$Player;->this$0:Lcom/gemini/chat/LiveActivity;
+
+    invoke-static {v1, v2}, Lcom/gemini/chat/LiveActivity;->access$4202(Lcom/gemini/chat/LiveActivity;I)I
+
+    .line 1096
+    :try_start_9
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity$Player;->track:Landroid/media/AudioTrack;
 
     invoke-virtual {v1}, Landroid/media/AudioTrack;->stop()V
-    :try_end_8
-    .catch Ljava/lang/Exception; {:try_start_8 .. :try_end_8} :catch_1
+    :try_end_9
+    .catch Ljava/lang/Exception; {:try_start_9 .. :try_end_9} :catch_2
 
-    .line 988
-    :goto_4
+    .line 1099
+    :goto_5
     iget-object v1, p0, Lcom/gemini/chat/LiveActivity$Player;->track:Landroid/media/AudioTrack;
 
     invoke-virtual {v1}, Landroid/media/AudioTrack;->release()V
 
-    .line 989
+    .line 1100
     throw v0
 
-    .line 958
+    .line 1067
     :cond_1
-    :try_start_9
+    :try_start_a
     iget-boolean v0, p0, Lcom/gemini/chat/LiveActivity$Player;->running:Z
 
     if-nez v0, :cond_3
 
     monitor-exit p0
-    :try_end_9
-    .catchall {:try_start_9 .. :try_end_9} :catchall_0
+    :try_end_a
+    .catchall {:try_start_a .. :try_end_a} :catchall_0
 
-    .line 985
+    .line 1094
     :cond_2
-    :try_start_a
+    iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Player;->this$0:Lcom/gemini/chat/LiveActivity;
+
+    invoke-static {v0, v2}, Lcom/gemini/chat/LiveActivity;->access$4202(Lcom/gemini/chat/LiveActivity;I)I
+
+    .line 1096
+    :try_start_b
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Player;->track:Landroid/media/AudioTrack;
 
     invoke-virtual {v0}, Landroid/media/AudioTrack;->stop()V
-    :try_end_a
-    .catch Ljava/lang/Exception; {:try_start_a .. :try_end_a} :catch_3
+    :try_end_b
+    .catch Ljava/lang/Exception; {:try_start_b .. :try_end_b} :catch_4
 
-    .line 988
-    :goto_5
+    .line 1099
+    :goto_6
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Player;->track:Landroid/media/AudioTrack;
 
     invoke-virtual {v0}, Landroid/media/AudioTrack;->release()V
 
     goto :goto_0
 
-    .line 960
+    .line 1069
     :cond_3
-    :try_start_b
+    :try_start_c
     iget-wide v0, p0, Lcom/gemini/chat/LiveActivity$Player;->written:J
 
     invoke-virtual {p0}, Lcom/gemini/chat/LiveActivity$Player;->playedFrames()J
 
-    move-result-wide v2
+    move-result-wide v4
 
-    cmp-long v0, v0, v2
+    cmp-long v0, v0, v4
 
     if-gtz v0, :cond_4
 
     iget-wide v0, p0, Lcom/gemini/chat/LiveActivity$Player;->queuedFrames:J
 
-    const-wide/16 v2, 0x1c20
+    const-wide/16 v4, 0x1c20
 
-    cmp-long v0, v0, v2
+    cmp-long v0, v0, v4
 
     if-gez v0, :cond_4
 
@@ -932,32 +977,32 @@
 
     if-nez v0, :cond_4
 
-    .line 961
+    .line 1070
     invoke-static {}, Ljava/lang/System;->currentTimeMillis()J
 
     move-result-wide v0
 
-    iget-wide v2, p0, Lcom/gemini/chat/LiveActivity$Player;->firstQueuedAt:J
+    iget-wide v4, p0, Lcom/gemini/chat/LiveActivity$Player;->firstQueuedAt:J
 
-    sub-long/2addr v0, v2
+    sub-long/2addr v0, v4
 
-    const-wide/16 v2, 0x258
+    const-wide/16 v4, 0x258
 
-    cmp-long v0, v0, v2
+    cmp-long v0, v0, v4
 
     if-gez v0, :cond_4
 
-    .line 962
+    .line 1071
     const-wide/16 v0, 0x1e
 
     invoke-virtual {p0, v0, v1}, Ljava/lang/Object;->wait(J)V
 
-    .line 963
+    .line 1072
     monitor-exit p0
 
-    goto :goto_1
+    goto/16 :goto_2
 
-    .line 965
+    .line 1074
     :cond_4
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Player;->queue:Ljava/util/LinkedList;
 
@@ -967,134 +1012,152 @@
 
     check-cast v0, [B
 
-    .line 966
-    iget-wide v2, p0, Lcom/gemini/chat/LiveActivity$Player;->queuedFrames:J
+    .line 1075
+    iget-wide v4, p0, Lcom/gemini/chat/LiveActivity$Player;->queuedFrames:J
 
     array-length v1, v0
 
     div-int/lit8 v1, v1, 0x2
 
-    int-to-long v4, v1
+    int-to-long v6, v1
 
-    sub-long/2addr v2, v4
+    sub-long/2addr v4, v6
 
-    iput-wide v2, p0, Lcom/gemini/chat/LiveActivity$Player;->queuedFrames:J
+    iput-wide v4, p0, Lcom/gemini/chat/LiveActivity$Player;->queuedFrames:J
 
-    .line 967
-    iget v2, p0, Lcom/gemini/chat/LiveActivity$Player;->generation:I
+    .line 1076
+    iget v3, p0, Lcom/gemini/chat/LiveActivity$Player;->generation:I
 
-    .line 968
+    .line 1077
     monitor-exit p0
-    :try_end_b
-    .catchall {:try_start_b .. :try_end_b} :catchall_0
+    :try_end_c
+    .catchall {:try_start_c .. :try_end_c} :catchall_0
 
-    .line 969
-    const/4 v1, 0x0
+    .line 1078
+    :try_start_d
+    iget-object v1, p0, Lcom/gemini/chat/LiveActivity$Player;->this$0:Lcom/gemini/chat/LiveActivity;
 
-    .line 970
-    :goto_6
-    :try_start_c
-    array-length v3, v0
+    const/4 v4, 0x0
 
-    if-ge v1, v3, :cond_5
+    array-length v5, v0
 
-    iget-boolean v3, p0, Lcom/gemini/chat/LiveActivity$Player;->running:Z
+    invoke-static {v0, v4, v5}, Lcom/gemini/chat/LiveActivity;->pcmLevel([BII)I
 
-    if-eqz v3, :cond_5
+    move-result v4
 
-    .line 971
-    iget-object v3, p0, Lcom/gemini/chat/LiveActivity$Player;->track:Landroid/media/AudioTrack;
+    invoke-static {v1, v4}, Lcom/gemini/chat/LiveActivity;->access$4202(Lcom/gemini/chat/LiveActivity;I)I
 
+    move v1, v2
+
+    .line 1080
+    :goto_7
     array-length v4, v0
 
-    sub-int/2addr v4, v1
+    if-ge v1, v4, :cond_5
 
-    invoke-virtual {v3, v0, v1, v4}, Landroid/media/AudioTrack;->write([BII)I
+    iget-boolean v4, p0, Lcom/gemini/chat/LiveActivity$Player;->running:Z
 
-    move-result v3
+    if-eqz v4, :cond_5
 
-    .line 972
-    if-gtz v3, :cond_8
+    .line 1081
+    iget-object v4, p0, Lcom/gemini/chat/LiveActivity$Player;->track:Landroid/media/AudioTrack;
 
-    .line 975
+    array-length v5, v0
+
+    sub-int/2addr v5, v1
+
+    invoke-virtual {v4, v0, v1, v5}, Landroid/media/AudioTrack;->write([BII)I
+
+    move-result v4
+
+    .line 1082
+    if-gtz v4, :cond_8
+
+    .line 1085
     :cond_5
     monitor-enter p0
-    :try_end_c
-    .catch Ljava/lang/Exception; {:try_start_c .. :try_end_c} :catch_0
-    .catchall {:try_start_c .. :try_end_c} :catchall_2
+    :try_end_d
+    .catch Ljava/lang/Exception; {:try_start_d .. :try_end_d} :catch_0
+    .catchall {:try_start_d .. :try_end_d} :catchall_2
 
-    .line 976
-    :try_start_d
+    .line 1086
+    :try_start_e
     iget v0, p0, Lcom/gemini/chat/LiveActivity$Player;->generation:I
 
-    if-ne v2, v0, :cond_7
+    if-ne v3, v0, :cond_7
 
-    .line 977
-    iget-wide v2, p0, Lcom/gemini/chat/LiveActivity$Player;->written:J
+    .line 1087
+    iget-wide v4, p0, Lcom/gemini/chat/LiveActivity$Player;->written:J
 
-    iget-wide v4, p0, Lcom/gemini/chat/LiveActivity$Player;->lastHead:J
+    iget-wide v6, p0, Lcom/gemini/chat/LiveActivity$Player;->lastHead:J
 
-    cmp-long v0, v2, v4
+    cmp-long v0, v4, v6
 
     if-gtz v0, :cond_6
 
     invoke-static {}, Ljava/lang/System;->currentTimeMillis()J
 
-    move-result-wide v2
+    move-result-wide v4
 
-    iput-wide v2, p0, Lcom/gemini/chat/LiveActivity$Player;->lastMove:J
+    iput-wide v4, p0, Lcom/gemini/chat/LiveActivity$Player;->lastMove:J
 
-    .line 978
+    .line 1088
     :cond_6
-    iget-wide v2, p0, Lcom/gemini/chat/LiveActivity$Player;->written:J
+    iget-wide v4, p0, Lcom/gemini/chat/LiveActivity$Player;->written:J
 
     div-int/lit8 v0, v1, 0x2
 
     int-to-long v0, v0
 
-    add-long/2addr v0, v2
+    add-long/2addr v0, v4
 
     iput-wide v0, p0, Lcom/gemini/chat/LiveActivity$Player;->written:J
 
-    .line 980
+    .line 1090
     :cond_7
     monitor-exit p0
 
-    goto/16 :goto_1
+    goto/16 :goto_2
 
     :catchall_3
     move-exception v0
 
     monitor-exit p0
-    :try_end_d
-    .catchall {:try_start_d .. :try_end_d} :catchall_3
-
-    :try_start_e
-    throw v0
     :try_end_e
-    .catch Ljava/lang/Exception; {:try_start_e .. :try_end_e} :catch_0
-    .catchall {:try_start_e .. :try_end_e} :catchall_2
+    .catchall {:try_start_e .. :try_end_e} :catchall_3
 
-    .line 973
+    :try_start_f
+    throw v0
+    :try_end_f
+    .catch Ljava/lang/Exception; {:try_start_f .. :try_end_f} :catch_0
+    .catchall {:try_start_f .. :try_end_f} :catchall_2
+
+    .line 1083
     :cond_8
-    add-int/2addr v1, v3
+    add-int/2addr v1, v4
 
-    .line 974
-    goto :goto_6
+    .line 1084
+    goto :goto_7
 
-    .line 986
+    .line 1052
     :catch_1
-    move-exception v1
-
-    goto/16 :goto_4
-
-    :catch_2
     move-exception v0
 
-    goto/16 :goto_3
+    goto/16 :goto_1
+
+    .line 1097
+    :catch_2
+    move-exception v1
+
+    goto/16 :goto_5
 
     :catch_3
     move-exception v0
 
-    goto :goto_5
+    goto/16 :goto_4
+
+    :catch_4
+    move-exception v0
+
+    goto/16 :goto_6
 .end method

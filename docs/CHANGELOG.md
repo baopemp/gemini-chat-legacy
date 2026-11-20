@@ -4,6 +4,26 @@ All notable changes to the Gemini Chat Legacy Android client are documented here
 
 ---
 
+## v0.9.0 - VersionCode: 90
+
+### Visual Polish
+- Added a pure-Canvas Gemini sparkle welcome screen in empty chats showing the active model and thinking level.
+- Added an immediate animated Thinking indicator (`Thinking.`, `..`, `...`) while waiting for the first token and a live green streaming cursor (`▍`) while replies stream in.
+- Added an inline Read Aloud bar with a green accent stripe and one-tap Stop button above the input row.
+- Added a 12-segment Canvas audio level meter under the status line in Live Voice.
+- Refined message headers with bold role labels and muted metadata, added crisp left accent borders and bold language tags to code blocks, and added a gentle fade-in on newly appended live messages.
+
+### Fixes & Behavior
+- Regenerate (on a user or model message), Retry (on an error), and Edit -> Resend now update the preceding user message timestamp in SQLite and in the chat view to reflect the latest generation date.
+- Switching Settings -> Model (or typing a custom model ID) to any model without `xhigh` support now snaps Thinking level back to High automatically and updates the inline hint (`gemini-4-hydrogen` and `gemini-4-neon` retain Extra High).
+- Hardened retry behavior for `gemini-4-hydrogen` high-demand `503` spikes: high-demand/overloaded `503` responses now cap at 1 jittered retry (~4.5 to 5.5 s, honoring `Retry-After`), `429` is never retried, and final `503`/`429` messages include clear recovery tips.
+
+### Performance & Weak-Phone Stability
+- Eliminated O(N^2) String copying during SSE streaming by snapshotting the active parser only on UI refresh ticks or Stop, with adaptive refresh intervals (250 ms to 850 ms) for long replies on single-core CPUs.
+- Offloaded picked image decoding and Base64 conversion to a background task so attaching photos no longer freezes the UI thread.
+- Switched decoded image thumbnails to `RGB_565` with a bounded 12-item LRU cache (cleared on low memory) and a lookup-table Base64 decoder.
+- Added `idx_messages_chat(chat_id, id)` index on SQLite open/create, replaced full-table scans with `LIMIT 1` queries, preloaded `emoji.tsv` asynchronously at low priority, cached `SimpleDateFormat` and Markdown measure paints, and added an ASCII batch fast-path in the Markdown renderer.
+
 ## v0.8.9 - VersionCode: 89
 
 ### Models

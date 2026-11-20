@@ -69,30 +69,47 @@ public final class ReplyParser {
     }
 
     /**
+     * Whether a model accepts thinkingLevel "xhigh" (ai.google.dev thinking docs, 2026-11-20):
+     * Gemini 4 Hydrogen and Gemini 4 Neon support xhigh (as may unknown future generations);
+     * Gemini 4 Carbon/Argon, Gemini 3.x/2.x, flash/pro aliases, robotics, and Gemma cap at high.
+     */
+    public static boolean supportsXhigh(String model) {
+        if (model == null) return true;
+        String m = model.trim().toLowerCase();
+        if (m.startsWith("models/")) m = m.substring(7);
+        if (m.length() == 0) return true;
+        if (m.startsWith("gemma-")) return false;
+        if (m.startsWith("gemini-4-carbon") || m.startsWith("gemini-4-argon")) return false;
+        if (m.startsWith("gemini-3") || m.startsWith("gemini-2")) return false;
+        if (m.startsWith("gemini-flash-") || m.startsWith("gemini-pro-")) return false;
+        if (m.startsWith("gemini-robotics-")) return false;
+        return true;
+    }
+
+    /**
      * thinkingConfig.thinkingLevel for a model, or null for the model's default. Levels a model doesn't accept are moved
-     * to the nearest one it does (ai.google.dev thinking docs, 2026-11-19):
+     * to the nearest one it does (ai.google.dev thinking docs, 2026-11-20):
      * - Gemma 4: only "minimal" (off) or "high".
      * - Gemini 4 Hydrogen / Neon: low, medium, high, xhigh (no minimal).
      * - Gemini 4 Carbon / Argon, 3.8 Flash, gemini-flash-latest, 3.1 Pro, 2.5: low, medium, high (no minimal, no xhigh).
      * - Gemini 3 Pro: low, high (no minimal, medium, xhigh).
-     * - Gemini 3.6 Flash, 3.5/3.1 Flash-Lite, 3 Flash, gemini-flash-lite-latest: minimal, low, medium, high (no xhigh).
+     * - Gemini 3.6 Flash, 3.5/3.1 Flash-Lite, 3 Flash, gemini-flash-lite-latest, robotics: minimal, low, medium, high (no xhigh).
      */
     public static String levelFor(String model, String level) {
         if (level == null || level.length() == 0) return null;
         if (model == null) return level;
-        if (model.startsWith("gemma-")) {
+        String m = model.trim().toLowerCase();
+        if (m.startsWith("models/")) m = m.substring(7);
+        if (m.startsWith("gemma-")) {
             return "minimal".equals(level) || "low".equals(level) ? "minimal" : "high";
         }
-        boolean noXhigh = model.startsWith("gemini-4-carbon") || model.startsWith("gemini-4-argon")
-                || model.startsWith("gemini-3") || model.startsWith("gemini-2")
-                || model.startsWith("gemini-flash-") || model.startsWith("gemini-pro-");
-        if ("xhigh".equals(level) && noXhigh) level = "high";
-        boolean noMinimal = model.startsWith("gemini-4-") || model.startsWith("gemini-3.8-flash")
-                || "gemini-flash-latest".equals(model)
-                || model.startsWith("gemini-3.1-pro") || model.startsWith("gemini-3-pro")
-                || model.startsWith("gemini-2.5-");
+        if ("xhigh".equals(level) && !supportsXhigh(m)) level = "high";
+        boolean noMinimal = m.startsWith("gemini-4-") || m.startsWith("gemini-3.8-flash")
+                || "gemini-flash-latest".equals(m)
+                || m.startsWith("gemini-3.1-pro") || m.startsWith("gemini-3-pro")
+                || m.startsWith("gemini-2.5-");
         if ("minimal".equals(level) && noMinimal) level = "low";
-        if ("medium".equals(level) && model.startsWith("gemini-3-pro")) level = "high";
+        if ("medium".equals(level) && m.startsWith("gemini-3-pro")) level = "high";
         return level;
     }
 }

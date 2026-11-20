@@ -33,6 +33,8 @@ import android.widget.TextView;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 /**
  * Builds the styled text and the row style of one chat message (replaces the old
@@ -59,11 +61,13 @@ public final class MessageFormatter {
     static final int CODE_FG = 0xFFFDD663;
     static final int CODE_BG = 0xFF2E3134;
     static final int BLOCK_BG = 0xFF1E1F21;
+    static final int BLOCK_BORDER = 0xFF5F6368;
     static final int BLOCK_FG = 0xFFE8EAED;
     static final int QUOTE_BAR = 0xFF5F6368;
     static final int QUOTE_FG = 0xFFBDC1C6;
     static final int RULE = 0xFF3C4043;
     static final int EMOJI_FG = 0xFFF6AE2D;
+    static final int HEADER_META = 0xFF9AA0A6;
 
     /** Message text size in sp (Settings > Text size; 14 = Normal). Set by applyPrefs(). */
     static float TEXT_SP = 14f;
@@ -79,6 +83,62 @@ public final class MessageFormatter {
     private MessageFormatter() {
     }
 
+    private static SimpleDateFormat cachedTsFmt;
+    private static Locale cachedTsLocale;
+    private static TimeZone cachedTsTz;
+    private static final Date cachedDate = new Date();
+
+    private static int cachedGridWidth = -1, cachedGridChars = 30;
+    private static float cachedGridDensity = -1f, cachedGridScaled = -1f, cachedGridSp = -1f;
+    private static Paint cachedMeasure, cachedMeasureTask;
+    private static float cachedMeasureSize = -1f;
+
+    /** Reuses a single SimpleDateFormat on weak phones while tracking locale/timezone changes. */
+    private static synchronized String formatTimestamp(long ts) {
+        Locale loc = Locale.getDefault();
+        TimeZone tz = TimeZone.getDefault();
+        if (cachedTsFmt == null || !loc.equals(cachedTsLocale) || !tz.equals(cachedTsTz)) {
+            cachedTsFmt = new SimpleDateFormat("HH:mm:ss, dd/MM/yyyy", loc);
+            cachedTsFmt.setTimeZone(tz);
+            cachedTsLocale = loc;
+            cachedTsTz = tz;
+        }
+        cachedDate.setTime(ts);
+        return cachedTsFmt.format(cachedDate);
+    }
+
+    /** Appends a role header where the role label pops in bold accent and the parenthetical metadata is refined. */
+    private static void appendHeader(SpannableStringBuilder out, String role, String model, long timestamp) {
+        int hs = out.length();
+        String label;
+        String meta = null;
+        if ("user".equals(role)) {
+            long ts = timestamp > 0 ? timestamp : System.currentTimeMillis();
+            label = "User";
+            meta = " (" + formatTimestamp(ts) + "):";
+        } else if ("model".equals(role)) {
+            label = "Model";
+            meta = model != null && model.length() > 0 && !"null".equals(model) ? " (" + model + "):" : ":";
+        } else {
+            label = "System:";
+        }
+        out.append(label);
+        set(out, new StyleSpan(Typeface.BOLD), hs, out.length());
+        set(out, new ForegroundColorSpan(roleColor(role)), hs, out.length());
+        if (meta != null) {
+            int ms = out.length();
+            out.append(meta);
+            if (meta.length() > 1) {
+                set(out, new RelativeSizeSpan(0.88f), ms, out.length());
+                set(out, new ForegroundColorSpan(HEADER_META), ms, out.length());
+            } else {
+                set(out, new StyleSpan(Typeface.BOLD), ms, out.length());
+                set(out, new ForegroundColorSpan(roleColor(role)), ms, out.length());
+            }
+        }
+        out.append('\n');
+    }
+
     /**
      * Header + rendered body. Fenced code blocks are added to codeBlocksOut (for "Copy Code Block N").
      * For user messages, `model` holds the inline image data URI when an image was attached.
@@ -91,21 +151,7 @@ public final class MessageFormatter {
         float sp = dm.scaledDensity;
         SpannableStringBuilder out = new SpannableStringBuilder();
 
-        // ---- header line (same wording as before 0.8.5)
-        String header;
-        if ("user".equals(role)) {
-            long ts = timestamp > 0 ? timestamp : System.currentTimeMillis();
-            header = "User (" + new SimpleDateFormat("HH:mm:ss, dd/MM/yyyy").format(new Date(ts)) + "):";
-        } else if ("model".equals(role)) {
-            header = model != null && model.length() > 0 && !"null".equals(model) ? "Model (" + model + "):" : "Model:";
-        } else {
-            header = "System:";
-        }
-        int hs = out.length();
-        out.append(header);
-        set(out, new StyleSpan(Typeface.BOLD), hs, out.length());
-        set(out, new ForegroundColorSpan(roleColor(role)), hs, out.length());
-        out.append('\n');
+        appendHeader(out, role, model, timestamp);
 
         // ---- attachment: small preview (max 120 dp), text marker if it can't be decoded
         if ("user".equals(role) && model != null && model.startsWith("data:image/")) {
@@ -130,19 +176,36 @@ public final class MessageFormatter {
         return out;
     }
 
-    /** How many monospace table characters fit in a full-width bubble on this screen. */
+    /** Live-streaming reply: formatted answer with a subtle green cursor glyph at the tail. */
+    public static CharSequence formatStreaming(Context ctx, String model, String text) {
+        SpannableStringBuilder out = (SpannableStringBuilder) format(ctx, "model", model, text, 0L, null);
+        int cs = out.length();
+        out.append(" \u258E");
+        set(out, new ForegroundColorSpan(ROLE_MODEL), cs, out.length());
+        return out;
+    }
+
+    /** How many monospace table characters fit in a full-width bubble on this screen (cached). */
     static int gridChars(DisplayMetrics dm) {
+        if (dm.widthPixels == cachedGridWidth && dm.density == cachedGridDensity
+                && dm.scaledDensity == cachedGridScaled && TEXT_SP == cachedGridSp) {
+            return cachedGridChars;
+        }
         float avail = dm.widthPixels - (10 + 10 + 10 + 10 + 4) * dm.density;
         Paint p = new Paint();
         p.setTypeface(Typeface.MONOSPACE);
         p.setTextSize(TEXT_SP * TABLE_SCALE * dm.scaledDensity);
         float w = p.measureText("0");
-        return w > 0 ? Math.max(12, (int) (avail / w)) : 30;
+        cachedGridChars = w > 0 ? Math.max(12, (int) (avail / w)) : 30;
+        cachedGridWidth = dm.widthPixels;
+        cachedGridDensity = dm.density;
+        cachedGridScaled = dm.scaledDensity;
+        cachedGridSp = TEXT_SP;
+        return cachedGridChars;
     }
 
     static final float TABLE_SCALE = 0.85f;
 
-    /** Applies a Markdown.Doc as Android spans at the end of `out`. */
     /** Markdown body only (no header): the "Thought Process" dialog. */
     public static CharSequence formatBody(Context ctx, String text) {
         EmojiMap.ensureLoaded(ctx);
@@ -152,20 +215,22 @@ public final class MessageFormatter {
         return out;
     }
 
-    /** A reply that is still thinking: header, "Thinking...", then the streamed thought summary, dimmed. */
+    /** A reply that is still thinking: header, animated "Thinking . / .. / ...", then the streamed thought summary. */
     public static CharSequence formatThinking(Context ctx, String model, String thoughts) {
+        return formatWaiting(ctx, model, thoughts, 3);
+    }
+
+    public static CharSequence formatWaiting(Context ctx, String model, String thoughts, int dots) {
         EmojiMap.ensureLoaded(ctx);
         DisplayMetrics dm = ctx.getResources().getDisplayMetrics();
         SpannableStringBuilder out = new SpannableStringBuilder();
-        String header = model != null && model.length() > 0 ? "Model (" + model + "):" : "Model:";
-        out.append(header);
-        set(out, new StyleSpan(Typeface.BOLD), 0, out.length());
-        set(out, new ForegroundColorSpan(ROLE_MODEL), 0, out.length());
-        out.append('\n');
+        appendHeader(out, "model", model, 0L);
         int s = out.length();
-        out.append("Thinking...");
+        int n = Math.max(1, Math.min(3, dots));
+        out.append("Thinking");
+        for (int i = 0; i < n; i++) out.append('.');
         set(out, new StyleSpan(Typeface.ITALIC), s, out.length());
-        set(out, new ForegroundColorSpan(TEXT_MUTED), s, out.length());
+        set(out, new ForegroundColorSpan(ROLE_MODEL), s, out.length());
         if (thoughts != null && thoughts.trim().length() > 0) {
             out.append('\n');
             int b = out.length();
@@ -178,13 +243,7 @@ public final class MessageFormatter {
     static void appendDoc(SpannableStringBuilder out, Markdown.Doc doc, float density, float scaledDensity) {
         int base = out.length();
         out.append(doc.text);
-        // markers are drawn bold (bullets/numbers) or monospace (task boxes); measure the same way so the
-        // hanging indent lines up exactly at every density / font scale
-        Paint measure = new Paint(Paint.ANTI_ALIAS_FLAG);
-        measure.setTextSize(TEXT_SP * scaledDensity);
-        Paint measureTask = new Paint(measure);
-        measure.setTypeface(Typeface.DEFAULT_BOLD);
-        measureTask.setTypeface(Typeface.MONOSPACE);
+        Paint measure = null, measureTask = null;
         int indentStep = (int) (14 * density + 0.5f);
         for (int k = 0; k < doc.spans.size(); k++) {
             Markdown.Span sp = doc.spans.get(k);
@@ -222,14 +281,16 @@ public final class MessageFormatter {
                     break;
                 }
                 case Markdown.CODE_BLOCK:
-                    set(out, new BlockSpan(BLOCK_BG, (int) (8 * density + 0.5f)), s, e);
+                    set(out, new BlockSpan(BLOCK_BG, BLOCK_BORDER, Math.max(1, (int) (2 * density + 0.5f)),
+                            (int) (10 * density + 0.5f)), s, e);
                     set(out, new TypefaceSpan("monospace"), s, e);
                     set(out, new RelativeSizeSpan(0.88f), s, e);
                     set(out, new ForegroundColorSpan(BLOCK_FG), s, e);
                     break;
                 case Markdown.CODE_LANG:
-                    set(out, new ForegroundColorSpan(TEXT_MUTED), s, e);
-                    set(out, new RelativeSizeSpan(0.85f), s, e);
+                    set(out, new ForegroundColorSpan(ACCENT), s, e);
+                    set(out, new StyleSpan(Typeface.BOLD), s, e);
+                    set(out, new RelativeSizeSpan(0.82f), s, e);
                     break;
                 case Markdown.QUOTE:
                     set(out, new QuoteBarSpan(QUOTE_BAR, (int) (3 * density + 0.5f), (int) (10 * density + 0.5f)), s, e);
@@ -237,6 +298,20 @@ public final class MessageFormatter {
                     break;
                 case Markdown.LIST_ITEM:
                 case Markdown.LIST_CONT: {
+                    if (measure == null) {
+                        float px = TEXT_SP * scaledDensity;
+                        if (cachedMeasure == null || cachedMeasureSize != px) {
+                            cachedMeasure = new Paint(Paint.ANTI_ALIAS_FLAG);
+                            cachedMeasure.setTextSize(px);
+                            cachedMeasure.setTypeface(Typeface.DEFAULT_BOLD);
+                            cachedMeasureTask = new Paint(Paint.ANTI_ALIAS_FLAG);
+                            cachedMeasureTask.setTextSize(px);
+                            cachedMeasureTask.setTypeface(Typeface.MONOSPACE);
+                            cachedMeasureSize = px;
+                        }
+                        measure = cachedMeasure;
+                        measureTask = cachedMeasureTask;
+                    }
                     int first = sp.level * indentStep;
                     String marker = sp.arg.trim();
                     Paint mp = marker.startsWith("[") ? measureTask : measure;
@@ -366,12 +441,14 @@ public final class MessageFormatter {
 
     // ---- custom spans ------------------------------------------------------------------------
 
-    /** Full-width background behind code-block lines, plus a left padding. */
+    /** Full-width background behind code-block lines, with a crisp left accent border and left padding. */
     static final class BlockSpan implements LineBackgroundSpan, LeadingMarginSpan {
-        private final int color, pad;
+        private final int color, border, borderW, pad;
 
-        BlockSpan(int color, int pad) {
+        BlockSpan(int color, int border, int borderW, int pad) {
             this.color = color;
+            this.border = border;
+            this.borderW = borderW;
             this.pad = pad;
         }
 
@@ -382,6 +459,8 @@ public final class MessageFormatter {
             p.setStyle(Paint.Style.FILL);
             p.setColor(color);
             c.drawRect(left, top, right, bottom, p);
+            p.setColor(border);
+            c.drawRect(left, top, left + borderW, bottom, p);
             p.setColor(old);
             p.setStyle(oldStyle);
         }

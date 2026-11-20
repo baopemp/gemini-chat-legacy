@@ -11,16 +11,16 @@ A lightweight native Gemini API client for legacy Android devices running Androi
 ## Features
 
 - Chat with Gemini 4 (`gemini-4-hydrogen`), Gemini 3, and Gemma 4 models, or enter any custom model ID.
-- Stream replies in real time with configurable thinking levels (Minimal to Extra High), inspectable thought summaries, automatic retries, and stop-and-keep partial replies.
-- Talk hands-free or push-to-talk with Gemini Live, complete with live speech transcription in the input box, 30 selectable voices, chat history handoff, and automatic reconnect.
-- Listen to any reply with streamed Read Aloud text-to-speech in your chosen voice.
-- Read formatted Markdown, code blocks with one-tap copy, readable Unicode LaTeX math, `:shortcode:` emoji for legacy fonts, and adjustable text sizes.
-- Attach images (Android 2.2+), enable device date and time grounding, auto-name conversations, edit or regenerate messages, and back up or restore chats and settings.
-- Run smoothly from Android 2.1 (API 7) up to modern Android, with automatic TLS 1.2 support enabled on Android 4.1 to 4.4.
+- Stream replies in real time with configurable thinking levels (Minimal to Extra High, snapping back to High on models without Extra High), animated thinking feedback, inspectable thought summaries, anti-429 retry pacing, and stop-and-keep partial replies.
+- Talk hands-free or push-to-talk with Gemini Live, complete with a live audio level meter, speech transcription in the input box, 30 selectable voices, chat history handoff, and automatic reconnect.
+- Listen to any reply with streamed Read Aloud text-to-speech and an inline Stop bar in your chosen voice.
+- Read formatted Markdown, bordered code blocks with one-tap copy, readable Unicode LaTeX math, `:shortcode:` emoji for legacy fonts, and adjustable text sizes.
+- Attach images smoothly off the UI thread (Android 2.2+), enable device date and time grounding, auto-name conversations, edit or regenerate messages with refreshed timestamps, and back up or restore chats and settings.
+- Run smoothly on legacy phones from Android 2.1 (API 7) up to modern Android, with indexed SQLite queries, cached RGB565 thumbnails, adaptive stream pacing, and automatic TLS 1.2 support on Android 4.1 to 4.4.
 
 ## Setup
 
-1. Download `gemini_chat_v0.8.9.apk` from [Releases](https://github.com/baopemp/gemini-chat-legacy/releases/latest) and install it (`adb install -r` keeps your chats and settings).
+1. Download `gemini_chat_v0.9.0.apk` from [Releases](https://github.com/baopemp/gemini-chat-legacy/releases/latest) and install it (`adb install -r` keeps your chats and settings).
 2. Open Settings and paste a Gemini API key from [Google AI Studio](https://aistudio.google.com/apikey). Free-tier keys work.
 3. Pick a model and start chatting.
 
@@ -33,7 +33,7 @@ Requires JDK 8+ (`keytool`), Python 3, and `curl`.
 ```bash
 ./scripts/build_java.sh                        # compile java/ to smali after Java edits
 ./scripts/build_apk.sh                         # audit, build, align, and sign
-adb install -r build/gemini_chat_v0.8.9.apk    # install without clearing data
+adb install -r build/gemini_chat_v0.9.0.apk    # install without clearing data
 ./tests/run_tests.sh                           # optional JVM bytecode and unit tests
 ```
 

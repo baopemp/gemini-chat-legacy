@@ -25,25 +25,25 @@
     .locals 1
 
     .prologue
-    .line 344
+    .line 419
     invoke-direct {p0}, Landroid/graphics/drawable/Drawable;-><init>()V
 
-    .line 341
+    .line 416
     new-instance v0, Landroid/graphics/Paint;
 
     invoke-direct {v0}, Landroid/graphics/Paint;-><init>()V
 
     iput-object v0, p0, Lcom/gemini/chat/MessageFormatter$RoleBar;->paint:Landroid/graphics/Paint;
 
-    .line 345
+    .line 420
     iget-object v0, p0, Lcom/gemini/chat/MessageFormatter$RoleBar;->paint:Landroid/graphics/Paint;
 
     invoke-virtual {v0, p1}, Landroid/graphics/Paint;->setColor(I)V
 
-    .line 346
+    .line 421
     iput p2, p0, Lcom/gemini/chat/MessageFormatter$RoleBar;->width:I
 
-    .line 347
+    .line 422
     return-void
 .end method
 
@@ -53,12 +53,12 @@
     .locals 6
 
     .prologue
-    .line 350
+    .line 425
     invoke-virtual {p0}, Lcom/gemini/chat/MessageFormatter$RoleBar;->getBounds()Landroid/graphics/Rect;
 
     move-result-object v0
 
-    .line 351
+    .line 426
     iget v1, v0, Landroid/graphics/Rect;->left:I
 
     int-to-float v1, v1
@@ -85,7 +85,7 @@
 
     invoke-virtual/range {v0 .. v5}, Landroid/graphics/Canvas;->drawRect(FFFFLandroid/graphics/Paint;)V
 
-    .line 352
+    .line 427
     return-void
 .end method
 
@@ -93,7 +93,7 @@
     .locals 1
 
     .prologue
-    .line 363
+    .line 438
     const/4 v0, -0x3
 
     return v0
@@ -103,12 +103,12 @@
     .locals 1
 
     .prologue
-    .line 355
+    .line 430
     iget-object v0, p0, Lcom/gemini/chat/MessageFormatter$RoleBar;->paint:Landroid/graphics/Paint;
 
     invoke-virtual {v0, p1}, Landroid/graphics/Paint;->setAlpha(I)V
 
-    .line 356
+    .line 431
     return-void
 .end method
 
@@ -116,11 +116,11 @@
     .locals 1
 
     .prologue
-    .line 359
+    .line 434
     iget-object v0, p0, Lcom/gemini/chat/MessageFormatter$RoleBar;->paint:Landroid/graphics/Paint;
 
     invoke-virtual {v0, p1}, Landroid/graphics/Paint;->setColorFilter(Landroid/graphics/ColorFilter;)Landroid/graphics/ColorFilter;
 
-    .line 360
+    .line 435
     return-void
 .end method

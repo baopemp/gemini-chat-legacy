@@ -1,6 +1,7 @@
 package com.gemini.chat;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Markdown -> plain text + style ranges ("Doc"). Pure Java (no android.*), so it is unit-tested
@@ -79,7 +80,9 @@ public final class Markdown {
         Doc d = new Doc();
         d.gridMaxChars = gridMaxChars;
         if (src == null) return d;
-        String norm = src.replace("\r\n", "\n").replace('\r', '\n').replace("\t", "    ");
+        String norm = src;
+        if (norm.indexOf('\r') >= 0) norm = norm.replace("\r\n", "\n").replace('\r', '\n');
+        if (norm.indexOf('\t') >= 0) norm = norm.replace("\t", "    ");
         String[] lines = norm.split("\n", -1);
         blocks(d, lines, 0, lines.length);
         // trim trailing newlines (spans past the end are clipped)
@@ -675,6 +678,11 @@ public final class Markdown {
             "lceil", "\u2308", "rceil", "\u2309", "langle", "\u27E8", "rangle", "\u27E9", "log", "log", "ln", "ln", "sin", "sin",
             "cos", "cos", "tan", "tan", "lim", "lim", "max", "max", "min", "min", "exp", "exp", "mod", "mod", "gcd", "gcd",
             "left", "", "right", "", "displaystyle", "", "limits", ""};
+    private static final HashMap<String, String> TEX_MAP = new HashMap<String, String>(256);
+
+    static {
+        for (int t = 0; t < TEX.length; t += 2) TEX_MAP.put(TEX[t], TEX[t + 1]);
+    }
     /** Only superscripts that Android 2.x fonts draw (tested on 2.1: U+2070 "0" is a box); others stay "x^10". */
     private static final String SUP_FROM = "123n", SUP_TO = "\u00B9\u00B2\u00B3\u207F";
 
@@ -741,13 +749,7 @@ public final class Markdown {
                     o.append(cmd.equals("text") || cmd.equals("mbox") ? a[0] : texToText(a[0]));
                     i = Integer.parseInt(a[1]);
                 } else {
-                    String v = null;
-                    for (int t = 0; t < TEX.length; t += 2) {
-                        if (TEX[t].equals(cmd)) {
-                            v = TEX[t + 1];
-                            break;
-                        }
-                    }
+                    String v = TEX_MAP.get(cmd);
                     o.append(v != null ? v : cmd); // unknown command: its name
                 }
                 continue;
@@ -915,6 +917,19 @@ public final class Markdown {
         int n = s.length();
         int i = 0;
         while (i < n) {
+            int run = i;
+            while (i < n) {
+                char c = s.charAt(i);
+                if (c >= 0x80) break;
+                // ASCII keycap base chars (#, *, 0-9) only form emoji when followed by U+FE0F or U+20E3
+                if (i + 1 < n && ((c >= '0' && c <= '9') || c == '#' || c == '*')) {
+                    char next = s.charAt(i + 1);
+                    if (next == 0xFE0F || next == 0x20E3) break;
+                }
+                i++;
+            }
+            if (i > run) d.text.append(s, run, i);
+            if (i >= n) break;
             int len = EmojiMap.matchAt(s, i);
             if (len > 0) {
                 int st = d.len();

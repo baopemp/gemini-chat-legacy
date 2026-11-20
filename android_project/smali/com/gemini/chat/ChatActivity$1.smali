@@ -3,12 +3,12 @@
 .source "ChatActivity.java"
 
 # interfaces
-.implements Lcom/gemini/chat/AutoNamer$Callback;
+.implements Ljava/lang/Runnable;
 
 
 # annotations
-.annotation system Ldalvik/annotation/EnclosingMethod;
-    value = Lcom/gemini/chat/ChatActivity;->maybeAutoName()V
+.annotation system Ldalvik/annotation/EnclosingClass;
+    value = Lcom/gemini/chat/ChatActivity;
 .end annotation
 
 .annotation system Ldalvik/annotation/InnerClass;
@@ -26,7 +26,7 @@
     .locals 0
 
     .prologue
-    .line 486
+    .line 97
     iput-object p1, p0, Lcom/gemini/chat/ChatActivity$1;->this$0:Lcom/gemini/chat/ChatActivity;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
@@ -36,26 +36,48 @@
 
 
 # virtual methods
-.method public onNamed(JLjava/lang/String;)V
+.method public run()V
     .locals 3
 
     .prologue
-    .line 488
+    .line 99
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$1;->this$0:Lcom/gemini/chat/ChatActivity;
 
-    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$900(Lcom/gemini/chat/ChatActivity;)J
+    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$000(Lcom/gemini/chat/ChatActivity;)Landroid/widget/ScrollView;
 
-    move-result-wide v0
+    move-result-object v0
 
-    cmp-long v0, p1, v0
-
-    if-nez v0, :cond_0
+    if-eqz v0, :cond_0
 
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$1;->this$0:Lcom/gemini/chat/ChatActivity;
 
-    invoke-virtual {v0, p3}, Lcom/gemini/chat/ChatActivity;->setTitle(Ljava/lang/CharSequence;)V
+    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$100(Lcom/gemini/chat/ChatActivity;)Landroid/widget/LinearLayout;
 
-    .line 489
+    move-result-object v0
+
+    if-eqz v0, :cond_0
+
+    iget-object v0, p0, Lcom/gemini/chat/ChatActivity$1;->this$0:Lcom/gemini/chat/ChatActivity;
+
+    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$000(Lcom/gemini/chat/ChatActivity;)Landroid/widget/ScrollView;
+
+    move-result-object v0
+
+    const/4 v1, 0x0
+
+    iget-object v2, p0, Lcom/gemini/chat/ChatActivity$1;->this$0:Lcom/gemini/chat/ChatActivity;
+
+    invoke-static {v2}, Lcom/gemini/chat/ChatActivity;->access$100(Lcom/gemini/chat/ChatActivity;)Landroid/widget/LinearLayout;
+
+    move-result-object v2
+
+    invoke-virtual {v2}, Landroid/widget/LinearLayout;->getMeasuredHeight()I
+
+    move-result v2
+
+    invoke-virtual {v0, v1, v2}, Landroid/widget/ScrollView;->scrollTo(II)V
+
+    .line 100
     :cond_0
     return-void
 .end method

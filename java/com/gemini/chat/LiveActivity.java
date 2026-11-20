@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
@@ -11,6 +13,7 @@ import android.media.AudioTrack;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Process;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
@@ -60,10 +63,19 @@ public class LiveActivity extends Activity {
     private boolean liveText;
 
     private TextView status;
+    private AudioMeterView meter;
     private ScrollView scroll;
     private LinearLayout turns;
     private EditText input;
     private Button btnTalk, btnSend;
+
+    private volatile int micLevel, playLevel;
+    private int meterPhase;
+    private final Runnable scrollDownRunnable = new Runnable() {
+        public void run() {
+            if (scroll != null && turns != null) scroll.scrollTo(0, turns.getMeasuredHeight());
+        }
+    };
 
     private LiveSession session;      // the conversation
     private volatile int sessionGen;  // callbacks from older sessions are ignored
@@ -103,6 +115,67 @@ public class LiveActivity extends Activity {
         return i > 0 ? entry.substring(0, i) : entry;
     }
 
+    /** Normalized 0..100 audio amplitude from 16-bit LE mono PCM (subsampled, zero allocations; unit-tested). */
+    static int pcmLevel(byte[] pcm, int off, int len) {
+        if (pcm == null || len < 2 || off < 0) return 0;
+        int end = Math.min(pcm.length, off + len) - 1;
+        long sum = 0;
+        int count = 0;
+        for (int i = off; i < end; i += 8) { // every 4th 16-bit sample: fast on ARMv6
+            int s = (pcm[i] & 0xFF) | (pcm[i + 1] << 8);
+            sum += (long) s * s;
+            count++;
+        }
+        if (count == 0) return 0;
+        int rms = (int) Math.sqrt((double) sum / count);
+        int pct = (rms * 100) / 8000;
+        return pct > 100 ? 100 : pct;
+    }
+
+    /** Slim 12-segment equalizer bar drawn in pure API-7 Canvas (zero per-frame allocations). */
+    private static final class AudioMeterView extends View {
+        private static final int BARS = 12;
+        private static final int IDLE_COLOR = 0xFF3C4043;
+        private final Paint paint = new Paint();
+        private int smoothLevel;
+        private int activeColor = IDLE_COLOR;
+
+        AudioMeterView(LiveActivity ctx) {
+            super(ctx);
+            paint.setStyle(Paint.Style.FILL);
+        }
+
+        void update(int targetLevel, int color) {
+            int next = targetLevel > smoothLevel
+                    ? (smoothLevel * 2 + targetLevel * 3) / 5
+                    : (smoothLevel * 3 + targetLevel) / 4;
+            if (next < 2 && targetLevel == 0) next = 0;
+            if (next != smoothLevel || color != activeColor) {
+                smoothLevel = next;
+                activeColor = color;
+                invalidate();
+            }
+        }
+
+        @Override
+        protected void onDraw(Canvas c) {
+            int w = getWidth(), h = getHeight();
+            if (w <= 0 || h <= 0) return;
+            int gap = Math.max(2, w / 90);
+            int barW = Math.max(2, (w - gap * (BARS - 1)) / BARS);
+            int startX = (w - (barW * BARS + gap * (BARS - 1))) / 2;
+            int lit = (smoothLevel * BARS + 99) / 100;
+            int midY = h / 2;
+            for (int i = 0; i < BARS; i++) {
+                int x = startX + i * (barW + gap);
+                boolean on = i < lit && smoothLevel > 0;
+                paint.setColor(on ? activeColor : IDLE_COLOR);
+                int half = on ? Math.max(2, (h * (45 + ((i * 5) % 45))) / 200) : Math.max(1, h / 6);
+                c.drawRect(x, midY - half, x + barW, midY + half, paint);
+            }
+        }
+    }
+
     private int dp(float v) {
         return (int) (v * getResources().getDisplayMetrics().density + 0.5f);
     }
@@ -134,10 +207,15 @@ public class LiveActivity extends Activity {
 
         status = new TextView(this);
         status.setTextSize(13f);
-        status.setPadding(dp(10), dp(4), dp(10), dp(4));
+        status.setPadding(dp(10), dp(4), dp(10), dp(2));
         status.setTextColor(0xFF9AA0A6);
         root.addView(status, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        meter = new AudioMeterView(this);
+        LinearLayout.LayoutParams mlp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, dp(10));
+        mlp.setMargins(dp(10), 0, dp(10), dp(4));
+        root.addView(meter, mlp);
 
         scroll = new ScrollView(this);
         turns = new LinearLayout(this);
@@ -268,11 +346,8 @@ public class LiveActivity extends Activity {
     }
 
     private void scrollDown() {
-        scroll.post(new Runnable() {
-            public void run() {
-                scroll.scrollTo(0, turns.getMeasuredHeight());
-            }
-        });
+        scroll.removeCallbacks(scrollDownRunnable);
+        scroll.post(scrollDownRunnable);
     }
 
     /** Shows the chat's earlier messages. */
@@ -589,6 +664,21 @@ public class LiveActivity extends Activity {
                 LiveSession s = session;
                 if (s != null && s.goAway && !talking && !modelTurnActive && !playing) resume(); // before Google cuts it
             }
+            if (meter != null) {
+                if (modelTurnActive || playing) {
+                    int lvl = playLevel;
+                    if (lvl <= 0 && (modelTurnActive || playing)) {
+                        meterPhase = (meterPhase + 1) & 7;
+                        lvl = 18 + (meterPhase <= 4 ? meterPhase * 6 : (8 - meterPhase) * 6);
+                    }
+                    meter.update(lvl, MessageFormatter.ROLE_MODEL);
+                } else if (talking && !micMuted()) {
+                    int lvl = micLevel;
+                    meter.update(lvl > 0 ? lvl : 12, MessageFormatter.ROLE_USER);
+                } else {
+                    meter.update(0, 0xFF3C4043);
+                }
+            }
             ui.postDelayed(this, 80);
         }
     };
@@ -747,6 +837,7 @@ public class LiveActivity extends Activity {
         }
         if (talking && send && tr != null) tr.audioStreamEnd(); // finalize the box text
         talking = false;
+        micLevel = 0;
         updateButtons();
         idleStatus();
     }
@@ -794,19 +885,28 @@ public class LiveActivity extends Activity {
         }
 
         public void run() {
+            try {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
+            } catch (Throwable ignored) {
+            }
             byte[] buf = new byte[rate / 10 * 2];
             try {
                 rec.startRecording();
                 while (running) {
                     int n = rec.read(buf, 0, buf.length);
                     if (n <= 0) continue;
-                    if (micMuted()) continue; // hands-free: no echo cancellation on old phones
+                    if (micMuted()) {
+                        micLevel = 0;
+                        continue; // hands-free: no echo cancellation on old phones
+                    }
+                    micLevel = pcmLevel(buf, 0, n);
                     LiveSession s = session, t = tr;
                     if (s != null) s.sendAudio(buf, 0, n, rate);
                     if (t != null) t.sendAudio(buf, 0, n, rate);
                 }
             } catch (Exception ignored) {
             } finally {
+                micLevel = 0;
                 try {
                     rec.stop();
                 } catch (Exception ignored) {
@@ -917,6 +1017,7 @@ public class LiveActivity extends Activity {
 
         /** Barge-in: drop everything queued or buffered. */
         void flush() {
+            playLevel = 0;
             synchronized (this) {
                 queue.clear();
                 queuedFrames = 0;
@@ -938,6 +1039,7 @@ public class LiveActivity extends Activity {
 
         void quit() {
             running = false;
+            playLevel = 0;
             synchronized (this) {
                 notifyAll();
             }
@@ -945,6 +1047,10 @@ public class LiveActivity extends Activity {
 
         public void run() {
             if (track == null) return;
+            try {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
+            } catch (Throwable ignored) {
+            }
             try {
                 track.play();
                 synchronized (this) {
@@ -954,7 +1060,10 @@ public class LiveActivity extends Activity {
                     byte[] b;
                     int gen;
                     synchronized (this) {
-                        while (running && queue.isEmpty()) wait(200);
+                        while (running && queue.isEmpty()) {
+                            playLevel = 0;
+                            wait(200);
+                        }
                         if (!running) break;
                         // from silence: wait for a little audio first, so a slow phone/network doesn't stutter
                         if (written <= playedFrames() && queuedFrames < PREBUFFER_FRAMES && !turnEnded
@@ -966,6 +1075,7 @@ public class LiveActivity extends Activity {
                         queuedFrames -= b.length / 2;
                         gen = generation;
                     }
+                    playLevel = pcmLevel(b, 0, b.length);
                     int off = 0;
                     while (off < b.length && running) {
                         int n = track.write(b, off, b.length - off); // blocks while the track buffer is full
@@ -981,6 +1091,7 @@ public class LiveActivity extends Activity {
                 }
             } catch (Exception ignored) {
             } finally {
+                playLevel = 0;
                 try {
                     track.stop();
                 } catch (Exception ignored) {

@@ -3,12 +3,12 @@
 .source "ChatActivity.java"
 
 # interfaces
-.implements Landroid/content/DialogInterface$OnClickListener;
+.implements Ljava/lang/Runnable;
 
 
 # annotations
 .annotation system Ldalvik/annotation/EnclosingMethod;
-    value = Lcom/gemini/chat/ChatActivity;->showThoughts(Ljava/lang/String;Ljava/lang/String;)V
+    value = Lcom/gemini/chat/ChatActivity;->loadMessages(Z)V
 .end annotation
 
 .annotation system Ldalvik/annotation/InnerClass;
@@ -20,11 +20,11 @@
 # instance fields
 .field final synthetic this$0:Lcom/gemini/chat/ChatActivity;
 
-.field final synthetic val$thoughts:Ljava/lang/String;
+.field final synthetic val$y:I
 
 
 # direct methods
-.method constructor <init>(Lcom/gemini/chat/ChatActivity;Ljava/lang/String;)V
+.method constructor <init>(Lcom/gemini/chat/ChatActivity;I)V
     .locals 0
     .annotation system Ldalvik/annotation/Signature;
         value = {
@@ -33,10 +33,10 @@
     .end annotation
 
     .prologue
-    .line 1050
+    .line 1200
     iput-object p1, p0, Lcom/gemini/chat/ChatActivity$10;->this$0:Lcom/gemini/chat/ChatActivity;
 
-    iput-object p2, p0, Lcom/gemini/chat/ChatActivity$10;->val$thoughts:Ljava/lang/String;
+    iput p2, p0, Lcom/gemini/chat/ChatActivity$10;->val$y:I
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 
@@ -45,19 +45,23 @@
 
 
 # virtual methods
-.method public onClick(Landroid/content/DialogInterface;I)V
+.method public run()V
     .locals 3
 
     .prologue
-    .line 1052
+    .line 1202
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$10;->this$0:Lcom/gemini/chat/ChatActivity;
 
-    iget-object v1, p0, Lcom/gemini/chat/ChatActivity$10;->val$thoughts:Ljava/lang/String;
+    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$000(Lcom/gemini/chat/ChatActivity;)Landroid/widget/ScrollView;
 
-    const-string v2, "Thoughts copied"
+    move-result-object v0
 
-    invoke-static {v0, v1, v2}, Lcom/gemini/chat/ChatActivity;->access$2400(Lcom/gemini/chat/ChatActivity;Ljava/lang/String;Ljava/lang/String;)V
+    const/4 v1, 0x0
 
-    .line 1053
+    iget v2, p0, Lcom/gemini/chat/ChatActivity$10;->val$y:I
+
+    invoke-virtual {v0, v1, v2}, Landroid/widget/ScrollView;->scrollTo(II)V
+
+    .line 1203
     return-void
 .end method

@@ -26,7 +26,7 @@
     .locals 0
 
     .prologue
-    .line 180
+    .line 250
     iput-object p1, p0, Lcom/gemini/chat/LiveActivity$3;->this$0:Lcom/gemini/chat/LiveActivity;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
@@ -40,11 +40,11 @@
     .locals 1
 
     .prologue
-    .line 182
+    .line 252
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$3;->this$0:Lcom/gemini/chat/LiveActivity;
 
-    invoke-virtual {v0}, Lcom/gemini/chat/LiveActivity;->finish()V
+    invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$300(Lcom/gemini/chat/LiveActivity;)V
 
-    .line 183
+    .line 253
     return-void
 .end method

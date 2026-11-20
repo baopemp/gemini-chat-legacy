@@ -32,6 +32,8 @@
 
 .field private lastError:Ljava/lang/String;
 
+.field private lastRetryAfter:Ljava/lang/String;
+
 .field private final listener:Lcom/gemini/chat/ReadAloud$Listener;
 
 .field final messageId:J
@@ -58,7 +60,7 @@
     .prologue
     const/4 v3, 0x0
 
-    .line 28
+    .line 29
     const/4 v0, 0x3
 
     new-array v0, v0, [Ljava/lang/String;
@@ -81,7 +83,7 @@
 
     sput-object v0, Lcom/gemini/chat/ReadAloud;->MODELS:[Ljava/lang/String;
 
-    .line 29
+    .line 30
     sget-object v0, Lcom/gemini/chat/ReadAloud;->MODELS:[Ljava/lang/String;
 
     aget-object v0, v0, v3
@@ -95,36 +97,36 @@
     .locals 1
 
     .prologue
-    .line 48
+    .line 49
     invoke-direct {p0}, Ljava/lang/Thread;-><init>()V
 
-    .line 46
+    .line 47
     const/4 v0, -0x1
 
     iput v0, p0, Lcom/gemini/chat/ReadAloud;->carry:I
 
-    .line 49
+    .line 50
     iput-wide p1, p0, Lcom/gemini/chat/ReadAloud;->messageId:J
 
-    .line 50
+    .line 51
     iput-object p3, p0, Lcom/gemini/chat/ReadAloud;->key:Ljava/lang/String;
 
-    .line 51
+    .line 52
     iput-object p4, p0, Lcom/gemini/chat/ReadAloud;->model:Ljava/lang/String;
 
-    .line 52
+    .line 53
     iput-object p5, p0, Lcom/gemini/chat/ReadAloud;->voice:Ljava/lang/String;
 
-    .line 53
+    .line 54
     iput-object p6, p0, Lcom/gemini/chat/ReadAloud;->text:Ljava/lang/String;
 
-    .line 54
+    .line 55
     iput-object p7, p0, Lcom/gemini/chat/ReadAloud;->ui:Landroid/os/Handler;
 
-    .line 55
+    .line 56
     iput-object p8, p0, Lcom/gemini/chat/ReadAloud;->listener:Lcom/gemini/chat/ReadAloud$Listener;
 
-    .line 56
+    .line 57
     return-void
 .end method
 
@@ -132,7 +134,7 @@
     .locals 1
 
     .prologue
-    .line 26
+    .line 27
     iget-object v0, p0, Lcom/gemini/chat/ReadAloud;->listener:Lcom/gemini/chat/ReadAloud$Listener;
 
     return-object v0
@@ -149,19 +151,19 @@
     .prologue
     const/4 v1, 0x0
 
-    .line 88
+    .line 89
     new-instance v0, Lorg/json/JSONObject;
 
     invoke-direct {v0, p0}, Lorg/json/JSONObject;-><init>(Ljava/lang/String;)V
 
-    .line 89
+    .line 90
     const-string v2, "error"
 
     invoke-virtual {v0, v2}, Lorg/json/JSONObject;->optJSONObject(Ljava/lang/String;)Lorg/json/JSONObject;
 
     move-result-object v2
 
-    .line 90
+    .line 91
     if-nez v2, :cond_0
 
     const-string v3, "error"
@@ -178,7 +180,7 @@
 
     if-eqz v3, :cond_4
 
-    .line 91
+    .line 92
     :cond_0
     if-eqz v2, :cond_1
 
@@ -192,7 +194,7 @@
 
     move-object v1, v0
 
-    .line 92
+    .line 93
     :goto_0
     if-eqz v2, :cond_2
 
@@ -204,7 +206,7 @@
 
     move-result-object v0
 
-    .line 93
+    .line 94
     :goto_1
     new-instance v2, Lorg/json/JSONException;
 
@@ -265,7 +267,7 @@
 
     throw v2
 
-    .line 91
+    .line 92
     :cond_1
     const-string v0, ""
 
@@ -273,19 +275,19 @@
 
     goto :goto_0
 
-    .line 92
+    .line 93
     :cond_2
     const-string v0, ""
 
     goto :goto_1
 
-    .line 93
+    .line 94
     :cond_3
     const-string v0, ""
 
     goto :goto_2
 
-    .line 95
+    .line 96
     :cond_4
     const-string v2, "step.delta"
 
@@ -301,12 +303,12 @@
 
     if-nez v2, :cond_6
 
-    .line 99
+    .line 100
     :cond_5
     :goto_3
     return-object v1
 
-    .line 96
+    .line 97
     :cond_6
     const-string v2, "delta"
 
@@ -314,7 +316,7 @@
 
     move-result-object v0
 
-    .line 97
+    .line 98
     if-eqz v0, :cond_5
 
     const-string v2, "audio"
@@ -331,7 +333,7 @@
 
     if-eqz v2, :cond_5
 
-    .line 98
+    .line 99
     const-string v2, "data"
 
     const-string v3, ""
@@ -340,7 +342,7 @@
 
     move-result-object v0
 
-    .line 99
+    .line 100
     invoke-virtual {v0}, Ljava/lang/String;->length()I
 
     move-result v2
@@ -367,18 +369,18 @@
     .end annotation
 
     .prologue
-    .line 299
+    .line 309
     iget-object v8, p0, Lcom/gemini/chat/ReadAloud;->track:Landroid/media/AudioTrack;
 
-    .line 300
+    .line 310
     if-nez v8, :cond_1
 
-    .line 314
+    .line 324
     :cond_0
     :goto_0
     return-void
 
-    .line 301
+    .line 311
     :cond_1
     const-wide/16 v2, -0x1
 
@@ -386,13 +388,13 @@
 
     move-result-wide v0
 
-    .line 302
+    .line 312
     :goto_1
     iget-boolean v4, p0, Lcom/gemini/chat/ReadAloud;->stopped:Z
 
     if-nez v4, :cond_0
 
-    .line 303
+    .line 313
     invoke-virtual {v8}, Landroid/media/AudioTrack;->getPlaybackHeadPosition()I
 
     move-result v4
@@ -403,19 +405,19 @@
 
     and-long/2addr v6, v4
 
-    .line 304
+    .line 314
     iget-wide v4, p0, Lcom/gemini/chat/ReadAloud;->written:J
 
     cmp-long v4, v6, v4
 
     if-gez v4, :cond_0
 
-    .line 305
+    .line 315
     invoke-static {}, Ljava/lang/System;->currentTimeMillis()J
 
     move-result-wide v4
 
-    .line 306
+    .line 316
     cmp-long v9, v6, v2
 
     if-eqz v9, :cond_3
@@ -424,7 +426,7 @@
 
     move-wide v2, v6
 
-    .line 312
+    .line 322
     :cond_2
     const-wide/16 v4, 0x32
 
@@ -432,7 +434,7 @@
 
     goto :goto_1
 
-    .line 309
+    .line 319
     :cond_3
     sub-long/2addr v4, v0
 
@@ -449,7 +451,7 @@
     .locals 3
 
     .prologue
-    .line 132
+    .line 133
     :try_start_0
     new-instance v0, Lorg/json/JSONObject;
 
@@ -461,7 +463,7 @@
 
     move-result-object v0
 
-    .line 133
+    .line 134
     if-eqz v0, :cond_0
 
     const-string v1, "message"
@@ -514,15 +516,15 @@
 
     move-result-object v0
 
-    .line 136
+    .line 137
     :goto_0
     return-object v0
 
-    .line 134
+    .line 135
     :catch_0
     move-exception v0
 
-    .line 136
+    .line 137
     :cond_0
     new-instance v0, Ljava/lang/StringBuilder;
 
@@ -554,7 +556,7 @@
     .end annotation
 
     .prologue
-    .line 261
+    .line 271
     const-string v0, "[DONE]"
 
     invoke-virtual {p1}, Ljava/lang/String;->trim()Ljava/lang/String;
@@ -567,18 +569,18 @@
 
     if-eqz v0, :cond_1
 
-    .line 264
+    .line 274
     :cond_0
     :goto_0
     return-void
 
-    .line 262
+    .line 272
     :cond_1
     invoke-static {p1}, Lcom/gemini/chat/ReadAloud;->audioOf(Ljava/lang/String;)Ljava/lang/String;
 
     move-result-object v0
 
-    .line 263
+    .line 273
     if-eqz v0, :cond_0
 
     invoke-static {v0}, Lcom/gemini/chat/B64;->decode(Ljava/lang/String;)[B
@@ -602,7 +604,7 @@
 
     const/4 v7, 0x0
 
-    .line 268
+    .line 278
     iget-boolean v0, p0, Lcom/gemini/chat/ReadAloud;->stopped:Z
 
     if-nez v0, :cond_0
@@ -611,12 +613,12 @@
 
     if-nez v0, :cond_1
 
-    .line 295
+    .line 305
     :cond_0
     :goto_0
     return-void
 
-    .line 269
+    .line 279
     :cond_1
     array-length v1, p1
 
@@ -629,12 +631,12 @@
     :goto_1
     add-int/2addr v1, v0
 
-    .line 270
+    .line 280
     and-int/lit8 v0, v1, -0x2
 
     new-array v8, v0, [B
 
-    .line 272
+    .line 282
     iget v0, p0, Lcom/gemini/chat/ReadAloud;->carry:I
 
     if-ltz v0, :cond_7
@@ -651,7 +653,7 @@
 
     move v0, v6
 
-    .line 273
+    .line 283
     :goto_2
     array-length v4, v8
 
@@ -659,7 +661,7 @@
 
     invoke-static {p1, v7, v8, v0, v4}, Ljava/lang/System;->arraycopy(Ljava/lang/Object;ILjava/lang/Object;II)V
 
-    .line 274
+    .line 284
     and-int/lit8 v0, v1, 0x1
 
     if-eqz v0, :cond_3
@@ -675,30 +677,30 @@
     :goto_3
     iput v0, p0, Lcom/gemini/chat/ReadAloud;->carry:I
 
-    .line 275
+    .line 285
     array-length v0, v8
 
     if-eqz v0, :cond_0
 
-    .line 276
+    .line 286
     iget-object v0, p0, Lcom/gemini/chat/ReadAloud;->track:Landroid/media/AudioTrack;
 
-    .line 277
+    .line 287
     if-nez v0, :cond_6
 
-    .line 278
+    .line 288
     invoke-static {v2, v3, v3}, Landroid/media/AudioTrack;->getMinBufferSize(III)I
 
     move-result v4
 
-    .line 279
+    .line 289
     new-instance v0, Landroid/media/AudioTrack;
 
     const/4 v1, 0x3
 
     const v5, 0xbb80
 
-    .line 280
+    .line 290
     invoke-static {v4, v5}, Ljava/lang/Math;->max(II)I
 
     move-result v5
@@ -707,17 +709,17 @@
 
     invoke-direct/range {v0 .. v6}, Landroid/media/AudioTrack;-><init>(IIIIII)V
 
-    .line 281
+    .line 291
     invoke-virtual {v0}, Landroid/media/AudioTrack;->getState()I
 
     move-result v1
 
     if-eq v1, v6, :cond_4
 
-    .line 282
+    .line 292
     invoke-virtual {v0}, Landroid/media/AudioTrack;->release()V
 
-    .line 283
+    .line 293
     new-instance v0, Ljava/lang/IllegalStateException;
 
     const-string v1, "Error: audio output not available"
@@ -729,47 +731,47 @@
     :cond_2
     move v0, v7
 
-    .line 269
+    .line 279
     goto :goto_1
 
-    .line 274
+    .line 284
     :cond_3
     const/4 v0, -0x1
 
     goto :goto_3
 
-    .line 285
+    .line 295
     :cond_4
     iget-boolean v1, p0, Lcom/gemini/chat/ReadAloud;->stopped:Z
 
     if-eqz v1, :cond_5
 
-    .line 286
+    .line 296
     invoke-virtual {v0}, Landroid/media/AudioTrack;->release()V
 
     goto :goto_0
 
-    .line 289
+    .line 299
     :cond_5
     iput-object v0, p0, Lcom/gemini/chat/ReadAloud;->track:Landroid/media/AudioTrack;
 
-    .line 290
+    .line 300
     invoke-virtual {v0}, Landroid/media/AudioTrack;->play()V
 
-    .line 292
+    .line 302
     :cond_6
     iget-boolean v1, p0, Lcom/gemini/chat/ReadAloud;->stopped:Z
 
     if-nez v1, :cond_0
 
-    .line 293
+    .line 303
     array-length v1, v8
 
     invoke-virtual {v0, v8, v7, v1}, Landroid/media/AudioTrack;->write([BII)I
 
     move-result v0
 
-    .line 294
+    .line 304
     if-lez v0, :cond_0
 
     iget-wide v2, p0, Lcom/gemini/chat/ReadAloud;->written:J
@@ -794,47 +796,47 @@
     .locals 2
 
     .prologue
-    .line 317
+    .line 327
     iget-object v0, p0, Lcom/gemini/chat/ReadAloud;->track:Landroid/media/AudioTrack;
 
-    .line 318
+    .line 328
     const/4 v1, 0x0
 
     iput-object v1, p0, Lcom/gemini/chat/ReadAloud;->track:Landroid/media/AudioTrack;
 
-    .line 319
+    .line 329
     if-nez v0, :cond_0
 
-    .line 329
+    .line 339
     :goto_0
     return-void
 
-    .line 321
+    .line 331
     :cond_0
     :try_start_0
     iget-boolean v1, p0, Lcom/gemini/chat/ReadAloud;->stopped:Z
 
     if-eqz v1, :cond_1
 
-    .line 322
+    .line 332
     invoke-virtual {v0}, Landroid/media/AudioTrack;->pause()V
 
-    .line 323
+    .line 333
     invoke-virtual {v0}, Landroid/media/AudioTrack;->flush()V
 
-    .line 325
+    .line 335
     :cond_1
     invoke-virtual {v0}, Landroid/media/AudioTrack;->stop()V
     :try_end_0
     .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_0
 
-    .line 328
+    .line 338
     :goto_1
     invoke-virtual {v0}, Landroid/media/AudioTrack;->release()V
 
     goto :goto_0
 
-    .line 326
+    .line 336
     :catch_0
     move-exception v1
 
@@ -856,11 +858,14 @@
 
     const/4 v3, 0x0
 
-    .line 205
-    .line 206
+    .line 213
+    .line 214
     const/4 v4, 0x0
 
-    .line 208
+    .line 215
+    iput-object v3, p0, Lcom/gemini/chat/ReadAloud;->lastRetryAfter:Ljava/lang/String;
+
+    .line 217
     :try_start_0
     new-instance v0, Ljava/net/URL;
 
@@ -876,45 +881,45 @@
     :try_end_0
     .catchall {:try_start_0 .. :try_end_0} :catchall_3
 
-    .line 209
+    .line 218
     :try_start_1
     iput-object v0, p0, Lcom/gemini/chat/ReadAloud;->conn:Ljava/net/HttpURLConnection;
 
-    .line 210
-    const/16 v2, 0x7530
+    .line 219
+    const/16 v2, 0x4e20
 
     invoke-virtual {v0, v2}, Ljava/net/HttpURLConnection;->setConnectTimeout(I)V
 
-    .line 211
+    .line 220
     const v2, 0x1d4c0
 
     invoke-virtual {v0, v2}, Ljava/net/HttpURLConnection;->setReadTimeout(I)V
 
-    .line 212
+    .line 221
     const-string v2, "POST"
 
     invoke-virtual {v0, v2}, Ljava/net/HttpURLConnection;->setRequestMethod(Ljava/lang/String;)V
 
-    .line 213
+    .line 222
     const-string v2, "Content-Type"
 
     const-string v6, "application/json; charset=utf-8"
 
     invoke-virtual {v0, v2, v6}, Ljava/net/HttpURLConnection;->setRequestProperty(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 214
+    .line 223
     const-string v2, "x-goog-api-key"
 
     iget-object v6, p0, Lcom/gemini/chat/ReadAloud;->key:Ljava/lang/String;
 
     invoke-virtual {v0, v2, v6}, Ljava/net/HttpURLConnection;->setRequestProperty(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 215
+    .line 224
     const/4 v2, 0x1
 
     invoke-virtual {v0, v2}, Ljava/net/HttpURLConnection;->setDoOutput(Z)V
 
-    .line 216
+    .line 225
     iget-object v2, p0, Lcom/gemini/chat/ReadAloud;->model:Ljava/lang/String;
 
     iget-object v6, p0, Lcom/gemini/chat/ReadAloud;->voice:Ljava/lang/String;
@@ -931,84 +936,84 @@
 
     move-result-object v2
 
-    .line 217
+    .line 226
     array-length v6, v2
 
     invoke-virtual {v0, v6}, Ljava/net/HttpURLConnection;->setFixedLengthStreamingMode(I)V
 
-    .line 218
+    .line 227
     invoke-virtual {v0}, Ljava/net/HttpURLConnection;->getOutputStream()Ljava/io/OutputStream;
     :try_end_1
     .catchall {:try_start_1 .. :try_end_1} :catchall_1
 
     move-result-object v6
 
-    .line 220
+    .line 229
     :try_start_2
     invoke-virtual {v6, v2}, Ljava/io/OutputStream;->write([B)V
     :try_end_2
     .catchall {:try_start_2 .. :try_end_2} :catchall_0
 
-    .line 222
+    .line 231
     :try_start_3
     invoke-virtual {v6}, Ljava/io/OutputStream;->close()V
 
-    .line 224
+    .line 233
     invoke-virtual {v0}, Ljava/net/HttpURLConnection;->getResponseCode()I
 
     move-result v2
 
-    .line 225
+    .line 234
     iget-boolean v6, p0, Lcom/gemini/chat/ReadAloud;->stopped:Z
     :try_end_3
     .catchall {:try_start_3 .. :try_end_3} :catchall_1
 
     if-eqz v6, :cond_4
 
-    .line 244
+    .line 254
     if-eqz v3, :cond_0
 
-    .line 246
+    .line 256
     :try_start_4
     invoke-virtual {v4}, Ljava/io/BufferedReader;->close()V
     :try_end_4
     .catch Ljava/lang/Exception; {:try_start_4 .. :try_end_4} :catch_0
 
-    .line 250
+    .line 260
     :cond_0
     :goto_0
     if-eqz v0, :cond_1
 
-    .line 252
+    .line 262
     :try_start_5
     invoke-virtual {v0}, Ljava/net/HttpURLConnection;->disconnect()V
     :try_end_5
     .catch Ljava/lang/Exception; {:try_start_5 .. :try_end_5} :catch_1
 
-    .line 256
+    .line 266
     :cond_1
     :goto_1
     iput-object v3, p0, Lcom/gemini/chat/ReadAloud;->conn:Ljava/net/HttpURLConnection;
 
     move v0, v1
 
-    .line 242
+    .line 252
     :goto_2
     return v0
 
-    .line 222
+    .line 231
     :catchall_0
     move-exception v1
 
     :try_start_6
     invoke-virtual {v6}, Ljava/io/OutputStream;->close()V
 
-    .line 223
+    .line 232
     throw v1
     :try_end_6
     .catchall {:try_start_6 .. :try_end_6} :catchall_1
 
-    .line 244
+    .line 254
     :catchall_1
     move-exception v1
 
@@ -1019,32 +1024,32 @@
     :goto_3
     if-eqz v2, :cond_2
 
-    .line 246
+    .line 256
     :try_start_7
     invoke-virtual {v2}, Ljava/io/BufferedReader;->close()V
     :try_end_7
     .catch Ljava/lang/Exception; {:try_start_7 .. :try_end_7} :catch_6
 
-    .line 250
+    .line 260
     :cond_2
     :goto_4
     if-eqz v4, :cond_3
 
-    .line 252
+    .line 262
     :try_start_8
     invoke-virtual {v4}, Ljava/net/HttpURLConnection;->disconnect()V
     :try_end_8
     .catch Ljava/lang/Exception; {:try_start_8 .. :try_end_8} :catch_7
 
-    .line 256
+    .line 266
     :cond_3
     :goto_5
     iput-object v3, p0, Lcom/gemini/chat/ReadAloud;->conn:Ljava/net/HttpURLConnection;
 
-    .line 257
+    .line 267
     throw v1
 
-    .line 226
+    .line 235
     :cond_4
     const/16 v6, 0xc8
 
@@ -1054,9 +1059,18 @@
 
     if-lt v2, v6, :cond_8
 
-    .line 227
+    .line 236
     :cond_5
     :try_start_9
+    const-string v1, "Retry-After"
+
+    invoke-virtual {v0, v1}, Ljava/net/HttpURLConnection;->getHeaderField(Ljava/lang/String;)Ljava/lang/String;
+
+    move-result-object v1
+
+    iput-object v1, p0, Lcom/gemini/chat/ReadAloud;->lastRetryAfter:Ljava/lang/String;
+
+    .line 237
     invoke-virtual {v0}, Ljava/net/HttpURLConnection;->getErrorStream()Ljava/io/InputStream;
 
     move-result-object v1
@@ -1073,37 +1087,37 @@
     :try_end_9
     .catchall {:try_start_9 .. :try_end_9} :catchall_1
 
-    .line 244
+    .line 254
     if-eqz v3, :cond_6
 
-    .line 246
+    .line 256
     :try_start_a
     invoke-virtual {v4}, Ljava/io/BufferedReader;->close()V
     :try_end_a
     .catch Ljava/lang/Exception; {:try_start_a .. :try_end_a} :catch_2
 
-    .line 250
+    .line 260
     :cond_6
     :goto_6
     if-eqz v0, :cond_7
 
-    .line 252
+    .line 262
     :try_start_b
     invoke-virtual {v0}, Ljava/net/HttpURLConnection;->disconnect()V
     :try_end_b
     .catch Ljava/lang/Exception; {:try_start_b .. :try_end_b} :catch_3
 
-    .line 256
+    .line 266
     :cond_7
     :goto_7
     iput-object v3, p0, Lcom/gemini/chat/ReadAloud;->conn:Ljava/net/HttpURLConnection;
 
     move v0, v2
 
-    .line 228
+    .line 238
     goto :goto_2
 
-    .line 230
+    .line 240
     :cond_8
     :try_start_c
     new-instance v2, Ljava/io/BufferedReader;
@@ -1124,13 +1138,13 @@
     :try_end_c
     .catchall {:try_start_c .. :try_end_c} :catchall_1
 
-    .line 231
+    .line 241
     :try_start_d
     new-instance v6, Ljava/lang/StringBuffer;
 
     invoke-direct {v6}, Ljava/lang/StringBuffer;-><init>()V
 
-    .line 233
+    .line 243
     :cond_9
     :goto_8
     iget-boolean v4, p0, Lcom/gemini/chat/ReadAloud;->stopped:Z
@@ -1143,7 +1157,7 @@
 
     if-eqz v7, :cond_c
 
-    .line 234
+    .line 244
     const-string v4, "data:"
 
     invoke-virtual {v7, v4}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
@@ -1152,7 +1166,7 @@
 
     if-eqz v4, :cond_b
 
-    .line 235
+    .line 245
     invoke-virtual {v7}, Ljava/lang/String;->length()I
 
     move-result v4
@@ -1180,7 +1194,7 @@
 
     goto :goto_8
 
-    .line 244
+    .line 254
     :catchall_2
     move-exception v1
 
@@ -1191,10 +1205,10 @@
     :cond_a
     move v4, v5
 
-    .line 235
+    .line 245
     goto :goto_9
 
-    .line 236
+    .line 246
     :cond_b
     invoke-virtual {v7}, Ljava/lang/String;->length()I
 
@@ -1208,21 +1222,21 @@
 
     if-lez v4, :cond_9
 
-    .line 237
+    .line 247
     invoke-virtual {v6}, Ljava/lang/StringBuffer;->toString()Ljava/lang/String;
 
     move-result-object v4
 
     invoke-direct {p0, v4}, Lcom/gemini/chat/ReadAloud;->event(Ljava/lang/String;)V
 
-    .line 238
+    .line 248
     const/4 v4, 0x0
 
     invoke-virtual {v6, v4}, Ljava/lang/StringBuffer;->setLength(I)V
 
     goto :goto_8
 
-    .line 241
+    .line 251
     :cond_c
     iget-boolean v4, p0, Lcom/gemini/chat/ReadAloud;->stopped:Z
 
@@ -1242,86 +1256,86 @@
     :try_end_d
     .catchall {:try_start_d .. :try_end_d} :catchall_2
 
-    .line 244
+    .line 254
     :cond_d
     if-eqz v2, :cond_e
 
-    .line 246
+    .line 256
     :try_start_e
     invoke-virtual {v2}, Ljava/io/BufferedReader;->close()V
     :try_end_e
     .catch Ljava/lang/Exception; {:try_start_e .. :try_end_e} :catch_4
 
-    .line 250
+    .line 260
     :cond_e
     :goto_a
     if-eqz v0, :cond_f
 
-    .line 252
+    .line 262
     :try_start_f
     invoke-virtual {v0}, Ljava/net/HttpURLConnection;->disconnect()V
     :try_end_f
     .catch Ljava/lang/Exception; {:try_start_f .. :try_end_f} :catch_5
 
-    .line 256
+    .line 266
     :cond_f
     :goto_b
     iput-object v3, p0, Lcom/gemini/chat/ReadAloud;->conn:Ljava/net/HttpURLConnection;
 
     move v0, v1
 
-    .line 242
+    .line 252
     goto/16 :goto_2
 
-    .line 247
+    .line 257
     :catch_0
     move-exception v2
 
     goto/16 :goto_0
 
-    .line 253
+    .line 263
     :catch_1
     move-exception v0
 
     goto/16 :goto_1
 
-    .line 247
+    .line 257
     :catch_2
     move-exception v1
 
     goto/16 :goto_6
 
-    .line 253
+    .line 263
     :catch_3
     move-exception v0
 
     goto/16 :goto_7
 
-    .line 247
+    .line 257
     :catch_4
     move-exception v2
 
     goto :goto_a
 
-    .line 253
+    .line 263
     :catch_5
     move-exception v0
 
     goto :goto_b
 
-    .line 247
+    .line 257
     :catch_6
     move-exception v0
 
     goto/16 :goto_4
 
-    .line 253
+    .line 263
     :catch_7
     move-exception v0
 
     goto/16 :goto_5
 
-    .line 244
+    .line 254
     :catchall_3
     move-exception v0
 
@@ -1343,36 +1357,36 @@
     .end annotation
 
     .prologue
-    .line 61
+    .line 62
     new-instance v0, Lorg/json/JSONObject;
 
     invoke-direct {v0}, Lorg/json/JSONObject;-><init>()V
 
-    .line 62
+    .line 63
     const-string v1, "type"
 
     const-string v2, "text"
 
     invoke-virtual {v0, v1, v2}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
 
-    .line 63
+    .line 64
     const-string v1, "text"
 
     invoke-virtual {v0, v1, p2}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
 
-    .line 64
+    .line 65
     new-instance v1, Lorg/json/JSONObject;
 
     invoke-direct {v1}, Lorg/json/JSONObject;-><init>()V
 
-    .line 65
+    .line 66
     const-string v2, "type"
 
     const-string v3, "user_input"
 
     invoke-virtual {v1, v2, v3}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
 
-    .line 66
+    .line 67
     const-string v2, "content"
 
     new-instance v3, Lorg/json/JSONArray;
@@ -1385,19 +1399,19 @@
 
     invoke-virtual {v1, v2, v0}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
 
-    .line 67
+    .line 68
     new-instance v0, Lorg/json/JSONObject;
 
     invoke-direct {v0}, Lorg/json/JSONObject;-><init>()V
 
-    .line 68
+    .line 69
     const-string v2, "type"
 
     const-string v3, "audio"
 
     invoke-virtual {v0, v2, v3}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
 
-    .line 69
+    .line 70
     if-eqz p0, :cond_0
 
     const-string v2, "gemini-3.1-"
@@ -1408,7 +1422,7 @@
 
     if-nez v2, :cond_1
 
-    .line 70
+    .line 71
     :cond_0
     const-string v2, "mime_type"
 
@@ -1416,30 +1430,30 @@
 
     invoke-virtual {v0, v2, v3}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
 
-    .line 71
+    .line 72
     const-string v2, "sample_rate"
 
     const/16 v3, 0x5dc0
 
     invoke-virtual {v0, v2, v3}, Lorg/json/JSONObject;->put(Ljava/lang/String;I)Lorg/json/JSONObject;
 
-    .line 73
+    .line 74
     :cond_1
     new-instance v2, Lorg/json/JSONObject;
 
     invoke-direct {v2}, Lorg/json/JSONObject;-><init>()V
 
-    .line 74
+    .line 75
     const-string v3, "voice"
 
     invoke-virtual {v2, v3, p1}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
 
-    .line 75
+    .line 76
     new-instance v3, Lorg/json/JSONObject;
 
     invoke-direct {v3}, Lorg/json/JSONObject;-><init>()V
 
-    .line 76
+    .line 77
     const-string v4, "speech_config"
 
     new-instance v5, Lorg/json/JSONArray;
@@ -1452,17 +1466,17 @@
 
     invoke-virtual {v3, v4, v2}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
 
-    .line 77
+    .line 78
     new-instance v2, Lorg/json/JSONObject;
 
     invoke-direct {v2}, Lorg/json/JSONObject;-><init>()V
 
-    .line 78
+    .line 79
     const-string v4, "model"
 
     invoke-virtual {v2, v4, p0}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
 
-    .line 79
+    .line 80
     const-string v4, "input"
 
     new-instance v5, Lorg/json/JSONArray;
@@ -1475,24 +1489,24 @@
 
     invoke-virtual {v2, v4, v1}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
 
-    .line 80
+    .line 81
     const-string v1, "response_format"
 
     invoke-virtual {v2, v1, v0}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
 
-    .line 81
+    .line 82
     const-string v0, "generation_config"
 
     invoke-virtual {v2, v0, v3}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
 
-    .line 82
+    .line 83
     const-string v0, "stream"
 
     const/4 v1, 0x1
 
     invoke-virtual {v2, v0, v1}, Lorg/json/JSONObject;->put(Ljava/lang/String;Z)Lorg/json/JSONObject;
 
-    .line 83
+    .line 84
     invoke-virtual {v2}, Lorg/json/JSONObject;->toString()Ljava/lang/String;
 
     move-result-object v0
@@ -1506,24 +1520,24 @@
     .prologue
     const/4 v2, 0x0
 
-    .line 104
+    .line 105
     invoke-static {p0, v2}, Lcom/gemini/chat/Markdown;->parse(Ljava/lang/String;I)Lcom/gemini/chat/Markdown$Doc;
 
     move-result-object v4
 
-    .line 105
+    .line 106
     iget-object v0, v4, Lcom/gemini/chat/Markdown$Doc;->text:Ljava/lang/StringBuilder;
 
     invoke-virtual {v0}, Ljava/lang/StringBuilder;->length()I
 
     move-result v5
 
-    .line 106
+    .line 107
     new-array v6, v5, [Z
 
     move v1, v2
 
-    .line 107
+    .line 108
     :goto_0
     iget-object v0, v4, Lcom/gemini/chat/Markdown$Doc;->spans:Ljava/util/ArrayList;
 
@@ -1533,7 +1547,7 @@
 
     if-ge v1, v0, :cond_2
 
-    .line 108
+    .line 109
     iget-object v0, v4, Lcom/gemini/chat/Markdown$Doc;->spans:Ljava/util/ArrayList;
 
     invoke-virtual {v0, v1}, Ljava/util/ArrayList;->get(I)Ljava/lang/Object;
@@ -1542,7 +1556,7 @@
 
     check-cast v0, Lcom/gemini/chat/Markdown$Span;
 
-    .line 109
+    .line 110
     iget v3, v0, Lcom/gemini/chat/Markdown$Span;->type:I
 
     const/16 v7, 0x10
@@ -1567,7 +1581,7 @@
 
     if-ne v3, v7, :cond_1
 
-    .line 111
+    .line 112
     :cond_0
     iget v3, v0, Lcom/gemini/chat/Markdown$Span;->start:I
 
@@ -1592,7 +1606,7 @@
 
     goto :goto_1
 
-    .line 107
+    .line 108
     :cond_1
     add-int/lit8 v0, v1, 0x1
 
@@ -1600,7 +1614,7 @@
 
     goto :goto_0
 
-    .line 114
+    .line 115
     :cond_2
     new-instance v3, Ljava/lang/StringBuffer;
 
@@ -1610,23 +1624,23 @@
 
     move v0, v2
 
-    .line 116
+    .line 117
     :goto_2
     if-ge v1, v5, :cond_6
 
-    .line 117
+    .line 118
     aget-boolean v7, v6, v1
 
     if-eqz v7, :cond_4
 
-    .line 116
+    .line 117
     :cond_3
     :goto_3
     add-int/lit8 v1, v1, 0x1
 
     goto :goto_2
 
-    .line 118
+    .line 119
     :cond_4
     iget-object v7, v4, Lcom/gemini/chat/Markdown$Doc;->text:Ljava/lang/StringBuilder;
 
@@ -1634,19 +1648,19 @@
 
     move-result v7
 
-    .line 119
+    .line 120
     const/16 v8, 0xa
 
     if-ne v7, v8, :cond_5
 
-    .line 120
+    .line 121
     add-int/lit8 v0, v0, 0x1
 
     const/4 v8, 0x2
 
     if-gt v0, v8, :cond_3
 
-    .line 124
+    .line 125
     :goto_4
     invoke-virtual {v3, v7}, Ljava/lang/StringBuffer;->append(C)Ljava/lang/StringBuffer;
 
@@ -1655,10 +1669,10 @@
     :cond_5
     move v0, v2
 
-    .line 122
+    .line 123
     goto :goto_4
 
-    .line 126
+    .line 127
     :cond_6
     invoke-virtual {v3}, Ljava/lang/StringBuffer;->toString()Ljava/lang/String;
 
@@ -1677,70 +1691,81 @@
     .locals 1
 
     .prologue
-    .line 166
+    .line 167
     iget-boolean v0, p0, Lcom/gemini/chat/ReadAloud;->stopped:Z
 
     return v0
 .end method
 
 .method public run()V
-    .locals 6
+    .locals 8
 
     .prologue
     const/4 v1, 0x0
 
-    .line 170
     .line 172
+    const/16 v0, -0x10
+
+    :try_start_0
+    invoke-static {v0}, Landroid/os/Process;->setThreadPriority(I)V
+    :try_end_0
+    .catch Ljava/lang/Throwable; {:try_start_0 .. :try_end_0} :catch_2
+
+    .line 177
+    :goto_0
+    const/4 v2, 0x2
+
+    .line 178
     const/4 v0, 0x0
 
-    .line 173
-    :goto_0
-    :try_start_0
+    .line 179
+    :goto_1
+    :try_start_1
     invoke-direct {p0}, Lcom/gemini/chat/ReadAloud;->request()I
 
-    move-result v2
+    move-result v3
 
-    .line 174
-    if-eqz v2, :cond_7
+    .line 180
+    if-eqz v3, :cond_7
 
-    iget-boolean v3, p0, Lcom/gemini/chat/ReadAloud;->stopped:Z
-    :try_end_0
-    .catch Ljava/lang/InterruptedException; {:try_start_0 .. :try_end_0} :catch_0
-    .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_1
-    .catchall {:try_start_0 .. :try_end_0} :catchall_0
+    iget-boolean v4, p0, Lcom/gemini/chat/ReadAloud;->stopped:Z
+    :try_end_1
+    .catch Ljava/lang/InterruptedException; {:try_start_1 .. :try_end_1} :catch_0
+    .catch Ljava/lang/Exception; {:try_start_1 .. :try_end_1} :catch_1
+    .catchall {:try_start_1 .. :try_end_1} :catchall_0
 
-    if-eqz v3, :cond_2
+    if-eqz v4, :cond_2
 
     move-object v0, v1
 
-    .line 181
-    :goto_1
+    .line 188
+    :goto_2
     if-nez v0, :cond_0
 
-    :try_start_1
+    :try_start_2
     iget-boolean v2, p0, Lcom/gemini/chat/ReadAloud;->stopped:Z
 
     if-nez v2, :cond_0
 
     invoke-direct {p0}, Lcom/gemini/chat/ReadAloud;->drain()V
-    :try_end_1
-    .catch Ljava/lang/InterruptedException; {:try_start_1 .. :try_end_1} :catch_3
-    .catch Ljava/lang/Exception; {:try_start_1 .. :try_end_1} :catch_2
-    .catchall {:try_start_1 .. :try_end_1} :catchall_0
+    :try_end_2
+    .catch Ljava/lang/InterruptedException; {:try_start_2 .. :try_end_2} :catch_4
+    .catch Ljava/lang/Exception; {:try_start_2 .. :try_end_2} :catch_3
+    .catchall {:try_start_2 .. :try_end_2} :catchall_0
 
-    .line 191
+    .line 198
     :cond_0
     invoke-direct {p0}, Lcom/gemini/chat/ReadAloud;->releaseTrack()V
 
-    .line 193
-    :goto_2
+    .line 200
+    :goto_3
     iget-boolean v2, p0, Lcom/gemini/chat/ReadAloud;->stopped:Z
 
     if-eqz v2, :cond_1
 
     move-object v0, v1
 
-    .line 194
+    .line 201
     :cond_1
     iget-object v1, p0, Lcom/gemini/chat/ReadAloud;->ui:Landroid/os/Handler;
 
@@ -1750,113 +1775,130 @@
 
     invoke-virtual {v1, v2}, Landroid/os/Handler;->post(Ljava/lang/Runnable;)Z
 
-    .line 199
+    .line 206
     return-void
 
-    .line 175
+    .line 181
     :cond_2
-    :try_start_2
-    invoke-static {v2}, Lcom/gemini/chat/ChatActivity;->retryable(I)Z
+    :try_start_3
+    iget-object v4, p0, Lcom/gemini/chat/ReadAloud;->lastError:Ljava/lang/String;
+
+    invoke-static {v3, v4}, Lcom/gemini/chat/ChatActivity;->maxRetriesFor(ILjava/lang/String;)I
+
+    move-result v4
+
+    invoke-static {v2, v4}, Ljava/lang/Math;->min(II)I
 
     move-result v2
 
-    if-eqz v2, :cond_3
+    .line 182
+    invoke-static {v3}, Lcom/gemini/chat/ChatActivity;->retryable(I)Z
 
-    const/4 v2, 0x2
+    move-result v4
+
+    if-eqz v4, :cond_3
 
     if-ge v0, v2, :cond_3
 
-    iget-wide v2, p0, Lcom/gemini/chat/ReadAloud;->written:J
+    iget-wide v4, p0, Lcom/gemini/chat/ReadAloud;->written:J
 
-    const-wide/16 v4, 0x0
+    const-wide/16 v6, 0x0
 
-    cmp-long v2, v2, v4
+    cmp-long v4, v4, v6
 
-    if-lez v2, :cond_4
+    if-lez v4, :cond_4
 
-    .line 176
+    .line 183
     :cond_3
     iget-object v0, p0, Lcom/gemini/chat/ReadAloud;->lastError:Ljava/lang/String;
 
-    goto :goto_1
+    goto :goto_2
 
-    .line 179
+    .line 186
     :cond_4
-    const-wide/16 v2, 0x7d0
+    add-int/lit8 v4, v0, 0x1
 
-    shl-long/2addr v2, v0
+    iget-object v5, p0, Lcom/gemini/chat/ReadAloud;->lastRetryAfter:Ljava/lang/String;
 
-    invoke-static {v2, v3}, Ljava/lang/Thread;->sleep(J)V
-    :try_end_2
-    .catch Ljava/lang/InterruptedException; {:try_start_2 .. :try_end_2} :catch_0
-    .catch Ljava/lang/Exception; {:try_start_2 .. :try_end_2} :catch_1
-    .catchall {:try_start_2 .. :try_end_2} :catchall_0
+    invoke-static {}, Ljava/lang/System;->nanoTime()J
 
-    .line 172
+    move-result-wide v6
+
+    invoke-static {v4, v3, v5, v6, v7}, Lcom/gemini/chat/ChatActivity;->retryDelayMs(IILjava/lang/String;J)J
+
+    move-result-wide v4
+
+    invoke-static {v4, v5}, Ljava/lang/Thread;->sleep(J)V
+    :try_end_3
+    .catch Ljava/lang/InterruptedException; {:try_start_3 .. :try_end_3} :catch_0
+    .catch Ljava/lang/Exception; {:try_start_3 .. :try_end_3} :catch_1
+    .catchall {:try_start_3 .. :try_end_3} :catchall_0
+
+    .line 178
     add-int/lit8 v0, v0, 0x1
 
-    goto :goto_0
+    goto :goto_1
 
-    .line 182
+    .line 189
     :catch_0
     move-exception v0
 
     move-object v0, v1
 
-    .line 191
-    :goto_3
+    .line 198
+    :goto_4
     invoke-direct {p0}, Lcom/gemini/chat/ReadAloud;->releaseTrack()V
 
-    goto :goto_2
+    goto :goto_3
 
-    .line 184
+    .line 191
     :catch_1
     move-exception v2
 
     move-object v0, v1
 
-    .line 185
-    :goto_4
-    :try_start_3
+    .line 192
+    :goto_5
+    :try_start_4
     iget-boolean v3, p0, Lcom/gemini/chat/ReadAloud;->stopped:Z
 
     if-nez v3, :cond_5
 
-    .line 186
+    .line 193
     const-string v0, "Gemini"
 
     const-string v3, "Read aloud failed"
 
     invoke-static {v0, v3, v2}, Landroid/util/Log;->e(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
 
-    .line 187
+    .line 194
     invoke-virtual {v2}, Ljava/lang/Exception;->getMessage()Ljava/lang/String;
 
     move-result-object v0
 
-    .line 188
+    .line 195
     if-eqz v0, :cond_6
 
     const-string v3, "Error"
 
     invoke-virtual {v0, v3}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
-    :try_end_3
-    .catchall {:try_start_3 .. :try_end_3} :catchall_0
+    :try_end_4
+    .catchall {:try_start_4 .. :try_end_4} :catchall_0
 
     move-result v3
 
     if-eqz v3, :cond_6
 
-    .line 191
+    .line 198
     :cond_5
-    :goto_5
+    :goto_6
     invoke-direct {p0}, Lcom/gemini/chat/ReadAloud;->releaseTrack()V
 
-    goto :goto_2
+    goto :goto_3
 
-    .line 188
+    .line 195
     :cond_6
-    :try_start_4
+    :try_start_5
     new-instance v0, Ljava/lang/StringBuilder;
 
     invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
@@ -1876,88 +1918,94 @@
     move-result-object v0
 
     invoke-virtual {v0}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-    :try_end_4
-    .catchall {:try_start_4 .. :try_end_4} :catchall_0
+    :try_end_5
+    .catchall {:try_start_5 .. :try_end_5} :catchall_0
 
     move-result-object v0
 
-    goto :goto_5
+    goto :goto_6
 
-    .line 191
+    .line 198
     :catchall_0
     move-exception v0
 
     invoke-direct {p0}, Lcom/gemini/chat/ReadAloud;->releaseTrack()V
 
-    .line 192
+    .line 199
     throw v0
 
-    .line 184
+    .line 173
     :catch_2
+    move-exception v0
+
+    goto/16 :goto_0
+
+    .line 191
+    :catch_3
+    move-exception v2
+
+    goto :goto_5
+
+    .line 189
+    :catch_4
     move-exception v2
 
     goto :goto_4
 
-    .line 182
-    :catch_3
-    move-exception v2
-
-    goto :goto_3
-
     :cond_7
     move-object v0, v1
 
-    goto :goto_1
+    goto/16 :goto_2
 .end method
 
 .method stopReading()V
     .locals 2
 
     .prologue
-    .line 142
+    .line 143
     const/4 v0, 0x1
 
     iput-boolean v0, p0, Lcom/gemini/chat/ReadAloud;->stopped:Z
 
-    .line 143
+    .line 144
     iget-object v0, p0, Lcom/gemini/chat/ReadAloud;->conn:Ljava/net/HttpURLConnection;
 
-    .line 144
+    .line 145
     if-eqz v0, :cond_0
 
-    .line 145
+    .line 146
     new-instance v1, Lcom/gemini/chat/ReadAloud$1;
 
     invoke-direct {v1, p0, v0}, Lcom/gemini/chat/ReadAloud$1;-><init>(Lcom/gemini/chat/ReadAloud;Ljava/net/HttpURLConnection;)V
 
-    .line 152
+    .line 153
     invoke-virtual {v1}, Lcom/gemini/chat/ReadAloud$1;->start()V
 
-    .line 154
+    .line 155
     :cond_0
     iget-object v0, p0, Lcom/gemini/chat/ReadAloud;->track:Landroid/media/AudioTrack;
 
-    .line 155
+    .line 156
     if-eqz v0, :cond_1
 
-    .line 157
+    .line 158
     :try_start_0
     invoke-virtual {v0}, Landroid/media/AudioTrack;->pause()V
 
-    .line 158
+    .line 159
     invoke-virtual {v0}, Landroid/media/AudioTrack;->flush()V
     :try_end_0
     .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_0
 
-    .line 162
+    .line 163
     :cond_1
     :goto_0
     invoke-virtual {p0}, Lcom/gemini/chat/ReadAloud;->interrupt()V
 
-    .line 163
+    .line 164
     return-void
 
-    .line 159
+    .line 160
     :catch_0
     move-exception v0
 

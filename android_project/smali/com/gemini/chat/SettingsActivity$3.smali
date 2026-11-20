@@ -3,7 +3,7 @@
 .source "SettingsActivity.java"
 
 # interfaces
-.implements Landroid/view/View$OnClickListener;
+.implements Landroid/widget/AdapterView$OnItemSelectedListener;
 
 
 # annotations
@@ -26,7 +26,7 @@
     .locals 0
 
     .prologue
-    .line 200
+    .line 207
     iput-object p1, p0, Lcom/gemini/chat/SettingsActivity$3;->this$0:Lcom/gemini/chat/SettingsActivity;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
@@ -36,15 +36,39 @@
 
 
 # virtual methods
-.method public onClick(Landroid/view/View;)V
+.method public onItemSelected(Landroid/widget/AdapterView;Landroid/view/View;IJ)V
     .locals 1
+    .annotation system Ldalvik/annotation/Signature;
+        value = {
+            "(",
+            "Landroid/widget/AdapterView",
+            "<*>;",
+            "Landroid/view/View;",
+            "IJ)V"
+        }
+    .end annotation
 
     .prologue
-    .line 202
+    .line 209
     iget-object v0, p0, Lcom/gemini/chat/SettingsActivity$3;->this$0:Lcom/gemini/chat/SettingsActivity;
 
     invoke-static {v0}, Lcom/gemini/chat/SettingsActivity;->access$100(Lcom/gemini/chat/SettingsActivity;)V
 
-    .line 203
+    .line 210
+    return-void
+.end method
+
+.method public onNothingSelected(Landroid/widget/AdapterView;)V
+    .locals 0
+    .annotation system Ldalvik/annotation/Signature;
+        value = {
+            "(",
+            "Landroid/widget/AdapterView",
+            "<*>;)V"
+        }
+    .end annotation
+
+    .prologue
+    .line 213
     return-void
 .end method

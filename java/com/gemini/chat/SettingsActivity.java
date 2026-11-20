@@ -3,7 +3,9 @@ package com.gemini.chat;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -40,7 +42,7 @@ public class SettingsActivity extends Activity {
 
     private EditText etApiKey, etSystemInstruction, etCustomModel, etLiveCustom;
     private Spinner spinnerModel, spTextThinking, spTextSize, spLiveModel, spLiveThinking, spVoice, spTts;
-    private TextView tvLiveThinking;
+    private TextView tvThinkingHint, tvLiveThinking;
     private CheckBox cbAutoName, cbShowThoughts, cbHandsFree, cbMuted, cbLiveText;
 
     /** "models/gemini-x" or " gemini-x " -> "gemini-x"; null if empty or not a plausible model id. */
@@ -154,11 +156,12 @@ public class SettingsActivity extends Activity {
         spinnerModel.setAdapter(spinner(withCustom(MODELS)).getAdapter());
         etCustomModel = modelIdField("Model ID, e.g. gemini-4-neon");
         spTextThinking = spinner(THINKING_LABELS);
+        tvThinkingHint = hint("");
         cbShowThoughts = check("Show thought process");
         at = col.indexOfChild(spinnerModel) + 1;
-        at = insert(col, at, new View[]{etCustomModel, title("Thinking level"), spTextThinking, cbShowThoughts,
-                hint("Hold a reply to see its thoughts.")},
-                new LinearLayout.LayoutParams[]{fill(4), fill(16), fill(4), fill(8), fill(0)});
+        at = insert(col, at, new View[]{etCustomModel, title("Thinking level"), spTextThinking, tvThinkingHint,
+                cbShowThoughts, hint("Hold a reply to see its thoughts.")},
+                new LinearLayout.LayoutParams[]{fill(4), fill(16), fill(4), fill(0), fill(8), fill(0)});
 
         // 3. live speech: model, custom id, thinking level (extended-thinking models), voice, options
         spLiveModel = spinner(withCustom(LiveActivity.LIVE_MODELS));
@@ -184,6 +187,26 @@ public class SettingsActivity extends Activity {
         spinnerModel.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> p, View v, int position, long id) {
                 updateVisibility();
+                syncThinkingForModel();
+            }
+
+            public void onNothingSelected(AdapterView<?> p) {
+            }
+        });
+        etCustomModel.addTextChangedListener(new TextWatcher() {
+            public void afterTextChanged(Editable s) {
+                syncThinkingForModel();
+            }
+
+            public void beforeTextChanged(CharSequence s, int a, int b, int c) {
+            }
+
+            public void onTextChanged(CharSequence s, int a, int b, int c) {
+            }
+        });
+        spTextThinking.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            public void onItemSelected(AdapterView<?> p, View v, int position, long id) {
+                syncThinkingForModel();
             }
 
             public void onNothingSelected(AdapterView<?> p) {
@@ -249,6 +272,30 @@ public class SettingsActivity extends Activity {
         cbMuted.setChecked(sp.getBoolean("live_muted", false));
         cbLiveText.setChecked(sp.getBoolean("live_text", true));
         updateVisibility();
+        syncThinkingForModel();
+    }
+
+    private String selectedTextModel() {
+        int pos = spinnerModel.getSelectedItemPosition();
+        if (pos >= 0 && pos < MODELS.length) return MODELS[pos];
+        String custom = normalizeModel(etCustomModel.getText().toString());
+        return custom != null ? custom : etCustomModel.getText().toString().trim();
+    }
+
+    /** Snaps Extra High back to High whenever the active model does not support xhigh. */
+    private void syncThinkingForModel() {
+        String m = selectedTextModel();
+        boolean hasXhigh = m.length() == 0 || ReplyParser.supportsXhigh(m);
+        int pos = spTextThinking.getSelectedItemPosition();
+        if (!hasXhigh && pos >= 0 && pos < THINKING_VALUES.length && "xhigh".equals(THINKING_VALUES[pos])) {
+            int highIdx = indexOf(THINKING_VALUES, "high");
+            if (highIdx >= 0) spTextThinking.setSelection(highIdx);
+        }
+        if (tvThinkingHint != null) {
+            tvThinkingHint.setText(hasXhigh
+                    ? "Supports Extra High reasoning depth."
+                    : "Caps at High on this model (Extra High is for Hydrogen / Neon).");
+        }
     }
 
     private void updateVisibility() {
@@ -300,7 +347,9 @@ public class SettingsActivity extends Activity {
         e.putInt("text_size", MessageFormatter.TEXT_SIZES[Math.max(0, spTextSize.getSelectedItemPosition())]);
         e.putString("model", model);
         e.putString(PREF_CUSTOM, custom);
-        e.putString("thinking_level", THINKING_VALUES[Math.max(0, spTextThinking.getSelectedItemPosition())]);
+        String thinking = THINKING_VALUES[Math.max(0, spTextThinking.getSelectedItemPosition())];
+        if ("xhigh".equals(thinking) && !ReplyParser.supportsXhigh(model)) thinking = "high";
+        e.putString("thinking_level", thinking);
         e.putBoolean("show_thoughts", cbShowThoughts.isChecked());
         e.putString("live_model", liveModel);
         if (lpos == LiveActivity.LIVE_MODELS.length) e.putString("live_custom_model", liveModel);

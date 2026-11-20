@@ -33,7 +33,7 @@
     .end annotation
 
     .prologue
-    .line 508
+    .line 583
     iput-object p1, p0, Lcom/gemini/chat/LiveActivity$Transcriber$2;->this$1:Lcom/gemini/chat/LiveActivity$Transcriber;
 
     iput-object p2, p0, Lcom/gemini/chat/LiveActivity$Transcriber$2;->val$text:Ljava/lang/String;
@@ -49,7 +49,7 @@
     .locals 4
 
     .prologue
-    .line 510
+    .line 585
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Transcriber$2;->this$1:Lcom/gemini/chat/LiveActivity$Transcriber;
 
     iget-object v0, v0, Lcom/gemini/chat/LiveActivity$Transcriber;->this$0:Lcom/gemini/chat/LiveActivity;
@@ -84,12 +84,12 @@
 
     if-nez v0, :cond_1
 
-    .line 514
+    .line 589
     :cond_0
     :goto_0
     return-void
 
-    .line 511
+    .line 586
     :cond_1
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Transcriber$2;->this$1:Lcom/gemini/chat/LiveActivity$Transcriber;
 
@@ -113,7 +113,7 @@
 
     invoke-virtual {v0, v1}, Ljava/lang/StringBuffer;->append(C)Ljava/lang/StringBuffer;
 
-    .line 512
+    .line 587
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Transcriber$2;->this$1:Lcom/gemini/chat/LiveActivity$Transcriber;
 
     iget-object v0, v0, Lcom/gemini/chat/LiveActivity$Transcriber;->this$0:Lcom/gemini/chat/LiveActivity;
@@ -122,7 +122,7 @@
 
     invoke-static {v0, v1}, Lcom/gemini/chat/LiveActivity;->access$3102(Lcom/gemini/chat/LiveActivity;Ljava/lang/String;)Ljava/lang/String;
 
-    .line 513
+    .line 588
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Transcriber$2;->this$1:Lcom/gemini/chat/LiveActivity$Transcriber;
 
     iget-object v0, v0, Lcom/gemini/chat/LiveActivity$Transcriber;->this$0:Lcom/gemini/chat/LiveActivity;

@@ -8,7 +8,7 @@
 
 # annotations
 .annotation system Ldalvik/annotation/EnclosingMethod;
-    value = Lcom/gemini/chat/ChatActivity;->showEditDialog(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+    value = Lcom/gemini/chat/ChatActivity;->showThoughts(Ljava/lang/String;Ljava/lang/String;)V
 .end annotation
 
 .annotation system Ldalvik/annotation/InnerClass;
@@ -20,15 +20,11 @@
 # instance fields
 .field final synthetic this$0:Lcom/gemini/chat/ChatActivity;
 
-.field final synthetic val$et:Landroid/widget/EditText;
-
-.field final synthetic val$hasImage:Z
-
-.field final synthetic val$msgId:J
+.field final synthetic val$thoughts:Ljava/lang/String;
 
 
 # direct methods
-.method constructor <init>(Lcom/gemini/chat/ChatActivity;Landroid/widget/EditText;ZJ)V
+.method constructor <init>(Lcom/gemini/chat/ChatActivity;Ljava/lang/String;)V
     .locals 0
     .annotation system Ldalvik/annotation/Signature;
         value = {
@@ -37,14 +33,10 @@
     .end annotation
 
     .prologue
-    .line 1114
+    .line 1377
     iput-object p1, p0, Lcom/gemini/chat/ChatActivity$12;->this$0:Lcom/gemini/chat/ChatActivity;
 
-    iput-object p2, p0, Lcom/gemini/chat/ChatActivity$12;->val$et:Landroid/widget/EditText;
-
-    iput-boolean p3, p0, Lcom/gemini/chat/ChatActivity$12;->val$hasImage:Z
-
-    iput-wide p4, p0, Lcom/gemini/chat/ChatActivity$12;->val$msgId:J
+    iput-object p2, p0, Lcom/gemini/chat/ChatActivity$12;->val$thoughts:Ljava/lang/String;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 
@@ -54,101 +46,18 @@
 
 # virtual methods
 .method public onClick(Landroid/content/DialogInterface;I)V
-    .locals 6
+    .locals 3
 
     .prologue
-    .line 1116
+    .line 1379
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$12;->this$0:Lcom/gemini/chat/ChatActivity;
 
-    iget-object v1, p0, Lcom/gemini/chat/ChatActivity$12;->val$et:Landroid/widget/EditText;
+    iget-object v1, p0, Lcom/gemini/chat/ChatActivity$12;->val$thoughts:Ljava/lang/String;
 
-    invoke-static {v0, v1}, Lcom/gemini/chat/ChatActivity;->access$3300(Lcom/gemini/chat/ChatActivity;Landroid/view/View;)V
+    const-string v2, "Thoughts copied"
 
-    .line 1117
-    iget-object v0, p0, Lcom/gemini/chat/ChatActivity$12;->val$et:Landroid/widget/EditText;
+    invoke-static {v0, v1, v2}, Lcom/gemini/chat/ChatActivity;->access$3300(Lcom/gemini/chat/ChatActivity;Ljava/lang/String;Ljava/lang/String;)V
 
-    invoke-virtual {v0}, Landroid/widget/EditText;->getText()Landroid/text/Editable;
-
-    move-result-object v0
-
-    invoke-virtual {v0}, Ljava/lang/Object;->toString()Ljava/lang/String;
-
-    move-result-object v0
-
-    invoke-virtual {v0}, Ljava/lang/String;->trim()Ljava/lang/String;
-
-    move-result-object v0
-
-    .line 1118
-    invoke-virtual {v0}, Ljava/lang/String;->length()I
-
-    move-result v1
-
-    if-nez v1, :cond_1
-
-    iget-boolean v1, p0, Lcom/gemini/chat/ChatActivity$12;->val$hasImage:Z
-
-    if-nez v1, :cond_1
-
-    .line 1125
-    :cond_0
-    :goto_0
+    .line 1380
     return-void
-
-    .line 1119
-    :cond_1
-    iget-object v1, p0, Lcom/gemini/chat/ChatActivity$12;->this$0:Lcom/gemini/chat/ChatActivity;
-
-    invoke-static {v1}, Lcom/gemini/chat/ChatActivity;->access$3400(Lcom/gemini/chat/ChatActivity;)Z
-
-    move-result v1
-
-    if-eqz v1, :cond_0
-
-    .line 1120
-    iget-object v1, p0, Lcom/gemini/chat/ChatActivity$12;->this$0:Lcom/gemini/chat/ChatActivity;
-
-    invoke-static {v1}, Lcom/gemini/chat/ChatActivity;->access$2600(Lcom/gemini/chat/ChatActivity;)V
-
-    .line 1121
-    iget-object v1, p0, Lcom/gemini/chat/ChatActivity$12;->this$0:Lcom/gemini/chat/ChatActivity;
-
-    invoke-static {v1}, Lcom/gemini/chat/ChatActivity;->access$000(Lcom/gemini/chat/ChatActivity;)Lcom/gemini/chat/DatabaseHelper;
-
-    move-result-object v1
-
-    iget-wide v2, p0, Lcom/gemini/chat/ChatActivity$12;->val$msgId:J
-
-    invoke-virtual {v1, v2, v3, v0}, Lcom/gemini/chat/DatabaseHelper;->updateMessage(JLjava/lang/String;)V
-
-    .line 1122
-    iget-object v0, p0, Lcom/gemini/chat/ChatActivity$12;->this$0:Lcom/gemini/chat/ChatActivity;
-
-    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$000(Lcom/gemini/chat/ChatActivity;)Lcom/gemini/chat/DatabaseHelper;
-
-    move-result-object v0
-
-    iget-object v1, p0, Lcom/gemini/chat/ChatActivity$12;->this$0:Lcom/gemini/chat/ChatActivity;
-
-    invoke-static {v1}, Lcom/gemini/chat/ChatActivity;->access$900(Lcom/gemini/chat/ChatActivity;)J
-
-    move-result-wide v2
-
-    iget-wide v4, p0, Lcom/gemini/chat/ChatActivity$12;->val$msgId:J
-
-    invoke-virtual {v0, v2, v3, v4, v5}, Lcom/gemini/chat/DatabaseHelper;->deleteMessagesAfter(JJ)V
-
-    .line 1123
-    iget-object v0, p0, Lcom/gemini/chat/ChatActivity$12;->this$0:Lcom/gemini/chat/ChatActivity;
-
-    const/4 v1, 0x0
-
-    invoke-static {v0, v1}, Lcom/gemini/chat/ChatActivity;->access$3000(Lcom/gemini/chat/ChatActivity;Z)V
-
-    .line 1124
-    iget-object v0, p0, Lcom/gemini/chat/ChatActivity$12;->this$0:Lcom/gemini/chat/ChatActivity;
-
-    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$3100(Lcom/gemini/chat/ChatActivity;)V
-
-    goto :goto_0
 .end method

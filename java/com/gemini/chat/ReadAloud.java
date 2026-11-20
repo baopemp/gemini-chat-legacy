@@ -4,6 +4,7 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.os.Handler;
+import android.os.Process;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -167,16 +168,22 @@ final class ReadAloud extends Thread {
     }
 
     public void run() {
+        try {
+            Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
+        } catch (Throwable ignored) {
+        }
         String error = null;
         try {
+            int maxRetries = MAX_RETRIES;
             for (int attempt = 0; ; attempt++) {
                 int code = request();
                 if (code == 0 || stopped) break;
-                if (!ChatActivity.retryable(code) || attempt >= MAX_RETRIES || written > 0) {
+                maxRetries = Math.min(maxRetries, ChatActivity.maxRetriesFor(code, lastError));
+                if (!ChatActivity.retryable(code) || attempt >= maxRetries || written > 0) {
                     error = lastError;
                     break;
                 }
-                Thread.sleep(2000L << attempt); // 2 s, 4 s
+                Thread.sleep(ChatActivity.retryDelayMs(attempt + 1, code, lastRetryAfter, System.nanoTime()));
             }
             if (error == null && !stopped) drain();
         } catch (InterruptedException e) {
@@ -199,15 +206,17 @@ final class ReadAloud extends Thread {
     }
 
     private String lastError;
+    private String lastRetryAfter;
 
     /** One attempt. 0 = audio streamed to the end; otherwise the HTTP status (message in lastError). */
     private int request() throws Exception {
         HttpURLConnection c = null;
         BufferedReader in = null;
+        lastRetryAfter = null;
         try {
             c = (HttpURLConnection) new URL(URL_INTERACTIONS).openConnection();
             conn = c;
-            c.setConnectTimeout(30000);
+            c.setConnectTimeout(20000);
             c.setReadTimeout(120000);
             c.setRequestMethod("POST");
             c.setRequestProperty("Content-Type", "application/json; charset=utf-8");
@@ -224,6 +233,7 @@ final class ReadAloud extends Thread {
             int code = c.getResponseCode();
             if (stopped) return 0;
             if (code < 200 || code >= 300) {
+                lastRetryAfter = c.getHeaderField("Retry-After");
                 lastError = errorMessage(code, ChatActivity.readAll(c.getErrorStream()));
                 return code;
             }

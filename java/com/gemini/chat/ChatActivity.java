@@ -7,6 +7,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -20,6 +26,7 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -75,11 +82,23 @@ public class ChatActivity extends Activity {
     private LinearLayout layoutChat;
     private ScrollView scrollChat;
 
-    /** Attached image as a data: URI (converted when picked), or null. */
+    /** Attached image as a data: URI (converted on a background thread when picked), or null. */
     private String pendingImage;
+    private AttachImageTask attachTask;
     private LinearLayout attachBar;
     private ImageView attachThumb;
     private TextView attachLabel;
+
+    /** Inline status bar shown while Read Aloud TTS is active. */
+    private LinearLayout readBar;
+    private TextView readLabel;
+    private TextView placeholderConfig;
+
+    private final Runnable scrollDownRunnable = new Runnable() {
+        public void run() {
+            if (scrollChat != null && layoutChat != null) scrollChat.scrollTo(0, layoutChat.getMeasuredHeight());
+        }
+    };
 
     // =========================================================================================
     // Request
@@ -117,23 +136,86 @@ public class ChatActivity extends Activity {
         return code == 500 || code == 502 || code == 503 || code == 504;
     }
 
+    /**
+     * Caps automatic retries so 503 high-demand spikes (e.g. gemini-4-hydrogen on the free tier)
+     * do not hammer free-tier RPM into a 429 rate-limit ban. 429 is never retried.
+     */
+    static int maxRetriesFor(int code, String errorBody) {
+        if (!retryable(code)) return 0;
+        if (code == 503 && errorBody != null) {
+            String lo = errorBody.toLowerCase();
+            if (lo.indexOf("high demand") >= 0 || lo.indexOf("overloaded") >= 0 || lo.indexOf("unavailable") >= 0) {
+                return 1;
+            }
+        }
+        return 2;
+    }
+
+    /** Parses an integer Retry-After header (seconds) into clamped ms [2 s, 20 s], or -1 if absent/invalid. */
+    static long parseRetryAfterMs(String header) {
+        if (header == null) return -1L;
+        String t = header.trim();
+        if (t.length() == 0) return -1L;
+        try {
+            long sec = Long.parseLong(t);
+            if (sec <= 0) return -1L;
+            return Math.max(2000L, Math.min(20000L, sec * 1000L));
+        } catch (NumberFormatException e) {
+            return -1L;
+        }
+    }
+
+    /** Respectful backoff with jitter; honors Retry-After and waits longer on 503 overload spikes. */
+    static long retryDelayMs(int attempt, int code, String retryAfter, long jitterSeed) {
+        long hdr = parseRetryAfterMs(retryAfter);
+        if (hdr > 0) return hdr;
+        int a = Math.max(1, attempt);
+        long base = (code == 503 ? 4500L : 2000L) << Math.min(a - 1, 3);
+        long jitterMax = code == 503 ? 1000L : 500L;
+        long jitter = Math.abs(jitterSeed == Long.MIN_VALUE ? 0L : jitterSeed) % (jitterMax + 1L);
+        return Math.min(20000L, base + jitter);
+    }
+
+    /** Adds concise user guidance on final 429/503 errors without losing the original status line. */
+    static String friendlyError(int code, String msg) {
+        if (msg == null) msg = "Error " + code;
+        String lo = msg.toLowerCase();
+        if (code == 429 && lo.indexOf("settings") < 0) {
+            return msg + "\nTip: Rate limit reached. Wait a minute before retrying, or switch models in Settings.";
+        }
+        if (code == 503 && lo.indexOf("settings") < 0) {
+            return msg + "\nTip: Model is busy right now. Wait a few seconds before retrying, or switch models in Settings.";
+        }
+        return msg;
+    }
+
+    /** Adaptive streaming UI refresh interval so long replies stay smooth on weak single-core CPUs. */
+    static long streamIntervalMs(int charCount) {
+        if (charCount < 800) return 250L;
+        if (charCount < 2500) return 400L;
+        if (charCount < 6000) return 600L;
+        return 850L;
+    }
+
     private class GeminiTask extends AsyncTask<String, Object, String> {
-        /** HTTP codes worth retrying (Google: "retry with backoff"). 429 = quota: not retried. */
-        private static final int MAX_RETRIES = 2;
         private long currentChatId;
         private String usedModel = "";
         private HttpURLConnection conn = null;
         private boolean failed = false;
         private int lastCode = 0;
+        private String lastRetryAfter = null;
         /** thinkingConfig: level (null = model default) and whether thought summaries are requested. */
         private String thinkingLevel;
         private boolean includeThoughts;
         /** Thought summary of the finished reply ("" if none). */
         private String thoughts = "";
         private long lastProgress;
+        private final Object partialLock = new Object();
+        private ReplyParser activeParser;
 
-        GeminiTask(long chatId) {
+        GeminiTask(long chatId, String model) {
             this.currentChatId = chatId;
+            this.usedModel = model != null ? model : "";
         }
 
         private String fail(String msg) {
@@ -270,6 +352,14 @@ public class ChatActivity extends Activity {
             t.start();
         }
 
+        /** Snapshot of {answerText, thoughts} streamed so far, read only when Stop is tapped. */
+        String[] snapshotPartial() {
+            synchronized (partialLock) {
+                if (activeParser == null) return new String[]{"", ""};
+                return new String[]{activeParser.text.toString(), activeParser.thoughts.toString()};
+            }
+        }
+
         /** params: apiKey, model, user system instruction, thinking level ("" = default), "1" = show thoughts */
         @Override
         protected String doInBackground(String... p) {
@@ -286,19 +376,24 @@ public class ChatActivity extends Activity {
                 return fail("Exception: " + e.toString());
             }
             String result = null;
-            for (int attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+            int maxRetries = 2;
+            for (int attempt = 0; ; attempt++) {
                 if (isCancelled()) return null;
                 if (attempt > 0) {
-                    partialText = "";
-                    partialThoughts = "";
-                    publishProgress(Integer.valueOf(attempt));
+                    synchronized (partialLock) {
+                        activeParser = null;
+                    }
+                    long waitMs = retryDelayMs(attempt, lastCode, lastRetryAfter, System.nanoTime());
+                    int waitSec = (int) ((waitMs + 500L) / 1000L);
+                    publishProgress((Object) new int[]{attempt, maxRetries, lastCode, waitSec});
                     try {
-                        Thread.sleep(2000L << (attempt - 1)); // 2 s, 4 s
+                        Thread.sleep(waitMs);
                     } catch (InterruptedException e) {
                         return null;
                     }
                     if (isCancelled()) return null;
                     failed = false;
+                    publishProgress((Object) new String[]{"", ""}); // restore Thinking indicator on retry
                 }
                 result = request(key, model, body);
                 if (failed && lastCode == 400 && thinkingLevel != null && result != null
@@ -313,19 +408,22 @@ public class ChatActivity extends Activity {
                     }
                     result = request(key, model, body);
                 }
-                if (!(failed && retryable(lastCode))) break;
+                if (failed) maxRetries = Math.min(maxRetries, maxRetriesFor(lastCode, result));
+                if (!(failed && retryable(lastCode) && attempt < maxRetries)) break;
             }
+            if (failed && result != null) result = friendlyError(lastCode, result);
             return result;
         }
 
         /** streamGenerateContent (SSE): thought summaries and the answer are shown while they arrive. */
         private String request(String key, String model, String body) {
             lastCode = 0;
+            lastRetryAfter = null;
             BufferedReader in = null;
             try {
                 HttpURLConnection c = (HttpURLConnection) new URL(API + model + ":streamGenerateContent?alt=sse").openConnection();
                 conn = c;
-                c.setConnectTimeout(30000);
+                c.setConnectTimeout(20000);
                 c.setReadTimeout(180000);
                 c.setRequestMethod("POST");
                 c.setRequestProperty("Content-Type", "application/json; charset=utf-8");
@@ -342,9 +440,15 @@ public class ChatActivity extends Activity {
                 int code = c.getResponseCode();
                 lastCode = code;
                 if (isCancelled()) return null;
-                if (code < 200 || code >= 300) return parseError(code, readAll(c.getErrorStream()));
+                if (code < 200 || code >= 300) {
+                    lastRetryAfter = c.getHeaderField("Retry-After");
+                    return parseError(code, readAll(c.getErrorStream()));
+                }
                 in = new BufferedReader(new InputStreamReader(c.getInputStream(), "UTF-8"), 8192);
                 ReplyParser r = new ReplyParser();
+                synchronized (partialLock) {
+                    activeParser = r;
+                }
                 StringBuffer data = new StringBuffer();
                 String line;
                 streamError = null;
@@ -377,9 +481,6 @@ public class ChatActivity extends Activity {
             }
         }
 
-        /** What has streamed so far (kept by Stop). */
-        volatile String partialText = "", partialThoughts = "";
-
         /** Error object sent inside an already started stream ("Error 500: ..."), or null. */
         private String streamError;
 
@@ -391,29 +492,40 @@ public class ChatActivity extends Activity {
                 streamError = "Error " + lastCode + ": " + err.optString("message", "");
                 return;
             }
-            r.feed(o);
-            partialText = r.text.toString();
-            partialThoughts = r.thoughts.toString();
+            int len;
+            synchronized (partialLock) {
+                r.feed(o);
+                len = r.text.length() + r.thoughts.length();
+            }
             long now = System.currentTimeMillis();
-            if (now - lastProgress >= 250) { // old phones: re-render at most 4 times a second
+            if (now - lastProgress >= streamIntervalMs(len)) {
                 lastProgress = now;
-                publishProgress((Object) new String[]{r.thoughts.toString(), r.text.toString()}); // one argument, not varargs
+                String th, tx;
+                synchronized (partialLock) {
+                    th = r.thoughts.toString();
+                    tx = r.text.toString();
+                }
+                publishProgress((Object) new String[]{th, tx}); // one argument, not varargs
             }
         }
 
         @Override
         protected void onPreExecute() {
             setUiLoading(true);
+            showStreaming(usedModel, "", "");
         }
 
         @Override
         protected void onProgressUpdate(Object... v) {
             if (currentTask != this) return;
-            if (v[0] instanceof Integer) {
+            if (v[0] instanceof int[]) {
+                int[] info = (int[]) v[0];
                 removeStreaming(); // a retry starts the reply over
-                etInput.setHint("Model is busy (" + lastCode + "), retry " + v[0] + "/" + MAX_RETRIES + "...");
+                etInput.setHint("Model is busy (" + info[2] + "), retry " + info[0] + "/" + info[1]
+                        + " in " + info[3] + "s...");
             } else {
                 String[] tt = (String[]) v[0];
+                etInput.setHint("Model is generating...");
                 showStreaming(usedModel, tt[0], tt[1]);
             }
         }
@@ -431,10 +543,10 @@ public class ChatActivity extends Activity {
             setUiLoading(false);
             if (result == null) return;
             if (failed) {
-                addMessageToChat(-1L, "system", null, result, System.currentTimeMillis(), null);
+                addMessageToChat(-1L, "system", null, result, System.currentTimeMillis(), null, true);
             } else {
                 long id = dbHelper.addMessage(currentChatId, "model", result, usedModel, thoughts);
-                addMessageToChat(id, "model", usedModel, result, System.currentTimeMillis(), thoughts);
+                addMessageToChat(id, "model", usedModel, result, System.currentTimeMillis(), thoughts, true);
             }
             Compat.invalidateMenu(ChatActivity.this);
             scrollChatDown();
@@ -492,23 +604,58 @@ public class ChatActivity extends Activity {
 
     /** The reply being streamed (not long-pressable until it is finished and saved). */
     private TextView streamView;
+    private String streamModel = "", streamThoughts = "", streamText = "";
+    private int thinkingDots = 1;
+    private boolean pulseScheduled;
+
+    private final Runnable thinkingPulse = new Runnable() {
+        public void run() {
+            pulseScheduled = false;
+            if (streamView == null || currentTask == null || streamText.length() > 0 || isFinishing()) return;
+            thinkingDots = (thinkingDots % 3) + 1;
+            streamView.setText(MessageFormatter.formatWaiting(ChatActivity.this, streamModel, streamThoughts, thinkingDots));
+            scheduleThinkingPulse();
+        }
+    };
+
+    private void scheduleThinkingPulse() {
+        if (pulseScheduled) return;
+        pulseScheduled = true;
+        handler.postDelayed(thinkingPulse, 450);
+    }
+
+    private void stopThinkingPulse() {
+        pulseScheduled = false;
+        handler.removeCallbacks(thinkingPulse);
+    }
 
     private void showStreaming(String model, String thoughts, String text) {
         boolean atBottom = scrollChat.getScrollY() + scrollChat.getHeight() >= layoutChat.getHeight() - 8;
+        streamModel = model != null ? model : "";
+        streamThoughts = thoughts != null ? thoughts : "";
+        streamText = text != null ? text : "";
         if (streamView == null) {
             removePlaceholder();
             streamView = new TextView(this);
             MessageFormatter.styleView(streamView, "model");
             streamView.setLongClickable(false);
             layoutChat.addView(streamView);
+            thinkingDots = 1;
         }
-        streamView.setText(text.length() > 0
-                ? MessageFormatter.format(this, "model", model, text, System.currentTimeMillis(), null)
-                : MessageFormatter.formatThinking(this, model, thoughts));
+        if (streamText.length() > 0) {
+            stopThinkingPulse();
+            streamView.setText(MessageFormatter.formatStreaming(this, streamModel, streamText));
+        } else {
+            streamView.setText(MessageFormatter.formatWaiting(this, streamModel, streamThoughts, thinkingDots));
+            scheduleThinkingPulse();
+        }
         if (atBottom) scrollChatDown();
     }
 
     private void removeStreaming() {
+        stopThinkingPulse();
+        streamText = "";
+        streamThoughts = "";
         if (streamView != null) {
             layoutChat.removeView(streamView);
             streamView = null;
@@ -522,6 +669,7 @@ public class ChatActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EmojiMap.preloadAsync(this);
         MessageFormatter.applyPrefs(this);
         renderedTextSp = MessageFormatter.TEXT_SP;
         setContentView(R.layout.main);
@@ -531,6 +679,7 @@ public class ChatActivity extends Activity {
         layoutChat = (LinearLayout) findViewById(R.id.layout_chat);
         scrollChat = (ScrollView) findViewById(R.id.scroll_chat);
         dbHelper = new DatabaseHelper(this);
+        buildReadBar();
         buildAttachBar();
 
         chatId = getIntent().getLongExtra("chat_id", -1L);
@@ -562,17 +711,18 @@ public class ChatActivity extends Activity {
             public void onClick(View v) {
                 GeminiTask t = currentTask;
                 if (t != null) {
-                    String part = t.partialText.trim();
+                    String[] snap = t.snapshotPartial();
+                    String part = snap[0].trim();
+                    String th = t.includeThoughts ? snap[1].trim() : "";
                     cancelTask();
                     setUiLoading(false);
                     if (part.length() > 0) { // keep what was written so far
                         String text = part + "\n\n*[Stopped]*";
-                        String th = t.includeThoughts ? t.partialThoughts.trim() : "";
                         long id = dbHelper.addMessage(t.currentChatId, "model", text, t.usedModel, th);
-                        addMessageToChat(id, "model", t.usedModel, text, System.currentTimeMillis(), th);
+                        addMessageToChat(id, "model", t.usedModel, text, System.currentTimeMillis(), th, true);
                         Compat.invalidateMenu(ChatActivity.this);
                     } else {
-                        addMessageToChat(-1L, "system", null, "Request stopped by user.", System.currentTimeMillis());
+                        addMessageToChat(-1L, "system", null, "Request stopped by user.", System.currentTimeMillis(), null, true);
                     }
                     scrollChatDown();
                 }
@@ -587,22 +737,33 @@ public class ChatActivity extends Activity {
     protected void onResume() {
         super.onResume();
         MessageFormatter.applyPrefs(this);
+        updatePlaceholderConfig();
         if (MessageFormatter.TEXT_SP != renderedTextSp) {
             renderedTextSp = MessageFormatter.TEXT_SP;
             if (chatId != -1 && currentTask == null) loadMessages(true);
         }
+        if (streamView != null && currentTask != null && streamText.length() == 0) scheduleThinkingPulse();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        stopThinkingPulse();
         stopReading(); // no audio from a screen that isn't shown
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        Thumbnail.clearCache();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        stopThinkingPulse();
         stopReading();
+        cancelAttachTask();
         cancelTask();
         if (dbHelper != null) dbHelper.close();
     }
@@ -617,8 +778,16 @@ public class ChatActivity extends Activity {
         }
     }
 
+    private void cancelAttachTask() {
+        AttachImageTask t = attachTask;
+        if (t != null) {
+            t.cancel(true);
+            attachTask = null;
+        }
+    }
+
     private boolean canSend() {
-        return etInput.getText().toString().trim().length() > 0 || pendingImage != null;
+        return attachTask == null && (etInput.getText().toString().trim().length() > 0 || pendingImage != null);
     }
 
     private SharedPreferences prefs() {
@@ -645,6 +814,7 @@ public class ChatActivity extends Activity {
         String text = etInput.getText().toString().trim();
         if (!hasApiKey()) return;
         if (text.length() == 0 && pendingImage == null) return;
+        removePlaceholder();
         if (chatId == -1) {
             String title = text.length() == 0 ? "Image" : text.replace('\n', ' ').trim();
             if (title.length() > 25) title = title.substring(0, 25) + "...";
@@ -652,10 +822,10 @@ public class ChatActivity extends Activity {
             setTitle(title);
             layoutChat.removeAllViews();
         }
-        removePlaceholder();
         String image = pendingImage;
+        long now = System.currentTimeMillis();
         long id = dbHelper.addMessage(chatId, "user", text, image);
-        addMessageToChat(id, "user", image, text, System.currentTimeMillis());
+        addMessageToChat(id, "user", image, text, now, null, true);
         setAttachment(null);
         etInput.setText("");
         scrollChatDown();
@@ -670,9 +840,10 @@ public class ChatActivity extends Activity {
             Toast.makeText(this, "Please go to Settings to set API Key", Toast.LENGTH_LONG).show();
             return;
         }
+        String model = sp.getString("model", DEFAULT_MODEL);
         cancelTask();
-        currentTask = new GeminiTask(chatId);
-        currentTask.execute(key, sp.getString("model", DEFAULT_MODEL), sp.getString("system_instruction", "").trim(),
+        currentTask = new GeminiTask(chatId, model);
+        currentTask.execute(key, model, sp.getString("system_instruction", "").trim(),
                 sp.getString("thinking_level", ""), sp.getBoolean("show_thoughts", true) ? "1" : "0");
     }
 
@@ -696,6 +867,37 @@ public class ChatActivity extends Activity {
 
     private int dp(float v) {
         return (int) (v * getResources().getDisplayMetrics().density + 0.5f);
+    }
+
+    private void buildReadBar() {
+        readBar = new LinearLayout(this);
+        readBar.setOrientation(LinearLayout.HORIZONTAL);
+        readBar.setGravity(Gravity.CENTER_VERTICAL);
+        readBar.setBackgroundDrawable(new LayerDrawable(new Drawable[]{
+                new ColorDrawable(0xFF1B2420),
+                new MessageFormatter.RoleBar(MessageFormatter.ROLE_MODEL, Math.max(2, dp(3)))}));
+        readBar.setPadding(dp(10), dp(4), dp(4), dp(4));
+        readBar.setVisibility(View.GONE);
+
+        readLabel = new TextView(this);
+        readLabel.setTextSize(13f);
+        readLabel.setTextColor(MessageFormatter.ROLE_MODEL);
+        readLabel.setSingleLine(true);
+        readBar.addView(readLabel, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+
+        Button stop = new Button(this, null, android.R.attr.buttonStyleSmall);
+        stop.setText("Stop");
+        stop.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                stopReading();
+            }
+        });
+        readBar.addView(stop, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        LinearLayout root = (LinearLayout) scrollChat.getParent();
+        root.addView(readBar, root.getChildCount() - 1, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
     }
 
     private void buildAttachBar() {
@@ -741,12 +943,17 @@ public class ChatActivity extends Activity {
     }
 
     private void setAttachment(String dataUri) {
+        setAttachment(dataUri, null);
+    }
+
+    private void setAttachment(String dataUri, Bitmap predecodedThumb) {
+        cancelAttachTask();
         pendingImage = dataUri;
         if (dataUri == null) {
             attachBar.setVisibility(View.GONE);
             attachThumb.setImageDrawable(null);
         } else {
-            Bitmap b = Thumbnail.fromDataUri(dataUri, dp(40));
+            Bitmap b = predecodedThumb != null ? predecodedThumb : Thumbnail.fromDataUri(dataUri, dp(40));
             attachThumb.setImageBitmap(b);
             int comma = dataUri.indexOf(',');
             long bytes = (dataUri.length() - comma - 1) * 3L / 4;
@@ -755,6 +962,36 @@ public class ChatActivity extends Activity {
         }
         if (currentTask == null) btnSend.setEnabled(canSend());
         Compat.invalidateMenu(this);
+    }
+
+    /** Decodes, downscales, and Base64-encodes a picked image off the UI thread (prevents ANRs on weak CPUs). */
+    private final class AttachImageTask extends AsyncTask<String, Void, Object[]> {
+        private final int thumbPx;
+
+        AttachImageTask(int thumbPx) {
+            this.thumbPx = thumbPx;
+        }
+
+        @Override
+        protected Object[] doInBackground(String... params) {
+            String dataUri = ImageUtil.uriToBase64(ChatActivity.this, params[0]);
+            if (dataUri == null || isCancelled()) return null;
+            Bitmap thumb = Thumbnail.fromDataUri(dataUri, thumbPx);
+            return new Object[]{dataUri, thumb};
+        }
+
+        @Override
+        protected void onPostExecute(Object[] res) {
+            if (attachTask != this || isCancelled() || isFinishing()) return;
+            attachTask = null;
+            if (res == null) {
+                setAttachment(null);
+                Toast.makeText(ChatActivity.this, "Could not read that image (only images are supported).",
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
+            setAttachment((String) res[0], (Bitmap) res[1]);
+        }
     }
 
     private void pickImage() {
@@ -786,53 +1023,156 @@ public class ChatActivity extends Activity {
         if (requestCode != REQ_IMAGE || resultCode != RESULT_OK || data == null) return;
         String uri = data.getDataString();
         if (uri == null) return;
-        String dataUri = ImageUtil.uriToBase64(this, uri);
-        if (dataUri == null) {
-            Toast.makeText(this, "Could not read that image (only images are supported).", Toast.LENGTH_LONG).show();
-            return;
-        }
-        setAttachment(dataUri);
+        cancelAttachTask();
+        pendingImage = null;
+        attachThumb.setImageDrawable(null);
+        attachLabel.setText("Attaching image...");
+        attachBar.setVisibility(View.VISIBLE);
+        if (currentTask == null) btnSend.setEnabled(false);
+        attachTask = new AttachImageTask(dp(40));
+        attachTask.execute(uri);
     }
 
     // =========================================================================================
-    // Message list
+    // Message list & empty welcome view
     // =========================================================================================
 
+    /** Crisp four-point Gemini star emblem drawn in pure API-7 Canvas (zero bitmap memory). */
+    private static final class SparkleView extends View {
+        private final Paint pMain = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Paint pSub = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Path pathMain = new Path();
+        private final Path pathSub = new Path();
+
+        SparkleView(ChatActivity ctx) {
+            super(ctx);
+            pMain.setColor(MessageFormatter.ROLE_USER);
+            pMain.setStyle(Paint.Style.FILL);
+            pSub.setColor(MessageFormatter.ROLE_MODEL);
+            pSub.setStyle(Paint.Style.FILL);
+        }
+
+        private static void buildStar(Path out, float cx, float cy, float r) {
+            out.reset();
+            float k = r * 0.24f;
+            out.moveTo(cx, cy - r);
+            out.quadTo(cx + k, cy - k, cx + r, cy);
+            out.quadTo(cx + k, cy + k, cx, cy + r);
+            out.quadTo(cx - k, cy + k, cx - r, cy);
+            out.quadTo(cx - k, cy - k, cx, cy - r);
+            out.close();
+        }
+
+        @Override
+        protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+            float s = Math.min(w, h);
+            buildStar(pathMain, w * 0.44f, h * 0.54f, s * 0.38f);
+            buildStar(pathSub, w * 0.78f, h * 0.24f, s * 0.16f);
+        }
+
+        @Override
+        protected void onDraw(Canvas c) {
+            c.drawPath(pathMain, pMain);
+            c.drawPath(pathSub, pSub);
+        }
+    }
+
+    private String activeConfigSummary() {
+        SharedPreferences sp = prefs();
+        String model = sp.getString("model", DEFAULT_MODEL);
+        String lvl = sp.getString("thinking_level", "");
+        String label = "Default";
+        for (int i = 0; i < SettingsActivity.THINKING_VALUES.length; i++) {
+            if (SettingsActivity.THINKING_VALUES[i].equals(lvl)) {
+                label = SettingsActivity.THINKING_LABELS[i];
+                break;
+            }
+        }
+        return model + " \u00B7 " + label;
+    }
+
+    private void updatePlaceholderConfig() {
+        if (placeholderConfig != null) placeholderConfig.setText(activeConfigSummary());
+    }
+
     private void showPlaceholder() {
-        TextView tv = new TextView(this);
-        tv.setText("Start chatting\nType a message below to start.");
-        tv.setTextSize(16f);
-        tv.setTextColor(0xFF888888);
-        tv.setGravity(Gravity.CENTER);
-        tv.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT,
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setGravity(Gravity.CENTER);
+        box.setPadding(dp(20), dp(16), dp(20), dp(16));
+        box.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT,
                 LinearLayout.LayoutParams.FILL_PARENT, 1f));
-        tv.setTag("placeholder");
-        layoutChat.addView(tv);
+        box.setTag("placeholder");
+
+        SparkleView star = new SparkleView(this);
+        int sz = dp(38);
+        LinearLayout.LayoutParams slp = new LinearLayout.LayoutParams(sz, sz);
+        slp.bottomMargin = dp(8);
+        box.addView(star, slp);
+
+        TextView title = new TextView(this);
+        title.setText("Gemini Chat");
+        title.setTextSize(17f);
+        title.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+        title.setTextColor(0xFFFFFFFF);
+        title.setGravity(Gravity.CENTER);
+        box.addView(title);
+
+        TextView sub = new TextView(this);
+        sub.setText("Type a message below or open Menu for Live Voice.");
+        sub.setTextSize(13f);
+        sub.setTextColor(MessageFormatter.TEXT_MUTED);
+        sub.setGravity(Gravity.CENTER);
+        LinearLayout.LayoutParams subLp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        subLp.topMargin = dp(4);
+        box.addView(sub, subLp);
+
+        placeholderConfig = new TextView(this);
+        placeholderConfig.setText(activeConfigSummary());
+        placeholderConfig.setTextSize(12f);
+        placeholderConfig.setTextColor(MessageFormatter.ACCENT);
+        placeholderConfig.setGravity(Gravity.CENTER);
+        LinearLayout.LayoutParams cfgLp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        cfgLp.topMargin = dp(8);
+        box.addView(placeholderConfig, cfgLp);
+
+        layoutChat.addView(box);
     }
 
     private void removePlaceholder() {
         if (layoutChat.getChildCount() == 1 && "placeholder".equals(layoutChat.getChildAt(0).getTag())) {
             layoutChat.removeAllViews();
+            placeholderConfig = null;
         }
     }
 
     private void addMessageToChat(long id, String role, String model, String text, long timestamp) {
-        addMessageToChat(id, role, model, text, timestamp, null);
+        addMessageToChat(id, role, model, text, timestamp, null, false);
     }
 
-    private void addMessageToChat(long id, String role, String model, String text, long timestamp, String thoughts) {
+    private void addMessageToChat(long id, String role, String model, String text, long timestamp, String thoughts,
+                                  boolean animate) {
         TextView tv = new TextView(this);
         ArrayList<String> codeBlocks = new ArrayList<String>();
         tv.setText(MessageFormatter.format(this, role, model, text, timestamp, codeBlocks));
         MessageFormatter.styleView(tv, role);
         tv.setOnLongClickListener(new MessageMenu(id, role, model, text, codeBlocks, thoughts));
         layoutChat.addView(tv);
+        if (animate) {
+            AlphaAnimation fade = new AlphaAnimation(0f, 1f);
+            fade.setDuration(160);
+            tv.startAnimation(fade);
+        }
     }
 
     /** Re-renders the chat from the database. keepScroll: stay where the user was (edits, deletes). */
     private void loadMessages(boolean keepScroll) {
         final int y = scrollChat.getScrollY();
         layoutChat.removeAllViews();
+        placeholderConfig = null;
+        stopThinkingPulse();
         streamView = null;
         boolean any = false;
         Cursor c = null;
@@ -845,7 +1185,7 @@ public class ChatActivity extends Activity {
                 do {
                     addMessageToChat(c.getLong(iId), c.getString(iRole), iModel != -1 ? c.getString(iModel) : null,
                             c.getString(iContent), iTs != -1 ? c.getLong(iTs) : 0L,
-                            iThoughts != -1 ? c.getString(iThoughts) : null);
+                            iThoughts != -1 ? c.getString(iThoughts) : null, false);
                     any = true;
                 } while (c.moveToNext());
             }
@@ -868,30 +1208,13 @@ public class ChatActivity extends Activity {
     }
 
     private void scrollChatDown() {
-        scrollChat.post(new Runnable() {
-            public void run() {
-                scrollChat.scrollTo(0, layoutChat.getMeasuredHeight());
-            }
-        });
+        scrollChat.removeCallbacks(scrollDownRunnable);
+        scrollChat.post(scrollDownRunnable);
     }
 
     /** Role of the newest saved user/model row ("user", "model") or null when there is none. */
     private String lastSavedRole() {
-        if (chatId == -1) return null;
-        String last = null;
-        Cursor c = dbHelper.getMessages(chatId);
-        if (c != null) {
-            try {
-                int iRole = c.getColumnIndex("role");
-                while (c.moveToNext()) {
-                    String r = c.getString(iRole);
-                    if ("user".equals(r) || "model".equals(r)) last = r;
-                }
-            } finally {
-                c.close();
-            }
-        }
-        return last;
+        return chatId == -1 ? null : dbHelper.getLastSavedRole(chatId);
     }
 
     // =========================================================================================
@@ -983,8 +1306,7 @@ public class ChatActivity extends Activity {
                     confirmDelete(id);
                     break;
                 case A_RETRY:
-                    loadMessages(false); // drop the old error lines (they aren't saved)
-                    startRequest();
+                    retryLast();
                     break;
                 case A_THOUGHTS:
                     showThoughts(model, thoughts);
@@ -1016,19 +1338,24 @@ public class ChatActivity extends Activity {
             public void onDone(ReadAloud r, String error) {
                 if (reader == r) {
                     reader = null;
+                    if (readBar != null) readBar.setVisibility(View.GONE);
                     Compat.invalidateMenu(ChatActivity.this);
                 }
                 if (error != null && !isFinishing()) Toast.makeText(ChatActivity.this, error, Toast.LENGTH_LONG).show();
             }
         });
         reader.start();
+        if (readBar != null) {
+            readLabel.setText("Reading aloud (" + voice + ")...");
+            readBar.setVisibility(View.VISIBLE);
+        }
         Compat.invalidateMenu(this);
-        Toast.makeText(this, "Reading aloud (" + voice + ")...", Toast.LENGTH_SHORT).show();
     }
 
     private void stopReading() {
         ReadAloud r = reader;
         reader = null;
+        if (readBar != null) readBar.setVisibility(View.GONE);
         if (r != null) {
             r.stopReading();
             Compat.invalidateMenu(this);
@@ -1062,20 +1389,36 @@ public class ChatActivity extends Activity {
     }
 
     /**
-     * User message: drop everything after it and ask again.
-     * Reply: drop it (and everything after it) and ask again from the messages before it.
+     * User message: drop everything after it, update its timestamp to now, and ask again.
+     * Reply: drop it (and everything after it), update the preceding user message's timestamp, and ask again.
      */
     private void regenerate(long msgId, String role) {
         if (!hasApiKey()) return;
         stopReading();
-        if ("user".equals(role)) dbHelper.deleteMessagesAfter(chatId, msgId);
-        else dbHelper.deleteMessagesFrom(chatId, msgId);
+        if ("user".equals(role)) {
+            dbHelper.deleteMessagesAfter(chatId, msgId);
+            dbHelper.touchMessageTimestamp(chatId, msgId, System.currentTimeMillis());
+        } else {
+            dbHelper.deleteMessagesFrom(chatId, msgId);
+            long lastUser = dbHelper.getLastMessageId(chatId, "user");
+            if (lastUser != -1) dbHelper.touchMessageTimestamp(chatId, lastUser, System.currentTimeMillis());
+        }
         if (lastSavedRole() == null) {
             loadMessages(false);
             Toast.makeText(this, "Nothing left to answer.", Toast.LENGTH_SHORT).show();
             return;
         }
         loadMessages(false);
+        startRequest();
+    }
+
+    /** Retries after a failed reply: refreshes the last user message timestamp and re-sends. */
+    private void retryLast() {
+        if (!hasApiKey()) return;
+        stopReading();
+        long lastUser = dbHelper.getLastMessageId(chatId, "user");
+        if (lastUser != -1) dbHelper.touchMessageTimestamp(chatId, lastUser, System.currentTimeMillis());
+        loadMessages(false); // drop the old error lines (they aren't saved)
         startRequest();
     }
 
@@ -1120,6 +1463,7 @@ public class ChatActivity extends Activity {
                     stopReading();
                     dbHelper.updateMessage(msgId, s);
                     dbHelper.deleteMessagesAfter(chatId, msgId);
+                    dbHelper.touchMessageTimestamp(chatId, msgId, System.currentTimeMillis());
                     loadMessages(false);
                     startRequest();
                 }
@@ -1177,18 +1521,7 @@ public class ChatActivity extends Activity {
         if (stop != null) stop.setVisible(reader != null);
         MenuItem del = menu.findItem(MENU_DELETE_CHAT);
         if (del != null) {
-            boolean has = false;
-            if (chatId != -1 && dbHelper != null) {
-                Cursor c = dbHelper.getMessages(chatId);
-                if (c != null) {
-                    try {
-                        has = c.getCount() > 0;
-                    } finally {
-                        c.close();
-                    }
-                }
-            }
-            del.setVisible(has);
+            del.setVisible(chatId != -1 && dbHelper != null && dbHelper.hasMessages(chatId));
         }
         MenuItem attach = menu.findItem(MENU_ATTACH);
         if (attach != null) {

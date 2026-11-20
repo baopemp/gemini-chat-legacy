@@ -28,16 +28,16 @@
     .locals 0
 
     .prologue
-    .line 402
+    .line 481
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 
-    .line 403
+    .line 482
     iput p1, p0, Lcom/gemini/chat/MessageFormatter$RuleSpan;->color:I
 
-    .line 404
+    .line 483
     iput p2, p0, Lcom/gemini/chat/MessageFormatter$RuleSpan;->thickness:I
 
-    .line 405
+    .line 484
     return-void
 .end method
 
@@ -47,32 +47,32 @@
     .locals 8
 
     .prologue
-    .line 409
+    .line 488
     invoke-virtual {p2}, Landroid/graphics/Paint;->getColor()I
 
     move-result v6
 
-    .line 410
+    .line 489
     invoke-virtual {p2}, Landroid/graphics/Paint;->getStyle()Landroid/graphics/Paint$Style;
 
     move-result-object v7
 
-    .line 411
+    .line 490
     sget-object v0, Landroid/graphics/Paint$Style;->FILL:Landroid/graphics/Paint$Style;
 
     invoke-virtual {p2, v0}, Landroid/graphics/Paint;->setStyle(Landroid/graphics/Paint$Style;)V
 
-    .line 412
+    .line 491
     iget v0, p0, Lcom/gemini/chat/MessageFormatter$RuleSpan;->color:I
 
     invoke-virtual {p2, v0}, Landroid/graphics/Paint;->setColor(I)V
 
-    .line 413
+    .line 492
     add-int v0, p5, p7
 
     div-int/lit8 v0, v0, 0x2
 
-    .line 414
+    .line 493
     int-to-float v1, p3
 
     int-to-float v2, v0
@@ -91,12 +91,12 @@
 
     invoke-virtual/range {v0 .. v5}, Landroid/graphics/Canvas;->drawRect(FFFFLandroid/graphics/Paint;)V
 
-    .line 415
+    .line 494
     invoke-virtual {p2, v6}, Landroid/graphics/Paint;->setColor(I)V
 
-    .line 416
+    .line 495
     invoke-virtual {p2, v7}, Landroid/graphics/Paint;->setStyle(Landroid/graphics/Paint$Style;)V
 
-    .line 417
+    .line 496
     return-void
 .end method

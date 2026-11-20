@@ -3,7 +3,7 @@
 .source "SettingsActivity.java"
 
 # interfaces
-.implements Landroid/widget/AdapterView$OnItemSelectedListener;
+.implements Landroid/text/TextWatcher;
 
 
 # annotations
@@ -26,7 +26,7 @@
     .locals 0
 
     .prologue
-    .line 192
+    .line 196
     iput-object p1, p0, Lcom/gemini/chat/SettingsActivity$2;->this$0:Lcom/gemini/chat/SettingsActivity;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
@@ -36,39 +36,31 @@
 
 
 # virtual methods
-.method public onItemSelected(Landroid/widget/AdapterView;Landroid/view/View;IJ)V
+.method public afterTextChanged(Landroid/text/Editable;)V
     .locals 1
-    .annotation system Ldalvik/annotation/Signature;
-        value = {
-            "(",
-            "Landroid/widget/AdapterView",
-            "<*>;",
-            "Landroid/view/View;",
-            "IJ)V"
-        }
-    .end annotation
-
-    .prologue
-    .line 194
-    iget-object v0, p0, Lcom/gemini/chat/SettingsActivity$2;->this$0:Lcom/gemini/chat/SettingsActivity;
-
-    invoke-static {v0}, Lcom/gemini/chat/SettingsActivity;->access$000(Lcom/gemini/chat/SettingsActivity;)V
-
-    .line 195
-    return-void
-.end method
-
-.method public onNothingSelected(Landroid/widget/AdapterView;)V
-    .locals 0
-    .annotation system Ldalvik/annotation/Signature;
-        value = {
-            "(",
-            "Landroid/widget/AdapterView",
-            "<*>;)V"
-        }
-    .end annotation
 
     .prologue
     .line 198
+    iget-object v0, p0, Lcom/gemini/chat/SettingsActivity$2;->this$0:Lcom/gemini/chat/SettingsActivity;
+
+    invoke-static {v0}, Lcom/gemini/chat/SettingsActivity;->access$100(Lcom/gemini/chat/SettingsActivity;)V
+
+    .line 199
+    return-void
+.end method
+
+.method public beforeTextChanged(Ljava/lang/CharSequence;III)V
+    .locals 0
+
+    .prologue
+    .line 202
+    return-void
+.end method
+
+.method public onTextChanged(Ljava/lang/CharSequence;III)V
+    .locals 0
+
+    .prologue
+    .line 205
     return-void
 .end method

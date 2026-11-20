@@ -50,6 +50,8 @@
 
 .field private tvLiveThinking:Landroid/widget/TextView;
 
+.field private tvThinkingHint:Landroid/widget/TextView;
+
 
 # direct methods
 .method static constructor <clinit>()V
@@ -66,7 +68,7 @@
 
     const/4 v3, 0x0
 
-    .line 33
+    .line 35
     const/16 v0, 0xa
 
     new-array v0, v0, [Ljava/lang/String;
@@ -123,7 +125,7 @@
 
     sput-object v0, Lcom/gemini/chat/SettingsActivity;->MODELS:[Ljava/lang/String;
 
-    .line 38
+    .line 40
     const/4 v0, 0x6
 
     new-array v0, v0, [Ljava/lang/String;
@@ -156,7 +158,7 @@
 
     sput-object v0, Lcom/gemini/chat/SettingsActivity;->THINKING_LABELS:[Ljava/lang/String;
 
-    .line 39
+    .line 41
     const/4 v0, 0x6
 
     new-array v0, v0, [Ljava/lang/String;
@@ -196,7 +198,7 @@
     .locals 0
 
     .prologue
-    .line 26
+    .line 28
     invoke-direct {p0}, Landroid/app/Activity;-><init>()V
 
     return-void
@@ -206,7 +208,7 @@
     .locals 0
 
     .prologue
-    .line 26
+    .line 28
     invoke-direct {p0}, Lcom/gemini/chat/SettingsActivity;->updateVisibility()V
 
     return-void
@@ -216,7 +218,17 @@
     .locals 0
 
     .prologue
-    .line 26
+    .line 28
+    invoke-direct {p0}, Lcom/gemini/chat/SettingsActivity;->syncThinkingForModel()V
+
+    return-void
+.end method
+
+.method static synthetic access$200(Lcom/gemini/chat/SettingsActivity;)V
+    .locals 0
+
+    .prologue
+    .line 28
     invoke-direct {p0}, Lcom/gemini/chat/SettingsActivity;->save()V
 
     return-void
@@ -226,15 +238,15 @@
     .locals 1
 
     .prologue
-    .line 113
+    .line 115
     new-instance v0, Landroid/widget/CheckBox;
 
     invoke-direct {v0, p0}, Landroid/widget/CheckBox;-><init>(Landroid/content/Context;)V
 
-    .line 114
+    .line 116
     invoke-virtual {v0, p1}, Landroid/widget/CheckBox;->setText(Ljava/lang/CharSequence;)V
 
-    .line 115
+    .line 117
     return-object v0
 .end method
 
@@ -242,7 +254,7 @@
     .locals 2
 
     .prologue
-    .line 78
+    .line 80
     invoke-virtual {p0}, Lcom/gemini/chat/SettingsActivity;->getResources()Landroid/content/res/Resources;
 
     move-result-object v0
@@ -268,7 +280,7 @@
     .locals 3
 
     .prologue
-    .line 84
+    .line 86
     new-instance v0, Landroid/widget/LinearLayout$LayoutParams;
 
     const/4 v1, -0x1
@@ -277,7 +289,7 @@
 
     invoke-direct {v0, v1, v2}, Landroid/widget/LinearLayout$LayoutParams;-><init>(II)V
 
-    .line 86
+    .line 88
     int-to-float v1, p1
 
     invoke-direct {p0, v1}, Lcom/gemini/chat/SettingsActivity;->dp(F)I
@@ -286,7 +298,7 @@
 
     iput v1, v0, Landroid/widget/LinearLayout$LayoutParams;->topMargin:I
 
-    .line 87
+    .line 89
     return-object v0
 .end method
 
@@ -294,20 +306,20 @@
     .locals 2
 
     .prologue
-    .line 98
+    .line 100
     new-instance v0, Landroid/widget/TextView;
 
     invoke-direct {v0, p0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
 
-    .line 99
+    .line 101
     invoke-virtual {v0, p1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
 
-    .line 100
+    .line 102
     const/high16 v1, 0x41400000    # 12.0f
 
     invoke-virtual {v0, v1}, Landroid/widget/TextView;->setTextSize(F)V
 
-    .line 101
+    .line 103
     return-object v0
 .end method
 
@@ -315,7 +327,7 @@
     .locals 2
 
     .prologue
-    .line 66
+    .line 68
     const/4 v0, 0x0
 
     :goto_0
@@ -331,17 +343,17 @@
 
     if-eqz v1, :cond_0
 
-    .line 67
+    .line 69
     :goto_1
     return v0
 
-    .line 66
+    .line 68
     :cond_0
     add-int/lit8 v0, v0, 0x1
 
     goto :goto_0
 
-    .line 67
+    .line 69
     :cond_1
     const/4 v0, -0x1
 
@@ -352,7 +364,7 @@
     .locals 1
 
     .prologue
-    .line 62
+    .line 64
     sget-object v0, Lcom/gemini/chat/SettingsActivity;->MODELS:[Ljava/lang/String;
 
     invoke-static {v0, p0}, Lcom/gemini/chat/SettingsActivity;->indexOf([Ljava/lang/String;Ljava/lang/String;)I
@@ -366,7 +378,7 @@
     .locals 4
 
     .prologue
-    .line 128
+    .line 130
     const/4 v0, 0x0
 
     :goto_0
@@ -388,7 +400,7 @@
 
     goto :goto_0
 
-    .line 129
+    .line 131
     :cond_0
     return p2
 .end method
@@ -401,14 +413,14 @@
 
     const/4 v1, 0x0
 
-    .line 210
+    .line 233
     const-string v0, "GeminiPrefs"
 
     invoke-virtual {p0, v0, v1}, Lcom/gemini/chat/SettingsActivity;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
 
     move-result-object v4
 
-    .line 211
+    .line 234
     iget-object v0, p0, Lcom/gemini/chat/SettingsActivity;->etApiKey:Landroid/widget/EditText;
 
     const-string v2, "api_key"
@@ -421,7 +433,7 @@
 
     invoke-virtual {v0, v2}, Landroid/widget/EditText;->setText(Ljava/lang/CharSequence;)V
 
-    .line 212
+    .line 235
     iget-object v0, p0, Lcom/gemini/chat/SettingsActivity;->etSystemInstruction:Landroid/widget/EditText;
 
     const-string v2, "system_instruction"
@@ -434,7 +446,7 @@
 
     invoke-virtual {v0, v2}, Landroid/widget/EditText;->setText(Ljava/lang/CharSequence;)V
 
-    .line 213
+    .line 236
     iget-object v0, p0, Lcom/gemini/chat/SettingsActivity;->cbAutoName:Landroid/widget/CheckBox;
 
     const-string v2, "auto_name"
@@ -449,7 +461,7 @@
 
     move v2, v3
 
-    .line 215
+    .line 238
     :goto_0
     sget-object v5, Lcom/gemini/chat/MessageFormatter;->TEXT_SIZES:[I
 
@@ -457,7 +469,7 @@
 
     if-ge v0, v5, :cond_1
 
-    .line 216
+    .line 239
     sget-object v5, Lcom/gemini/chat/MessageFormatter;->TEXT_SIZES:[I
 
     aget v5, v5, v0
@@ -474,19 +486,19 @@
 
     move v2, v0
 
-    .line 215
+    .line 238
     :cond_0
     add-int/lit8 v0, v0, 0x1
 
     goto :goto_0
 
-    .line 218
+    .line 241
     :cond_1
     iget-object v0, p0, Lcom/gemini/chat/SettingsActivity;->spTextSize:Landroid/widget/Spinner;
 
     invoke-virtual {v0, v2}, Landroid/widget/Spinner;->setSelection(I)V
 
-    .line 220
+    .line 243
     const-string v0, "model"
 
     const-string v2, "gemini-3.5-flash-lite"
@@ -495,7 +507,7 @@
 
     move-result-object v2
 
-    .line 221
+    .line 244
     iget-object v0, p0, Lcom/gemini/chat/SettingsActivity;->etCustomModel:Landroid/widget/EditText;
 
     const-string v5, "custom_model"
@@ -508,31 +520,31 @@
 
     invoke-virtual {v0, v5}, Landroid/widget/EditText;->setText(Ljava/lang/CharSequence;)V
 
-    .line 222
+    .line 245
     invoke-static {v2}, Lcom/gemini/chat/SettingsActivity;->indexOfModel(Ljava/lang/String;)I
 
     move-result v0
 
-    .line 223
+    .line 246
     if-gez v0, :cond_2
 
-    .line 224
+    .line 247
     sget-object v0, Lcom/gemini/chat/SettingsActivity;->MODELS:[Ljava/lang/String;
 
     array-length v0, v0
 
-    .line 225
+    .line 248
     iget-object v5, p0, Lcom/gemini/chat/SettingsActivity;->etCustomModel:Landroid/widget/EditText;
 
     invoke-virtual {v5, v2}, Landroid/widget/EditText;->setText(Ljava/lang/CharSequence;)V
 
-    .line 227
+    .line 250
     :cond_2
     iget-object v2, p0, Lcom/gemini/chat/SettingsActivity;->spinnerModel:Landroid/widget/Spinner;
 
     invoke-virtual {v2, v0}, Landroid/widget/Spinner;->setSelection(I)V
 
-    .line 228
+    .line 251
     sget-object v0, Lcom/gemini/chat/SettingsActivity;->THINKING_VALUES:[Ljava/lang/String;
 
     const-string v2, "thinking_level"
@@ -547,7 +559,7 @@
 
     move-result v0
 
-    .line 229
+    .line 252
     iget-object v2, p0, Lcom/gemini/chat/SettingsActivity;->spTextThinking:Landroid/widget/Spinner;
 
     if-gez v0, :cond_3
@@ -557,7 +569,7 @@
     :cond_3
     invoke-virtual {v2, v0}, Landroid/widget/Spinner;->setSelection(I)V
 
-    .line 230
+    .line 253
     iget-object v0, p0, Lcom/gemini/chat/SettingsActivity;->cbShowThoughts:Landroid/widget/CheckBox;
 
     const-string v2, "show_thoughts"
@@ -568,7 +580,7 @@
 
     invoke-virtual {v0, v2}, Landroid/widget/CheckBox;->setChecked(Z)V
 
-    .line 232
+    .line 255
     const-string v0, "live_model"
 
     const-string v2, "gemini-3.8-live"
@@ -577,7 +589,7 @@
 
     move-result-object v2
 
-    .line 233
+    .line 256
     iget-object v0, p0, Lcom/gemini/chat/SettingsActivity;->etLiveCustom:Landroid/widget/EditText;
 
     const-string v5, "live_custom_model"
@@ -590,33 +602,33 @@
 
     invoke-virtual {v0, v5}, Landroid/widget/EditText;->setText(Ljava/lang/CharSequence;)V
 
-    .line 234
+    .line 257
     sget-object v0, Lcom/gemini/chat/LiveActivity;->LIVE_MODELS:[Ljava/lang/String;
 
     invoke-static {v0, v2}, Lcom/gemini/chat/SettingsActivity;->indexOf([Ljava/lang/String;Ljava/lang/String;)I
 
     move-result v0
 
-    .line 235
+    .line 258
     if-gez v0, :cond_4
 
-    .line 236
+    .line 259
     sget-object v0, Lcom/gemini/chat/LiveActivity;->LIVE_MODELS:[Ljava/lang/String;
 
     array-length v0, v0
 
-    .line 237
+    .line 260
     iget-object v5, p0, Lcom/gemini/chat/SettingsActivity;->etLiveCustom:Landroid/widget/EditText;
 
     invoke-virtual {v5, v2}, Landroid/widget/EditText;->setText(Ljava/lang/CharSequence;)V
 
-    .line 239
+    .line 262
     :cond_4
     iget-object v2, p0, Lcom/gemini/chat/SettingsActivity;->spLiveModel:Landroid/widget/Spinner;
 
     invoke-virtual {v2, v0}, Landroid/widget/Spinner;->setSelection(I)V
 
-    .line 240
+    .line 263
     sget-object v0, Lcom/gemini/chat/LiveActivity;->THINKING:[Ljava/lang/String;
 
     const-string v2, "live_thinking"
@@ -631,7 +643,7 @@
 
     move-result v0
 
-    .line 241
+    .line 264
     iget-object v2, p0, Lcom/gemini/chat/SettingsActivity;->spLiveThinking:Landroid/widget/Spinner;
 
     if-gez v0, :cond_5
@@ -641,7 +653,7 @@
     :cond_5
     invoke-virtual {v2, v0}, Landroid/widget/Spinner;->setSelection(I)V
 
-    .line 242
+    .line 265
     const-string v0, "live_voice"
 
     const-string v2, "Kore"
@@ -652,7 +664,7 @@
 
     move v0, v1
 
-    .line 243
+    .line 266
     :goto_1
     sget-object v5, Lcom/gemini/chat/LiveActivity;->VOICES:[Ljava/lang/String;
 
@@ -660,7 +672,7 @@
 
     if-ge v0, v5, :cond_7
 
-    .line 244
+    .line 267
     sget-object v5, Lcom/gemini/chat/LiveActivity;->VOICES:[Ljava/lang/String;
 
     aget-object v5, v5, v0
@@ -679,13 +691,13 @@
 
     invoke-virtual {v5, v0}, Landroid/widget/Spinner;->setSelection(I)V
 
-    .line 243
+    .line 266
     :cond_6
     add-int/lit8 v0, v0, 0x1
 
     goto :goto_1
 
-    .line 246
+    .line 269
     :cond_7
     sget-object v0, Lcom/gemini/chat/ReadAloud;->MODELS:[Ljava/lang/String;
 
@@ -701,7 +713,7 @@
 
     move-result v0
 
-    .line 247
+    .line 270
     iget-object v2, p0, Lcom/gemini/chat/SettingsActivity;->spTts:Landroid/widget/Spinner;
 
     if-gez v0, :cond_8
@@ -711,7 +723,7 @@
     :cond_8
     invoke-virtual {v2, v0}, Landroid/widget/Spinner;->setSelection(I)V
 
-    .line 248
+    .line 271
     iget-object v0, p0, Lcom/gemini/chat/SettingsActivity;->cbHandsFree:Landroid/widget/CheckBox;
 
     const-string v2, "live_hands_free"
@@ -722,7 +734,7 @@
 
     invoke-virtual {v0, v2}, Landroid/widget/CheckBox;->setChecked(Z)V
 
-    .line 249
+    .line 272
     iget-object v0, p0, Lcom/gemini/chat/SettingsActivity;->cbMuted:Landroid/widget/CheckBox;
 
     const-string v2, "live_muted"
@@ -733,7 +745,7 @@
 
     invoke-virtual {v0, v1}, Landroid/widget/CheckBox;->setChecked(Z)V
 
-    .line 250
+    .line 273
     iget-object v0, p0, Lcom/gemini/chat/SettingsActivity;->cbLiveText:Landroid/widget/CheckBox;
 
     const-string v1, "live_text"
@@ -744,10 +756,13 @@
 
     invoke-virtual {v0, v1}, Landroid/widget/CheckBox;->setChecked(Z)V
 
-    .line 251
+    .line 274
     invoke-direct {p0}, Lcom/gemini/chat/SettingsActivity;->updateVisibility()V
 
-    .line 252
+    .line 275
+    invoke-direct {p0}, Lcom/gemini/chat/SettingsActivity;->syncThinkingForModel()V
+
+    .line 276
     return-void
 .end method
 
@@ -755,25 +770,25 @@
     .locals 2
 
     .prologue
-    .line 119
+    .line 121
     new-instance v0, Landroid/widget/EditText;
 
     invoke-direct {v0, p0}, Landroid/widget/EditText;-><init>(Landroid/content/Context;)V
 
-    .line 120
+    .line 122
     invoke-virtual {v0, p1}, Landroid/widget/EditText;->setHint(Ljava/lang/CharSequence;)V
 
-    .line 121
+    .line 123
     const/4 v1, 0x1
 
     invoke-virtual {v0, v1}, Landroid/widget/EditText;->setSingleLine(Z)V
 
-    .line 122
+    .line 124
     const v1, 0x80001
 
     invoke-virtual {v0, v1}, Landroid/widget/EditText;->setInputType(I)V
 
-    .line 123
+    .line 125
     return-object v0
 .end method
 
@@ -785,23 +800,23 @@
 
     const/4 v3, 0x0
 
-    .line 48
+    .line 50
     if-nez p0, :cond_1
 
     move-object v0, v3
 
-    .line 58
+    .line 60
     :cond_0
     :goto_0
     return-object v0
 
-    .line 49
+    .line 51
     :cond_1
     invoke-virtual {p0}, Ljava/lang/String;->trim()Ljava/lang/String;
 
     move-result-object v0
 
-    .line 50
+    .line 52
     const-string v1, "models/"
 
     invoke-virtual {v0, v1}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
@@ -816,7 +831,7 @@
 
     move-result-object v0
 
-    .line 51
+    .line 53
     :cond_2
     invoke-virtual {v0}, Ljava/lang/String;->length()I
 
@@ -840,7 +855,7 @@
     :cond_4
     move v1, v2
 
-    .line 52
+    .line 54
     :goto_1
     invoke-virtual {v0}, Ljava/lang/String;->length()I
 
@@ -848,12 +863,12 @@
 
     if-ge v1, v4, :cond_0
 
-    .line 53
+    .line 55
     invoke-virtual {v0, v1}, Ljava/lang/String;->charAt(I)C
 
     move-result v4
 
-    .line 54
+    .line 56
     const/16 v5, 0x61
 
     if-lt v4, v5, :cond_5
@@ -896,7 +911,7 @@
     :cond_8
     const/4 v4, 0x1
 
-    .line 56
+    .line 58
     :goto_2
     if-nez v4, :cond_a
 
@@ -907,10 +922,10 @@
     :cond_9
     move v4, v2
 
-    .line 54
+    .line 56
     goto :goto_2
 
-    .line 52
+    .line 54
     :cond_a
     add-int/lit8 v1, v1, 0x1
 
@@ -925,14 +940,14 @@
 
     const/4 v8, 0x0
 
-    .line 268
+    .line 315
     iget-object v0, p0, Lcom/gemini/chat/SettingsActivity;->spinnerModel:Landroid/widget/Spinner;
 
     invoke-virtual {v0}, Landroid/widget/Spinner;->getSelectedItemPosition()I
 
     move-result v0
 
-    .line 269
+    .line 316
     iget-object v1, p0, Lcom/gemini/chat/SettingsActivity;->etCustomModel:Landroid/widget/EditText;
 
     invoke-virtual {v1}, Landroid/widget/EditText;->getText()Landroid/text/Editable;
@@ -947,7 +962,7 @@
 
     move-result-object v2
 
-    .line 271
+    .line 318
     if-ltz v0, :cond_2
 
     sget-object v1, Lcom/gemini/chat/SettingsActivity;->MODELS:[Ljava/lang/String;
@@ -956,12 +971,12 @@
 
     if-ge v0, v1, :cond_2
 
-    .line 272
+    .line 319
     sget-object v1, Lcom/gemini/chat/SettingsActivity;->MODELS:[Ljava/lang/String;
 
     aget-object v0, v1, v0
 
-    .line 284
+    .line 331
     :goto_0
     iget-object v1, p0, Lcom/gemini/chat/SettingsActivity;->spLiveModel:Landroid/widget/Spinner;
 
@@ -969,7 +984,7 @@
 
     move-result v3
 
-    .line 285
+    .line 332
     if-ltz v3, :cond_5
 
     sget-object v1, Lcom/gemini/chat/LiveActivity;->LIVE_MODELS:[Ljava/lang/String;
@@ -978,12 +993,12 @@
 
     if-ge v3, v1, :cond_5
 
-    .line 286
+    .line 333
     sget-object v1, Lcom/gemini/chat/LiveActivity;->LIVE_MODELS:[Ljava/lang/String;
 
     aget-object v1, v1, v3
 
-    .line 297
+    .line 344
     :cond_0
     const-string v4, "GeminiPrefs"
 
@@ -995,7 +1010,7 @@
 
     move-result-object v4
 
-    .line 298
+    .line 345
     const-string v5, "api_key"
 
     iget-object v6, p0, Lcom/gemini/chat/SettingsActivity;->etApiKey:Landroid/widget/EditText;
@@ -1014,7 +1029,7 @@
 
     invoke-interface {v4, v5, v6}, Landroid/content/SharedPreferences$Editor;->putString(Ljava/lang/String;Ljava/lang/String;)Landroid/content/SharedPreferences$Editor;
 
-    .line 299
+    .line 346
     const-string v5, "auto_name"
 
     iget-object v6, p0, Lcom/gemini/chat/SettingsActivity;->cbAutoName:Landroid/widget/CheckBox;
@@ -1025,7 +1040,7 @@
 
     invoke-interface {v4, v5, v6}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
 
-    .line 300
+    .line 347
     const-string v5, "text_size"
 
     sget-object v6, Lcom/gemini/chat/MessageFormatter;->TEXT_SIZES:[I
@@ -1044,19 +1059,17 @@
 
     invoke-interface {v4, v5, v6}, Landroid/content/SharedPreferences$Editor;->putInt(Ljava/lang/String;I)Landroid/content/SharedPreferences$Editor;
 
-    .line 301
+    .line 348
     const-string v5, "model"
 
     invoke-interface {v4, v5, v0}, Landroid/content/SharedPreferences$Editor;->putString(Ljava/lang/String;Ljava/lang/String;)Landroid/content/SharedPreferences$Editor;
 
-    .line 302
-    const-string v0, "custom_model"
+    .line 349
+    const-string v5, "custom_model"
 
-    invoke-interface {v4, v0, v2}, Landroid/content/SharedPreferences$Editor;->putString(Ljava/lang/String;Ljava/lang/String;)Landroid/content/SharedPreferences$Editor;
+    invoke-interface {v4, v5, v2}, Landroid/content/SharedPreferences$Editor;->putString(Ljava/lang/String;Ljava/lang/String;)Landroid/content/SharedPreferences$Editor;
 
-    .line 303
-    const-string v0, "thinking_level"
-
+    .line 350
     sget-object v2, Lcom/gemini/chat/SettingsActivity;->THINKING_VALUES:[Ljava/lang/String;
 
     iget-object v5, p0, Lcom/gemini/chat/SettingsActivity;->spTextThinking:Landroid/widget/Spinner;
@@ -1071,9 +1084,30 @@
 
     aget-object v2, v2, v5
 
-    invoke-interface {v4, v0, v2}, Landroid/content/SharedPreferences$Editor;->putString(Ljava/lang/String;Ljava/lang/String;)Landroid/content/SharedPreferences$Editor;
+    .line 351
+    const-string v5, "xhigh"
 
-    .line 304
+    invoke-virtual {v5, v2}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+
+    move-result v5
+
+    if-eqz v5, :cond_7
+
+    invoke-static {v0}, Lcom/gemini/chat/ReplyParser;->supportsXhigh(Ljava/lang/String;)Z
+
+    move-result v0
+
+    if-nez v0, :cond_7
+
+    const-string v0, "high"
+
+    .line 352
+    :goto_1
+    const-string v2, "thinking_level"
+
+    invoke-interface {v4, v2, v0}, Landroid/content/SharedPreferences$Editor;->putString(Ljava/lang/String;Ljava/lang/String;)Landroid/content/SharedPreferences$Editor;
+
+    .line 353
     const-string v0, "show_thoughts"
 
     iget-object v2, p0, Lcom/gemini/chat/SettingsActivity;->cbShowThoughts:Landroid/widget/CheckBox;
@@ -1084,12 +1118,12 @@
 
     invoke-interface {v4, v0, v2}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
 
-    .line 305
+    .line 354
     const-string v0, "live_model"
 
     invoke-interface {v4, v0, v1}, Landroid/content/SharedPreferences$Editor;->putString(Ljava/lang/String;Ljava/lang/String;)Landroid/content/SharedPreferences$Editor;
 
-    .line 306
+    .line 355
     sget-object v0, Lcom/gemini/chat/LiveActivity;->LIVE_MODELS:[Ljava/lang/String;
 
     array-length v0, v0
@@ -1100,7 +1134,7 @@
 
     invoke-interface {v4, v0, v1}, Landroid/content/SharedPreferences$Editor;->putString(Ljava/lang/String;Ljava/lang/String;)Landroid/content/SharedPreferences$Editor;
 
-    .line 307
+    .line 356
     :cond_1
     const-string v0, "live_thinking"
 
@@ -1120,7 +1154,7 @@
 
     invoke-interface {v4, v0, v1}, Landroid/content/SharedPreferences$Editor;->putString(Ljava/lang/String;Ljava/lang/String;)Landroid/content/SharedPreferences$Editor;
 
-    .line 308
+    .line 357
     const-string v0, "live_voice"
 
     sget-object v1, Lcom/gemini/chat/LiveActivity;->VOICES:[Ljava/lang/String;
@@ -1143,7 +1177,7 @@
 
     invoke-interface {v4, v0, v1}, Landroid/content/SharedPreferences$Editor;->putString(Ljava/lang/String;Ljava/lang/String;)Landroid/content/SharedPreferences$Editor;
 
-    .line 309
+    .line 358
     const-string v0, "tts_model"
 
     sget-object v1, Lcom/gemini/chat/ReadAloud;->MODELS:[Ljava/lang/String;
@@ -1162,7 +1196,7 @@
 
     invoke-interface {v4, v0, v1}, Landroid/content/SharedPreferences$Editor;->putString(Ljava/lang/String;Ljava/lang/String;)Landroid/content/SharedPreferences$Editor;
 
-    .line 310
+    .line 359
     const-string v0, "live_hands_free"
 
     iget-object v1, p0, Lcom/gemini/chat/SettingsActivity;->cbHandsFree:Landroid/widget/CheckBox;
@@ -1173,7 +1207,7 @@
 
     invoke-interface {v4, v0, v1}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
 
-    .line 311
+    .line 360
     const-string v0, "live_muted"
 
     iget-object v1, p0, Lcom/gemini/chat/SettingsActivity;->cbMuted:Landroid/widget/CheckBox;
@@ -1184,7 +1218,7 @@
 
     invoke-interface {v4, v0, v1}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
 
-    .line 312
+    .line 361
     const-string v0, "live_text"
 
     iget-object v1, p0, Lcom/gemini/chat/SettingsActivity;->cbLiveText:Landroid/widget/CheckBox;
@@ -1195,7 +1229,7 @@
 
     invoke-interface {v4, v0, v1}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
 
-    .line 313
+    .line 362
     const-string v0, "system_instruction"
 
     iget-object v1, p0, Lcom/gemini/chat/SettingsActivity;->etSystemInstruction:Landroid/widget/EditText;
@@ -1214,13 +1248,13 @@
 
     invoke-interface {v4, v0, v1}, Landroid/content/SharedPreferences$Editor;->putString(Ljava/lang/String;Ljava/lang/String;)Landroid/content/SharedPreferences$Editor;
 
-    .line 314
+    .line 363
     invoke-static {p0, v4}, Lcom/gemini/chat/TimeGrounding;->saveSetting(Landroid/app/Activity;Landroid/content/SharedPreferences$Editor;)V
 
-    .line 315
+    .line 364
     invoke-interface {v4}, Landroid/content/SharedPreferences$Editor;->commit()Z
 
-    .line 316
+    .line 365
     const-string v0, "Settings Saved"
 
     invoke-static {p0, v0, v8}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
@@ -1229,23 +1263,23 @@
 
     invoke-virtual {v0}, Landroid/widget/Toast;->show()V
 
-    .line 317
+    .line 366
     invoke-virtual {p0}, Lcom/gemini/chat/SettingsActivity;->finish()V
 
-    .line 318
-    :goto_1
+    .line 367
+    :goto_2
     return-void
 
-    .line 274
+    .line 321
     :cond_2
     invoke-static {v2}, Lcom/gemini/chat/SettingsActivity;->normalizeModel(Ljava/lang/String;)Ljava/lang/String;
 
     move-result-object v1
 
-    .line 275
+    .line 322
     if-nez v1, :cond_4
 
-    .line 276
+    .line 323
     invoke-virtual {v2}, Ljava/lang/String;->length()I
 
     move-result v0
@@ -1254,36 +1288,36 @@
 
     const-string v0, "Enter a model ID, e.g. gemini-4-neon"
 
-    :goto_2
+    :goto_3
     invoke-static {p0, v0, v4}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
 
     move-result-object v0
 
-    .line 277
+    .line 324
     invoke-virtual {v0}, Landroid/widget/Toast;->show()V
 
-    .line 278
+    .line 325
     iget-object v0, p0, Lcom/gemini/chat/SettingsActivity;->etCustomModel:Landroid/widget/EditText;
 
     invoke-virtual {v0}, Landroid/widget/EditText;->requestFocus()Z
 
-    goto :goto_1
+    goto :goto_2
 
-    .line 277
+    .line 324
     :cond_3
     const-string v0, "Invalid model ID (letters, digits, \'-\', \'.\', \'_\' only)"
 
-    goto :goto_2
+    goto :goto_3
 
     :cond_4
     move-object v0, v1
 
     move-object v2, v1
 
-    .line 281
+    .line 328
     goto/16 :goto_0
 
-    .line 288
+    .line 335
     :cond_5
     iget-object v1, p0, Lcom/gemini/chat/SettingsActivity;->etLiveCustom:Landroid/widget/EditText;
 
@@ -1299,10 +1333,10 @@
 
     move-result-object v1
 
-    .line 289
+    .line 336
     if-nez v1, :cond_0
 
-    .line 290
+    .line 337
     iget-object v0, p0, Lcom/gemini/chat/SettingsActivity;->etLiveCustom:Landroid/widget/EditText;
 
     invoke-virtual {v0}, Landroid/widget/EditText;->getText()Landroid/text/Editable;
@@ -1317,7 +1351,7 @@
 
     move-result-object v0
 
-    .line 291
+    .line 338
     invoke-virtual {v0}, Ljava/lang/String;->length()I
 
     move-result v0
@@ -1326,74 +1360,251 @@
 
     const-string v0, "Enter a live model ID, e.g. gemini-3.8-live"
 
-    :goto_3
+    :goto_4
     invoke-static {p0, v0, v4}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
 
     move-result-object v0
 
-    .line 292
+    .line 339
     invoke-virtual {v0}, Landroid/widget/Toast;->show()V
 
-    .line 293
+    .line 340
     iget-object v0, p0, Lcom/gemini/chat/SettingsActivity;->etLiveCustom:Landroid/widget/EditText;
 
     invoke-virtual {v0}, Landroid/widget/EditText;->requestFocus()Z
 
-    goto :goto_1
+    goto :goto_2
 
-    .line 292
+    .line 339
     :cond_6
     const-string v0, "Invalid live model ID (letters, digits, \'-\', \'.\', \'_\' only)"
 
-    goto :goto_3
+    goto :goto_4
+
+    :cond_7
+    move-object v0, v2
+
+    goto/16 :goto_1
+.end method
+
+.method private selectedTextModel()Ljava/lang/String;
+    .locals 2
+
+    .prologue
+    .line 279
+    iget-object v0, p0, Lcom/gemini/chat/SettingsActivity;->spinnerModel:Landroid/widget/Spinner;
+
+    invoke-virtual {v0}, Landroid/widget/Spinner;->getSelectedItemPosition()I
+
+    move-result v0
+
+    .line 280
+    if-ltz v0, :cond_1
+
+    sget-object v1, Lcom/gemini/chat/SettingsActivity;->MODELS:[Ljava/lang/String;
+
+    array-length v1, v1
+
+    if-ge v0, v1, :cond_1
+
+    sget-object v1, Lcom/gemini/chat/SettingsActivity;->MODELS:[Ljava/lang/String;
+
+    aget-object v0, v1, v0
+
+    .line 282
+    :cond_0
+    :goto_0
+    return-object v0
+
+    .line 281
+    :cond_1
+    iget-object v0, p0, Lcom/gemini/chat/SettingsActivity;->etCustomModel:Landroid/widget/EditText;
+
+    invoke-virtual {v0}, Landroid/widget/EditText;->getText()Landroid/text/Editable;
+
+    move-result-object v0
+
+    invoke-virtual {v0}, Ljava/lang/Object;->toString()Ljava/lang/String;
+
+    move-result-object v0
+
+    invoke-static {v0}, Lcom/gemini/chat/SettingsActivity;->normalizeModel(Ljava/lang/String;)Ljava/lang/String;
+
+    move-result-object v0
+
+    .line 282
+    if-nez v0, :cond_0
+
+    iget-object v0, p0, Lcom/gemini/chat/SettingsActivity;->etCustomModel:Landroid/widget/EditText;
+
+    invoke-virtual {v0}, Landroid/widget/EditText;->getText()Landroid/text/Editable;
+
+    move-result-object v0
+
+    invoke-virtual {v0}, Ljava/lang/Object;->toString()Ljava/lang/String;
+
+    move-result-object v0
+
+    invoke-virtual {v0}, Ljava/lang/String;->trim()Ljava/lang/String;
+
+    move-result-object v0
+
+    goto :goto_0
 .end method
 
 .method private spinner([Ljava/lang/String;)Landroid/widget/Spinner;
     .locals 3
 
     .prologue
-    .line 105
+    .line 107
     new-instance v0, Landroid/widget/Spinner;
 
     invoke-direct {v0, p0}, Landroid/widget/Spinner;-><init>(Landroid/content/Context;)V
 
-    .line 106
+    .line 108
     new-instance v1, Landroid/widget/ArrayAdapter;
 
     const v2, 0x1090008
 
     invoke-direct {v1, p0, v2, p1}, Landroid/widget/ArrayAdapter;-><init>(Landroid/content/Context;I[Ljava/lang/Object;)V
 
-    .line 107
+    .line 109
     const v2, 0x1090009
 
     invoke-virtual {v1, v2}, Landroid/widget/ArrayAdapter;->setDropDownViewResource(I)V
 
-    .line 108
+    .line 110
     invoke-virtual {v0, v1}, Landroid/widget/Spinner;->setAdapter(Landroid/widget/SpinnerAdapter;)V
 
-    .line 109
+    .line 111
     return-object v0
+.end method
+
+.method private syncThinkingForModel()V
+    .locals 4
+
+    .prologue
+    .line 287
+    invoke-direct {p0}, Lcom/gemini/chat/SettingsActivity;->selectedTextModel()Ljava/lang/String;
+
+    move-result-object v0
+
+    .line 288
+    invoke-virtual {v0}, Ljava/lang/String;->length()I
+
+    move-result v1
+
+    if-eqz v1, :cond_0
+
+    invoke-static {v0}, Lcom/gemini/chat/ReplyParser;->supportsXhigh(Ljava/lang/String;)Z
+
+    move-result v0
+
+    if-eqz v0, :cond_3
+
+    :cond_0
+    const/4 v0, 0x1
+
+    .line 289
+    :goto_0
+    iget-object v1, p0, Lcom/gemini/chat/SettingsActivity;->spTextThinking:Landroid/widget/Spinner;
+
+    invoke-virtual {v1}, Landroid/widget/Spinner;->getSelectedItemPosition()I
+
+    move-result v1
+
+    .line 290
+    if-nez v0, :cond_1
+
+    if-ltz v1, :cond_1
+
+    sget-object v2, Lcom/gemini/chat/SettingsActivity;->THINKING_VALUES:[Ljava/lang/String;
+
+    array-length v2, v2
+
+    if-ge v1, v2, :cond_1
+
+    const-string v2, "xhigh"
+
+    sget-object v3, Lcom/gemini/chat/SettingsActivity;->THINKING_VALUES:[Ljava/lang/String;
+
+    aget-object v1, v3, v1
+
+    invoke-virtual {v2, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+
+    move-result v1
+
+    if-eqz v1, :cond_1
+
+    .line 291
+    sget-object v1, Lcom/gemini/chat/SettingsActivity;->THINKING_VALUES:[Ljava/lang/String;
+
+    const-string v2, "high"
+
+    invoke-static {v1, v2}, Lcom/gemini/chat/SettingsActivity;->indexOf([Ljava/lang/String;Ljava/lang/String;)I
+
+    move-result v1
+
+    .line 292
+    if-ltz v1, :cond_1
+
+    iget-object v2, p0, Lcom/gemini/chat/SettingsActivity;->spTextThinking:Landroid/widget/Spinner;
+
+    invoke-virtual {v2, v1}, Landroid/widget/Spinner;->setSelection(I)V
+
+    .line 294
+    :cond_1
+    iget-object v1, p0, Lcom/gemini/chat/SettingsActivity;->tvThinkingHint:Landroid/widget/TextView;
+
+    if-eqz v1, :cond_2
+
+    .line 295
+    iget-object v1, p0, Lcom/gemini/chat/SettingsActivity;->tvThinkingHint:Landroid/widget/TextView;
+
+    if-eqz v0, :cond_4
+
+    .line 296
+    const-string v0, "Supports Extra High reasoning depth."
+
+    .line 295
+    :goto_1
+    invoke-virtual {v1, v0}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
+
+    .line 299
+    :cond_2
+    return-void
+
+    .line 288
+    :cond_3
+    const/4 v0, 0x0
+
+    goto :goto_0
+
+    .line 297
+    :cond_4
+    const-string v0, "Caps at High on this model (Extra High is for Hydrogen / Neon)."
+
+    goto :goto_1
 .end method
 
 .method private title(Ljava/lang/String;)Landroid/widget/TextView;
     .locals 2
 
     .prologue
-    .line 91
+    .line 93
     new-instance v0, Landroid/widget/TextView;
 
     invoke-direct {v0, p0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
 
-    .line 92
+    .line 94
     invoke-virtual {v0, p1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
 
-    .line 93
+    .line 95
     sget-object v1, Landroid/graphics/Typeface;->DEFAULT_BOLD:Landroid/graphics/Typeface;
 
     invoke-virtual {v0, v1}, Landroid/widget/TextView;->setTypeface(Landroid/graphics/Typeface;)V
 
-    .line 94
+    .line 96
     return-object v0
 .end method
 
@@ -1407,7 +1618,7 @@
 
     const/4 v2, 0x0
 
-    .line 255
+    .line 302
     iget-object v0, p0, Lcom/gemini/chat/SettingsActivity;->spinnerModel:Landroid/widget/Spinner;
 
     invoke-virtual {v0}, Landroid/widget/Spinner;->getSelectedItemPosition()I
@@ -1422,7 +1633,7 @@
 
     move v0, v1
 
-    .line 256
+    .line 303
     :goto_0
     iget-object v4, p0, Lcom/gemini/chat/SettingsActivity;->etCustomModel:Landroid/widget/EditText;
 
@@ -1433,7 +1644,7 @@
     :goto_1
     invoke-virtual {v4, v0}, Landroid/widget/EditText;->setVisibility(I)V
 
-    .line 257
+    .line 304
     iget-object v0, p0, Lcom/gemini/chat/SettingsActivity;->spLiveModel:Landroid/widget/Spinner;
 
     invoke-virtual {v0}, Landroid/widget/Spinner;->getSelectedItemPosition()I
@@ -1446,7 +1657,7 @@
 
     if-ne v0, v4, :cond_4
 
-    .line 258
+    .line 305
     :goto_2
     iget-object v4, p0, Lcom/gemini/chat/SettingsActivity;->etLiveCustom:Landroid/widget/EditText;
 
@@ -1457,7 +1668,7 @@
     :goto_3
     invoke-virtual {v4, v0}, Landroid/widget/EditText;->setVisibility(I)V
 
-    .line 260
+    .line 307
     if-eqz v1, :cond_6
 
     iget-object v0, p0, Lcom/gemini/chat/SettingsActivity;->etLiveCustom:Landroid/widget/EditText;
@@ -1470,7 +1681,7 @@
 
     move-result-object v0
 
-    .line 262
+    .line 309
     :goto_4
     invoke-static {v0}, Lcom/gemini/chat/LiveSession;->needsThinkingLevel(Ljava/lang/String;)Z
 
@@ -1483,45 +1694,45 @@
     :cond_0
     move v3, v2
 
-    .line 263
+    .line 310
     :cond_1
     iget-object v0, p0, Lcom/gemini/chat/SettingsActivity;->tvLiveThinking:Landroid/widget/TextView;
 
     invoke-virtual {v0, v3}, Landroid/widget/TextView;->setVisibility(I)V
 
-    .line 264
+    .line 311
     iget-object v0, p0, Lcom/gemini/chat/SettingsActivity;->spLiveThinking:Landroid/widget/Spinner;
 
     invoke-virtual {v0, v3}, Landroid/widget/Spinner;->setVisibility(I)V
 
-    .line 265
+    .line 312
     return-void
 
     :cond_2
     move v0, v2
 
-    .line 255
+    .line 302
     goto :goto_0
 
     :cond_3
     move v0, v3
 
-    .line 256
+    .line 303
     goto :goto_1
 
     :cond_4
     move v1, v2
 
-    .line 257
+    .line 304
     goto :goto_2
 
     :cond_5
     move v0, v3
 
-    .line 258
+    .line 305
     goto :goto_3
 
-    .line 261
+    .line 308
     :cond_6
     sget-object v0, Lcom/gemini/chat/LiveActivity;->LIVE_MODELS:[Ljava/lang/String;
 
@@ -1546,61 +1757,61 @@
     .prologue
     const/4 v2, 0x0
 
-    .line 71
+    .line 73
     array-length v0, p0
 
     add-int/lit8 v0, v0, 0x1
 
     new-array v0, v0, [Ljava/lang/String;
 
-    .line 72
+    .line 74
     array-length v1, p0
 
     invoke-static {p0, v2, v0, v2, v1}, Ljava/lang/System;->arraycopy(Ljava/lang/Object;ILjava/lang/Object;II)V
 
-    .line 73
+    .line 75
     array-length v1, p0
 
     const-string v2, "Custom model..."
 
     aput-object v2, v0, v1
 
-    .line 74
+    .line 76
     return-object v0
 .end method
 
 
 # virtual methods
 .method protected onCreate(Landroid/os/Bundle;)V
-    .locals 11
+    .locals 12
 
     .prologue
-    const/4 v10, 0x2
+    const/4 v11, 0x2
 
-    const/4 v9, 0x1
+    const/4 v10, 0x1
 
-    const/4 v6, 0x3
+    const/4 v9, 0x3
 
-    const/4 v8, 0x0
+    const/4 v8, 0x4
 
-    const/4 v7, 0x4
+    const/4 v7, 0x0
 
-    .line 136
+    .line 138
     invoke-super {p0, p1}, Landroid/app/Activity;->onCreate(Landroid/os/Bundle;)V
 
-    .line 137
+    .line 139
     const v0, 0x7f030003
 
     invoke-virtual {p0, v0}, Lcom/gemini/chat/SettingsActivity;->setContentView(I)V
 
-    .line 138
+    .line 140
     invoke-virtual {p0}, Lcom/gemini/chat/SettingsActivity;->getWindow()Landroid/view/Window;
 
     move-result-object v0
 
-    invoke-virtual {v0, v6}, Landroid/view/Window;->setSoftInputMode(I)V
+    invoke-virtual {v0, v9}, Landroid/view/Window;->setSoftInputMode(I)V
 
-    .line 139
+    .line 141
     const v0, 0x7f050005
 
     invoke-virtual {p0, v0}, Lcom/gemini/chat/SettingsActivity;->findViewById(I)Landroid/view/View;
@@ -1611,7 +1822,7 @@
 
     iput-object v0, p0, Lcom/gemini/chat/SettingsActivity;->etApiKey:Landroid/widget/EditText;
 
-    .line 140
+    .line 142
     const v0, 0x7f050006
 
     invoke-virtual {p0, v0}, Lcom/gemini/chat/SettingsActivity;->findViewById(I)Landroid/view/View;
@@ -1622,7 +1833,7 @@
 
     iput-object v0, p0, Lcom/gemini/chat/SettingsActivity;->spinnerModel:Landroid/widget/Spinner;
 
-    .line 141
+    .line 143
     const v0, 0x7f050007
 
     invoke-virtual {p0, v0}, Lcom/gemini/chat/SettingsActivity;->findViewById(I)Landroid/view/View;
@@ -1633,7 +1844,7 @@
 
     iput-object v0, p0, Lcom/gemini/chat/SettingsActivity;->etSystemInstruction:Landroid/widget/EditText;
 
-    .line 142
+    .line 144
     const v0, 0x7f050008
 
     invoke-virtual {p0, v0}, Lcom/gemini/chat/SettingsActivity;->findViewById(I)Landroid/view/View;
@@ -1642,7 +1853,7 @@
 
     check-cast v0, Landroid/widget/Button;
 
-    .line 143
+    .line 145
     iget-object v1, p0, Lcom/gemini/chat/SettingsActivity;->spinnerModel:Landroid/widget/Spinner;
 
     invoke-virtual {v1}, Landroid/widget/Spinner;->getParent()Landroid/view/ViewParent;
@@ -1651,7 +1862,7 @@
 
     check-cast v1, Landroid/view/ViewGroup;
 
-    .line 146
+    .line 148
     const-string v2, "Auto-name chats"
 
     invoke-direct {p0, v2}, Lcom/gemini/chat/SettingsActivity;->check(Ljava/lang/String;)Landroid/widget/CheckBox;
@@ -1660,7 +1871,7 @@
 
     iput-object v2, p0, Lcom/gemini/chat/SettingsActivity;->cbAutoName:Landroid/widget/CheckBox;
 
-    .line 147
+    .line 149
     sget-object v2, Lcom/gemini/chat/MessageFormatter;->TEXT_SIZE_LABELS:[Ljava/lang/String;
 
     invoke-direct {p0, v2}, Lcom/gemini/chat/SettingsActivity;->spinner([Ljava/lang/String;)Landroid/widget/Spinner;
@@ -1669,7 +1880,7 @@
 
     iput-object v2, p0, Lcom/gemini/chat/SettingsActivity;->spTextSize:Landroid/widget/Spinner;
 
-    .line 148
+    .line 150
     iget-object v2, p0, Lcom/gemini/chat/SettingsActivity;->spinnerModel:Landroid/widget/Spinner;
 
     invoke-virtual {v1, v2}, Landroid/view/ViewGroup;->indexOfChild(Landroid/view/View;)I
@@ -1678,12 +1889,12 @@
 
     add-int/lit8 v2, v2, -0x1
 
-    .line 149
-    new-array v3, v7, [Landroid/view/View;
+    .line 151
+    new-array v3, v8, [Landroid/view/View;
 
     iget-object v4, p0, Lcom/gemini/chat/SettingsActivity;->cbAutoName:Landroid/widget/CheckBox;
 
-    aput-object v4, v3, v8
+    aput-object v4, v3, v7
 
     const-string v4, "Names each chat after its first reply."
 
@@ -1691,37 +1902,37 @@
 
     move-result-object v4
 
-    aput-object v4, v3, v9
+    aput-object v4, v3, v10
 
     const-string v4, "Text size"
 
-    .line 150
+    .line 152
     invoke-direct {p0, v4}, Lcom/gemini/chat/SettingsActivity;->title(Ljava/lang/String;)Landroid/widget/TextView;
 
     move-result-object v4
 
-    aput-object v4, v3, v10
+    aput-object v4, v3, v11
 
     iget-object v4, p0, Lcom/gemini/chat/SettingsActivity;->spTextSize:Landroid/widget/Spinner;
 
-    aput-object v4, v3, v6
+    aput-object v4, v3, v9
 
-    new-array v4, v7, [Landroid/widget/LinearLayout$LayoutParams;
+    new-array v4, v8, [Landroid/widget/LinearLayout$LayoutParams;
 
     const/16 v5, 0x8
 
-    .line 151
+    .line 153
     invoke-direct {p0, v5}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
 
     move-result-object v5
 
-    aput-object v5, v4, v8
+    aput-object v5, v4, v7
 
-    invoke-direct {p0, v8}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
+    invoke-direct {p0, v7}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
 
     move-result-object v5
 
-    aput-object v5, v4, v9
+    aput-object v5, v4, v10
 
     const/16 v5, 0x10
 
@@ -1729,18 +1940,18 @@
 
     move-result-object v5
 
-    aput-object v5, v4, v10
+    aput-object v5, v4, v11
 
-    invoke-direct {p0, v7}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
+    invoke-direct {p0, v8}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
 
     move-result-object v5
 
-    aput-object v5, v4, v6
+    aput-object v5, v4, v9
 
-    .line 149
+    .line 151
     invoke-direct {p0, v1, v2, v3, v4}, Lcom/gemini/chat/SettingsActivity;->insert(Landroid/view/ViewGroup;I[Landroid/view/View;[Landroid/widget/LinearLayout$LayoutParams;)I
 
-    .line 154
+    .line 156
     iget-object v2, p0, Lcom/gemini/chat/SettingsActivity;->spinnerModel:Landroid/widget/Spinner;
 
     sget-object v3, Lcom/gemini/chat/SettingsActivity;->MODELS:[Ljava/lang/String;
@@ -1759,7 +1970,7 @@
 
     invoke-virtual {v2, v3}, Landroid/widget/Spinner;->setAdapter(Landroid/widget/SpinnerAdapter;)V
 
-    .line 155
+    .line 157
     const-string v2, "Model ID, e.g. gemini-4-neon"
 
     invoke-direct {p0, v2}, Lcom/gemini/chat/SettingsActivity;->modelIdField(Ljava/lang/String;)Landroid/widget/EditText;
@@ -1768,7 +1979,7 @@
 
     iput-object v2, p0, Lcom/gemini/chat/SettingsActivity;->etCustomModel:Landroid/widget/EditText;
 
-    .line 156
+    .line 158
     sget-object v2, Lcom/gemini/chat/SettingsActivity;->THINKING_LABELS:[Ljava/lang/String;
 
     invoke-direct {p0, v2}, Lcom/gemini/chat/SettingsActivity;->spinner([Ljava/lang/String;)Landroid/widget/Spinner;
@@ -1777,7 +1988,16 @@
 
     iput-object v2, p0, Lcom/gemini/chat/SettingsActivity;->spTextThinking:Landroid/widget/Spinner;
 
-    .line 157
+    .line 159
+    const-string v2, ""
+
+    invoke-direct {p0, v2}, Lcom/gemini/chat/SettingsActivity;->hint(Ljava/lang/String;)Landroid/widget/TextView;
+
+    move-result-object v2
+
+    iput-object v2, p0, Lcom/gemini/chat/SettingsActivity;->tvThinkingHint:Landroid/widget/TextView;
+
+    .line 160
     const-string v2, "Show thought process"
 
     invoke-direct {p0, v2}, Lcom/gemini/chat/SettingsActivity;->check(Ljava/lang/String;)Landroid/widget/CheckBox;
@@ -1786,7 +2006,7 @@
 
     iput-object v2, p0, Lcom/gemini/chat/SettingsActivity;->cbShowThoughts:Landroid/widget/CheckBox;
 
-    .line 158
+    .line 161
     iget-object v2, p0, Lcom/gemini/chat/SettingsActivity;->spinnerModel:Landroid/widget/Spinner;
 
     invoke-virtual {v1, v2}, Landroid/view/ViewGroup;->indexOfChild(Landroid/view/View;)I
@@ -1795,14 +2015,14 @@
 
     add-int/lit8 v2, v2, 0x1
 
-    .line 159
-    const/4 v3, 0x5
+    .line 162
+    const/4 v3, 0x6
 
     new-array v3, v3, [Landroid/view/View;
 
     iget-object v4, p0, Lcom/gemini/chat/SettingsActivity;->etCustomModel:Landroid/widget/EditText;
 
-    aput-object v4, v3, v8
+    aput-object v4, v3, v7
 
     const-string v4, "Thinking level"
 
@@ -1810,35 +2030,41 @@
 
     move-result-object v4
 
-    aput-object v4, v3, v9
+    aput-object v4, v3, v10
 
     iget-object v4, p0, Lcom/gemini/chat/SettingsActivity;->spTextThinking:Landroid/widget/Spinner;
 
-    aput-object v4, v3, v10
+    aput-object v4, v3, v11
+
+    iget-object v4, p0, Lcom/gemini/chat/SettingsActivity;->tvThinkingHint:Landroid/widget/TextView;
+
+    aput-object v4, v3, v9
 
     iget-object v4, p0, Lcom/gemini/chat/SettingsActivity;->cbShowThoughts:Landroid/widget/CheckBox;
 
-    aput-object v4, v3, v6
-
-    const-string v4, "Hold a reply to see its thoughts."
-
-    .line 160
-    invoke-direct {p0, v4}, Lcom/gemini/chat/SettingsActivity;->hint(Ljava/lang/String;)Landroid/widget/TextView;
-
-    move-result-object v4
-
-    aput-object v4, v3, v7
+    aput-object v4, v3, v8
 
     const/4 v4, 0x5
 
-    new-array v4, v4, [Landroid/widget/LinearLayout$LayoutParams;
+    const-string v5, "Hold a reply to see its thoughts."
 
-    .line 161
-    invoke-direct {p0, v7}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
+    .line 163
+    invoke-direct {p0, v5}, Lcom/gemini/chat/SettingsActivity;->hint(Ljava/lang/String;)Landroid/widget/TextView;
 
     move-result-object v5
 
-    aput-object v5, v4, v8
+    aput-object v5, v3, v4
+
+    const/4 v4, 0x6
+
+    new-array v4, v4, [Landroid/widget/LinearLayout$LayoutParams;
+
+    .line 164
+    invoke-direct {p0, v8}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
+
+    move-result-object v5
+
+    aput-object v5, v4, v7
 
     const/16 v5, 0x10
 
@@ -1846,13 +2072,19 @@
 
     move-result-object v5
 
-    aput-object v5, v4, v9
+    aput-object v5, v4, v10
+
+    invoke-direct {p0, v8}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
+
+    move-result-object v5
+
+    aput-object v5, v4, v11
 
     invoke-direct {p0, v7}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
 
     move-result-object v5
 
-    aput-object v5, v4, v10
+    aput-object v5, v4, v9
 
     const/16 v5, 0x8
 
@@ -1860,20 +2092,22 @@
 
     move-result-object v5
 
-    aput-object v5, v4, v6
+    aput-object v5, v4, v8
 
-    invoke-direct {p0, v8}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
+    const/4 v5, 0x5
 
-    move-result-object v5
+    invoke-direct {p0, v7}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
 
-    aput-object v5, v4, v7
+    move-result-object v6
 
-    .line 159
+    aput-object v6, v4, v5
+
+    .line 162
     invoke-direct {p0, v1, v2, v3, v4}, Lcom/gemini/chat/SettingsActivity;->insert(Landroid/view/ViewGroup;I[Landroid/view/View;[Landroid/widget/LinearLayout$LayoutParams;)I
 
     move-result v2
 
-    .line 164
+    .line 167
     sget-object v3, Lcom/gemini/chat/LiveActivity;->LIVE_MODELS:[Ljava/lang/String;
 
     invoke-static {v3}, Lcom/gemini/chat/SettingsActivity;->withCustom([Ljava/lang/String;)[Ljava/lang/String;
@@ -1886,7 +2120,7 @@
 
     iput-object v3, p0, Lcom/gemini/chat/SettingsActivity;->spLiveModel:Landroid/widget/Spinner;
 
-    .line 165
+    .line 168
     const-string v3, "Live model ID, e.g. gemini-3.8-live"
 
     invoke-direct {p0, v3}, Lcom/gemini/chat/SettingsActivity;->modelIdField(Ljava/lang/String;)Landroid/widget/EditText;
@@ -1895,7 +2129,7 @@
 
     iput-object v3, p0, Lcom/gemini/chat/SettingsActivity;->etLiveCustom:Landroid/widget/EditText;
 
-    .line 166
+    .line 169
     const-string v3, "Live thinking level"
 
     invoke-direct {p0, v3}, Lcom/gemini/chat/SettingsActivity;->title(Ljava/lang/String;)Landroid/widget/TextView;
@@ -1904,20 +2138,20 @@
 
     iput-object v3, p0, Lcom/gemini/chat/SettingsActivity;->tvLiveThinking:Landroid/widget/TextView;
 
-    .line 167
-    new-array v3, v6, [Ljava/lang/String;
+    .line 170
+    new-array v3, v9, [Ljava/lang/String;
 
     const-string v4, "Low"
 
-    aput-object v4, v3, v8
+    aput-object v4, v3, v7
 
     const-string v4, "Medium"
 
-    aput-object v4, v3, v9
+    aput-object v4, v3, v10
 
     const-string v4, "High"
 
-    aput-object v4, v3, v10
+    aput-object v4, v3, v11
 
     invoke-direct {p0, v3}, Lcom/gemini/chat/SettingsActivity;->spinner([Ljava/lang/String;)Landroid/widget/Spinner;
 
@@ -1925,7 +2159,7 @@
 
     iput-object v3, p0, Lcom/gemini/chat/SettingsActivity;->spLiveThinking:Landroid/widget/Spinner;
 
-    .line 168
+    .line 171
     sget-object v3, Lcom/gemini/chat/LiveActivity;->VOICES:[Ljava/lang/String;
 
     invoke-direct {p0, v3}, Lcom/gemini/chat/SettingsActivity;->spinner([Ljava/lang/String;)Landroid/widget/Spinner;
@@ -1934,7 +2168,7 @@
 
     iput-object v3, p0, Lcom/gemini/chat/SettingsActivity;->spVoice:Landroid/widget/Spinner;
 
-    .line 169
+    .line 172
     sget-object v3, Lcom/gemini/chat/ReadAloud;->MODELS:[Ljava/lang/String;
 
     invoke-direct {p0, v3}, Lcom/gemini/chat/SettingsActivity;->spinner([Ljava/lang/String;)Landroid/widget/Spinner;
@@ -1943,7 +2177,7 @@
 
     iput-object v3, p0, Lcom/gemini/chat/SettingsActivity;->spTts:Landroid/widget/Spinner;
 
-    .line 170
+    .line 173
     const-string v3, "Hands-free"
 
     invoke-direct {p0, v3}, Lcom/gemini/chat/SettingsActivity;->check(Ljava/lang/String;)Landroid/widget/CheckBox;
@@ -1952,7 +2186,7 @@
 
     iput-object v3, p0, Lcom/gemini/chat/SettingsActivity;->cbHandsFree:Landroid/widget/CheckBox;
 
-    .line 171
+    .line 174
     const-string v3, "Mute voice"
 
     invoke-direct {p0, v3}, Lcom/gemini/chat/SettingsActivity;->check(Ljava/lang/String;)Landroid/widget/CheckBox;
@@ -1961,7 +2195,7 @@
 
     iput-object v3, p0, Lcom/gemini/chat/SettingsActivity;->cbMuted:Landroid/widget/CheckBox;
 
-    .line 172
+    .line 175
     const-string v3, "Live text while speaking"
 
     invoke-direct {p0, v3}, Lcom/gemini/chat/SettingsActivity;->check(Ljava/lang/String;)Landroid/widget/CheckBox;
@@ -1970,7 +2204,7 @@
 
     iput-object v3, p0, Lcom/gemini/chat/SettingsActivity;->cbLiveText:Landroid/widget/CheckBox;
 
-    .line 173
+    .line 176
     const/16 v3, 0x10
 
     new-array v3, v3, [Landroid/view/View;
@@ -1981,29 +2215,29 @@
 
     move-result-object v4
 
-    aput-object v4, v3, v8
+    aput-object v4, v3, v7
 
     iget-object v4, p0, Lcom/gemini/chat/SettingsActivity;->spLiveModel:Landroid/widget/Spinner;
 
-    aput-object v4, v3, v9
+    aput-object v4, v3, v10
 
     iget-object v4, p0, Lcom/gemini/chat/SettingsActivity;->etLiveCustom:Landroid/widget/EditText;
 
-    aput-object v4, v3, v10
+    aput-object v4, v3, v11
 
     iget-object v4, p0, Lcom/gemini/chat/SettingsActivity;->tvLiveThinking:Landroid/widget/TextView;
 
-    aput-object v4, v3, v6
+    aput-object v4, v3, v9
 
     iget-object v4, p0, Lcom/gemini/chat/SettingsActivity;->spLiveThinking:Landroid/widget/Spinner;
 
-    aput-object v4, v3, v7
+    aput-object v4, v3, v8
 
     const/4 v4, 0x5
 
     const-string v5, "Voice"
 
-    .line 174
+    .line 177
     invoke-direct {p0, v5}, Lcom/gemini/chat/SettingsActivity;->title(Ljava/lang/String;)Landroid/widget/TextView;
 
     move-result-object v5
@@ -2030,7 +2264,7 @@
 
     const-string v5, "Read Aloud model"
 
-    .line 175
+    .line 178
     invoke-direct {p0, v5}, Lcom/gemini/chat/SettingsActivity;->title(Ljava/lang/String;)Landroid/widget/TextView;
 
     move-result-object v5
@@ -2069,7 +2303,7 @@
 
     const-string v5, "Replies are shown as text only."
 
-    .line 176
+    .line 179
     invoke-direct {p0, v5}, Lcom/gemini/chat/SettingsActivity;->hint(Ljava/lang/String;)Landroid/widget/TextView;
 
     move-result-object v5
@@ -2086,7 +2320,7 @@
 
     const-string v5, "Shows your words in the text box as you speak."
 
-    .line 177
+    .line 180
     invoke-direct {p0, v5}, Lcom/gemini/chat/SettingsActivity;->hint(Ljava/lang/String;)Landroid/widget/TextView;
 
     move-result-object v5
@@ -2099,24 +2333,24 @@
 
     const/16 v5, 0x14
 
-    .line 178
+    .line 181
     invoke-direct {p0, v5}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
 
     move-result-object v5
 
-    aput-object v5, v4, v8
+    aput-object v5, v4, v7
 
-    invoke-direct {p0, v7}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
-
-    move-result-object v5
-
-    aput-object v5, v4, v9
-
-    invoke-direct {p0, v7}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
+    invoke-direct {p0, v8}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
 
     move-result-object v5
 
     aput-object v5, v4, v10
+
+    invoke-direct {p0, v8}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
+
+    move-result-object v5
+
+    aput-object v5, v4, v11
 
     const/16 v5, 0x10
 
@@ -2124,13 +2358,13 @@
 
     move-result-object v5
 
-    aput-object v5, v4, v6
+    aput-object v5, v4, v9
 
-    invoke-direct {p0, v7}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
+    invoke-direct {p0, v8}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
 
     move-result-object v5
 
-    aput-object v5, v4, v7
+    aput-object v5, v4, v8
 
     const/4 v5, 0x5
 
@@ -2144,7 +2378,7 @@
 
     const/4 v5, 0x6
 
-    invoke-direct {p0, v7}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
+    invoke-direct {p0, v8}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
 
     move-result-object v6
 
@@ -2152,7 +2386,7 @@
 
     const/4 v5, 0x7
 
-    invoke-direct {p0, v8}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
+    invoke-direct {p0, v7}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
 
     move-result-object v6
 
@@ -2162,7 +2396,7 @@
 
     const/16 v6, 0x10
 
-    .line 179
+    .line 182
     invoke-direct {p0, v6}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
 
     move-result-object v6
@@ -2171,7 +2405,7 @@
 
     const/16 v5, 0x9
 
-    invoke-direct {p0, v7}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
+    invoke-direct {p0, v8}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
 
     move-result-object v6
 
@@ -2189,8 +2423,8 @@
 
     const/16 v5, 0xb
 
-    .line 180
-    invoke-direct {p0, v8}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
+    .line 183
+    invoke-direct {p0, v7}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
 
     move-result-object v6
 
@@ -2208,7 +2442,7 @@
 
     const/16 v5, 0xd
 
-    invoke-direct {p0, v8}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
+    invoke-direct {p0, v7}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
 
     move-result-object v6
 
@@ -2226,19 +2460,19 @@
 
     const/16 v5, 0xf
 
-    invoke-direct {p0, v8}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
+    invoke-direct {p0, v7}, Lcom/gemini/chat/SettingsActivity;->fill(I)Landroid/widget/LinearLayout$LayoutParams;
 
     move-result-object v6
 
     aput-object v6, v4, v5
 
-    .line 173
+    .line 176
     invoke-direct {p0, v1, v2, v3, v4}, Lcom/gemini/chat/SettingsActivity;->insert(Landroid/view/ViewGroup;I[Landroid/view/View;[Landroid/widget/LinearLayout$LayoutParams;)I
 
-    .line 183
+    .line 186
     invoke-direct {p0}, Lcom/gemini/chat/SettingsActivity;->load()V
 
-    .line 184
+    .line 187
     iget-object v1, p0, Lcom/gemini/chat/SettingsActivity;->spinnerModel:Landroid/widget/Spinner;
 
     new-instance v2, Lcom/gemini/chat/SettingsActivity$1;
@@ -2247,28 +2481,46 @@
 
     invoke-virtual {v1, v2}, Landroid/widget/Spinner;->setOnItemSelectedListener(Landroid/widget/AdapterView$OnItemSelectedListener;)V
 
-    .line 192
-    iget-object v1, p0, Lcom/gemini/chat/SettingsActivity;->spLiveModel:Landroid/widget/Spinner;
+    .line 196
+    iget-object v1, p0, Lcom/gemini/chat/SettingsActivity;->etCustomModel:Landroid/widget/EditText;
 
     new-instance v2, Lcom/gemini/chat/SettingsActivity$2;
 
     invoke-direct {v2, p0}, Lcom/gemini/chat/SettingsActivity$2;-><init>(Lcom/gemini/chat/SettingsActivity;)V
 
+    invoke-virtual {v1, v2}, Landroid/widget/EditText;->addTextChangedListener(Landroid/text/TextWatcher;)V
+
+    .line 207
+    iget-object v1, p0, Lcom/gemini/chat/SettingsActivity;->spTextThinking:Landroid/widget/Spinner;
+
+    new-instance v2, Lcom/gemini/chat/SettingsActivity$3;
+
+    invoke-direct {v2, p0}, Lcom/gemini/chat/SettingsActivity$3;-><init>(Lcom/gemini/chat/SettingsActivity;)V
+
     invoke-virtual {v1, v2}, Landroid/widget/Spinner;->setOnItemSelectedListener(Landroid/widget/AdapterView$OnItemSelectedListener;)V
 
-    .line 200
-    new-instance v1, Lcom/gemini/chat/SettingsActivity$3;
+    .line 215
+    iget-object v1, p0, Lcom/gemini/chat/SettingsActivity;->spLiveModel:Landroid/widget/Spinner;
 
-    invoke-direct {v1, p0}, Lcom/gemini/chat/SettingsActivity$3;-><init>(Lcom/gemini/chat/SettingsActivity;)V
+    new-instance v2, Lcom/gemini/chat/SettingsActivity$4;
+
+    invoke-direct {v2, p0}, Lcom/gemini/chat/SettingsActivity$4;-><init>(Lcom/gemini/chat/SettingsActivity;)V
+
+    invoke-virtual {v1, v2}, Landroid/widget/Spinner;->setOnItemSelectedListener(Landroid/widget/AdapterView$OnItemSelectedListener;)V
+
+    .line 223
+    new-instance v1, Lcom/gemini/chat/SettingsActivity$5;
+
+    invoke-direct {v1, p0}, Lcom/gemini/chat/SettingsActivity$5;-><init>(Lcom/gemini/chat/SettingsActivity;)V
 
     invoke-virtual {v0, v1}, Landroid/widget/Button;->setOnClickListener(Landroid/view/View$OnClickListener;)V
 
-    .line 205
+    .line 228
     invoke-static {p0}, Lcom/gemini/chat/ConfigBinder;->bind(Landroid/app/Activity;)V
 
-    .line 206
+    .line 229
     invoke-static {p0}, Lcom/gemini/chat/TimeGrounding;->bindSetting(Landroid/app/Activity;)V
 
-    .line 207
+    .line 230
     return-void
 .end method

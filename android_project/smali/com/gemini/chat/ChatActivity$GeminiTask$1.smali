@@ -33,7 +33,7 @@
     .end annotation
 
     .prologue
-    .line 261
+    .line 343
     iput-object p1, p0, Lcom/gemini/chat/ChatActivity$GeminiTask$1;->this$1:Lcom/gemini/chat/ChatActivity$GeminiTask;
 
     iput-object p2, p0, Lcom/gemini/chat/ChatActivity$GeminiTask$1;->val$c:Ljava/net/HttpURLConnection;
@@ -49,7 +49,7 @@
     .locals 1
 
     .prologue
-    .line 264
+    .line 346
     :try_start_0
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask$1;->val$c:Ljava/net/HttpURLConnection;
 
@@ -57,11 +57,11 @@
     :try_end_0
     .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_0
 
-    .line 267
+    .line 349
     :goto_0
     return-void
 
-    .line 265
+    .line 347
     :catch_0
     move-exception v0
 

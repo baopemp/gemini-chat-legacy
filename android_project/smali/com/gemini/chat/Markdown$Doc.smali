@@ -49,36 +49,36 @@
     .locals 1
 
     .prologue
-    .line 39
+    .line 40
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 
-    .line 40
+    .line 41
     new-instance v0, Ljava/lang/StringBuilder;
 
     invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
 
     iput-object v0, p0, Lcom/gemini/chat/Markdown$Doc;->text:Ljava/lang/StringBuilder;
 
-    .line 41
+    .line 42
     new-instance v0, Ljava/util/ArrayList;
 
     invoke-direct {v0}, Ljava/util/ArrayList;-><init>()V
 
     iput-object v0, p0, Lcom/gemini/chat/Markdown$Doc;->spans:Ljava/util/ArrayList;
 
-    .line 42
+    .line 43
     new-instance v0, Ljava/util/ArrayList;
 
     invoke-direct {v0}, Ljava/util/ArrayList;-><init>()V
 
     iput-object v0, p0, Lcom/gemini/chat/Markdown$Doc;->codeBlocks:Ljava/util/ArrayList;
 
-    .line 43
+    .line 44
     const/4 v0, -0x1
 
     iput v0, p0, Lcom/gemini/chat/Markdown$Doc;->lastGapAt:I
 
-    .line 44
+    .line 45
     const/16 v0, 0x1e
 
     iput v0, p0, Lcom/gemini/chat/Markdown$Doc;->gridMaxChars:I
@@ -94,26 +94,26 @@
     .prologue
     const/16 v2, 0xa
 
-    .line 60
+    .line 61
     iget-object v0, p0, Lcom/gemini/chat/Markdown$Doc;->text:Ljava/lang/StringBuilder;
 
     invoke-virtual {v0}, Ljava/lang/StringBuilder;->length()I
 
     move-result v0
 
-    .line 61
+    .line 62
     if-eqz v0, :cond_0
 
     iget v1, p0, Lcom/gemini/chat/Markdown$Doc;->lastGapAt:I
 
     if-ne v1, v0, :cond_1
 
-    .line 67
+    .line 68
     :cond_0
     :goto_0
     return-void
 
-    .line 62
+    .line 63
     :cond_1
     iget-object v1, p0, Lcom/gemini/chat/Markdown$Doc;->text:Ljava/lang/StringBuilder;
 
@@ -129,7 +129,7 @@
 
     invoke-virtual {v0, v2}, Ljava/lang/StringBuilder;->append(C)Ljava/lang/StringBuilder;
 
-    .line 63
+    .line 64
     :cond_2
     iget-object v0, p0, Lcom/gemini/chat/Markdown$Doc;->text:Ljava/lang/StringBuilder;
 
@@ -137,19 +137,19 @@
 
     move-result v0
 
-    .line 64
+    .line 65
     iget-object v1, p0, Lcom/gemini/chat/Markdown$Doc;->text:Ljava/lang/StringBuilder;
 
     invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(C)Ljava/lang/StringBuilder;
 
-    .line 65
+    .line 66
     add-int/lit8 v1, v0, 0x1
 
     const/16 v2, 0x16
 
     invoke-virtual {p0, v0, v1, v2}, Lcom/gemini/chat/Markdown$Doc;->span(III)V
 
-    .line 66
+    .line 67
     iget-object v0, p0, Lcom/gemini/chat/Markdown$Doc;->text:Ljava/lang/StringBuilder;
 
     invoke-virtual {v0}, Ljava/lang/StringBuilder;->length()I
@@ -165,7 +165,7 @@
     .locals 1
 
     .prologue
-    .line 55
+    .line 56
     iget-object v0, p0, Lcom/gemini/chat/Markdown$Doc;->text:Ljava/lang/StringBuilder;
 
     invoke-virtual {v0}, Ljava/lang/StringBuilder;->length()I
@@ -179,7 +179,7 @@
     .locals 6
 
     .prologue
-    .line 47
+    .line 48
     const/4 v4, 0x0
 
     const/4 v5, 0x0
@@ -194,7 +194,7 @@
 
     invoke-virtual/range {v0 .. v5}, Lcom/gemini/chat/Markdown$Doc;->span(IIIILjava/lang/String;)V
 
-    .line 48
+    .line 49
     return-void
 .end method
 
@@ -202,7 +202,7 @@
     .locals 7
 
     .prologue
-    .line 51
+    .line 52
     if-le p2, p1, :cond_0
 
     iget-object v6, p0, Lcom/gemini/chat/Markdown$Doc;->spans:Ljava/util/ArrayList;
@@ -223,7 +223,7 @@
 
     invoke-virtual {v6, v0}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
 
-    .line 52
+    .line 53
     :cond_0
     return-void
 .end method

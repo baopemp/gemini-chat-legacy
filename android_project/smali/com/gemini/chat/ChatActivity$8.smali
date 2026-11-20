@@ -3,12 +3,12 @@
 .source "ChatActivity.java"
 
 # interfaces
-.implements Ljava/lang/Runnable;
+.implements Landroid/view/View$OnClickListener;
 
 
 # annotations
 .annotation system Ldalvik/annotation/EnclosingMethod;
-    value = Lcom/gemini/chat/ChatActivity;->scrollChatDown()V
+    value = Lcom/gemini/chat/ChatActivity;->buildAttachBar()V
 .end annotation
 
 .annotation system Ldalvik/annotation/InnerClass;
@@ -26,7 +26,7 @@
     .locals 0
 
     .prologue
-    .line 871
+    .line 922
     iput-object p1, p0, Lcom/gemini/chat/ChatActivity$8;->this$0:Lcom/gemini/chat/ChatActivity;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
@@ -36,31 +36,17 @@
 
 
 # virtual methods
-.method public run()V
-    .locals 3
+.method public onClick(Landroid/view/View;)V
+    .locals 2
 
     .prologue
-    .line 873
+    .line 924
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$8;->this$0:Lcom/gemini/chat/ChatActivity;
-
-    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$2000(Lcom/gemini/chat/ChatActivity;)Landroid/widget/ScrollView;
-
-    move-result-object v0
 
     const/4 v1, 0x0
 
-    iget-object v2, p0, Lcom/gemini/chat/ChatActivity$8;->this$0:Lcom/gemini/chat/ChatActivity;
+    invoke-static {v0, v1}, Lcom/gemini/chat/ChatActivity;->access$2700(Lcom/gemini/chat/ChatActivity;Ljava/lang/String;)V
 
-    invoke-static {v2}, Lcom/gemini/chat/ChatActivity;->access$2100(Lcom/gemini/chat/ChatActivity;)Landroid/widget/LinearLayout;
-
-    move-result-object v2
-
-    invoke-virtual {v2}, Landroid/widget/LinearLayout;->getMeasuredHeight()I
-
-    move-result v2
-
-    invoke-virtual {v0, v1, v2}, Landroid/widget/ScrollView;->scrollTo(II)V
-
-    .line 874
+    .line 925
     return-void
 .end method

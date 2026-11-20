@@ -3,12 +3,12 @@
 .source "ChatActivity.java"
 
 # interfaces
-.implements Landroid/content/DialogInterface$OnClickListener;
+.implements Lcom/gemini/chat/ReadAloud$Listener;
 
 
 # annotations
 .annotation system Ldalvik/annotation/EnclosingMethod;
-    value = Lcom/gemini/chat/ChatActivity;->confirmDelete(J)V
+    value = Lcom/gemini/chat/ChatActivity;->readAloud(JLjava/lang/String;)V
 .end annotation
 
 .annotation system Ldalvik/annotation/InnerClass;
@@ -20,23 +20,14 @@
 # instance fields
 .field final synthetic this$0:Lcom/gemini/chat/ChatActivity;
 
-.field final synthetic val$msgId:J
-
 
 # direct methods
-.method constructor <init>(Lcom/gemini/chat/ChatActivity;J)V
+.method constructor <init>(Lcom/gemini/chat/ChatActivity;)V
     .locals 0
-    .annotation system Ldalvik/annotation/Signature;
-        value = {
-            "()V"
-        }
-    .end annotation
 
     .prologue
-    .line 1086
+    .line 1337
     iput-object p1, p0, Lcom/gemini/chat/ChatActivity$11;->this$0:Lcom/gemini/chat/ChatActivity;
-
-    iput-wide p2, p0, Lcom/gemini/chat/ChatActivity$11;->val$msgId:J
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 
@@ -45,28 +36,74 @@
 
 
 # virtual methods
-.method public onClick(Landroid/content/DialogInterface;I)V
-    .locals 4
+.method public onDone(Lcom/gemini/chat/ReadAloud;Ljava/lang/String;)V
+    .locals 2
 
     .prologue
-    .line 1088
+    .line 1339
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$11;->this$0:Lcom/gemini/chat/ChatActivity;
 
-    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$000(Lcom/gemini/chat/ChatActivity;)Lcom/gemini/chat/DatabaseHelper;
+    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$3100(Lcom/gemini/chat/ChatActivity;)Lcom/gemini/chat/ReadAloud;
 
     move-result-object v0
 
-    iget-wide v2, p0, Lcom/gemini/chat/ChatActivity$11;->val$msgId:J
+    if-ne v0, p1, :cond_1
 
-    invoke-virtual {v0, v2, v3}, Lcom/gemini/chat/DatabaseHelper;->deleteMessage(J)V
+    .line 1340
+    iget-object v0, p0, Lcom/gemini/chat/ChatActivity$11;->this$0:Lcom/gemini/chat/ChatActivity;
 
-    .line 1089
+    const/4 v1, 0x0
+
+    invoke-static {v0, v1}, Lcom/gemini/chat/ChatActivity;->access$3102(Lcom/gemini/chat/ChatActivity;Lcom/gemini/chat/ReadAloud;)Lcom/gemini/chat/ReadAloud;
+
+    .line 1341
+    iget-object v0, p0, Lcom/gemini/chat/ChatActivity$11;->this$0:Lcom/gemini/chat/ChatActivity;
+
+    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$4000(Lcom/gemini/chat/ChatActivity;)Landroid/widget/LinearLayout;
+
+    move-result-object v0
+
+    if-eqz v0, :cond_0
+
+    iget-object v0, p0, Lcom/gemini/chat/ChatActivity$11;->this$0:Lcom/gemini/chat/ChatActivity;
+
+    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$4000(Lcom/gemini/chat/ChatActivity;)Landroid/widget/LinearLayout;
+
+    move-result-object v0
+
+    const/16 v1, 0x8
+
+    invoke-virtual {v0, v1}, Landroid/widget/LinearLayout;->setVisibility(I)V
+
+    .line 1342
+    :cond_0
+    iget-object v0, p0, Lcom/gemini/chat/ChatActivity$11;->this$0:Lcom/gemini/chat/ChatActivity;
+
+    invoke-static {v0}, Lcom/gemini/chat/Compat;->invalidateMenu(Landroid/app/Activity;)V
+
+    .line 1344
+    :cond_1
+    if-eqz p2, :cond_2
+
+    iget-object v0, p0, Lcom/gemini/chat/ChatActivity$11;->this$0:Lcom/gemini/chat/ChatActivity;
+
+    invoke-virtual {v0}, Lcom/gemini/chat/ChatActivity;->isFinishing()Z
+
+    move-result v0
+
+    if-nez v0, :cond_2
+
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$11;->this$0:Lcom/gemini/chat/ChatActivity;
 
     const/4 v1, 0x1
 
-    invoke-static {v0, v1}, Lcom/gemini/chat/ChatActivity;->access$3000(Lcom/gemini/chat/ChatActivity;Z)V
+    invoke-static {v0, p2, v1}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
 
-    .line 1090
+    move-result-object v0
+
+    invoke-virtual {v0}, Landroid/widget/Toast;->show()V
+
+    .line 1345
+    :cond_2
     return-void
 .end method

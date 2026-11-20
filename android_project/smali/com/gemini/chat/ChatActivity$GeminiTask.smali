@@ -25,11 +25,9 @@
 .end annotation
 
 
-# static fields
-.field private static final MAX_RETRIES:I = 0x2
-
-
 # instance fields
+.field private activeParser:Lcom/gemini/chat/ReplyParser;
+
 .field private conn:Ljava/net/HttpURLConnection;
 
 .field private currentChatId:J
@@ -42,9 +40,9 @@
 
 .field private lastProgress:J
 
-.field volatile partialText:Ljava/lang/String;
+.field private lastRetryAfter:Ljava/lang/String;
 
-.field volatile partialThoughts:Ljava/lang/String;
+.field private final partialLock:Ljava/lang/Object;
 
 .field private streamError:Ljava/lang/String;
 
@@ -58,79 +56,92 @@
 
 
 # direct methods
-.method constructor <init>(Lcom/gemini/chat/ChatActivity;J)V
-    .locals 2
+.method constructor <init>(Lcom/gemini/chat/ChatActivity;JLjava/lang/String;)V
+    .locals 4
 
     .prologue
+    const/4 v2, 0x0
+
     const/4 v1, 0x0
 
-    .line 135
+    .line 216
     iput-object p1, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->this$0:Lcom/gemini/chat/ChatActivity;
 
     invoke-direct {p0}, Landroid/os/AsyncTask;-><init>()V
 
-    .line 124
+    .line 202
     const-string v0, ""
 
     iput-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->usedModel:Ljava/lang/String;
 
-    .line 125
-    const/4 v0, 0x0
+    .line 203
+    iput-object v2, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->conn:Ljava/net/HttpURLConnection;
 
-    iput-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->conn:Ljava/net/HttpURLConnection;
-
-    .line 126
+    .line 204
     iput-boolean v1, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->failed:Z
 
-    .line 127
+    .line 205
     iput v1, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->lastCode:I
 
-    .line 132
+    .line 206
+    iput-object v2, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->lastRetryAfter:Ljava/lang/String;
+
+    .line 211
     const-string v0, ""
 
     iput-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->thoughts:Ljava/lang/String;
 
-    .line 381
-    const-string v0, ""
+    .line 213
+    new-instance v0, Ljava/lang/Object;
 
-    iput-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->partialText:Ljava/lang/String;
+    invoke-direct {v0}, Ljava/lang/Object;-><init>()V
 
-    const-string v0, ""
+    iput-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->partialLock:Ljava/lang/Object;
 
-    iput-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->partialThoughts:Ljava/lang/String;
-
-    .line 136
+    .line 217
     iput-wide p2, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->currentChatId:J
 
-    .line 137
+    .line 218
+    if-eqz p4, :cond_0
+
+    :goto_0
+    iput-object p4, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->usedModel:Ljava/lang/String;
+
+    .line 219
     return-void
+
+    .line 218
+    :cond_0
+    const-string p4, ""
+
+    goto :goto_0
 .end method
 
-.method static synthetic access$1400(Lcom/gemini/chat/ChatActivity$GeminiTask;)Z
+.method static synthetic access$2200(Lcom/gemini/chat/ChatActivity$GeminiTask;)Z
     .locals 1
 
     .prologue
-    .line 120
+    .line 200
     iget-boolean v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->includeThoughts:Z
 
     return v0
 .end method
 
-.method static synthetic access$1500(Lcom/gemini/chat/ChatActivity$GeminiTask;)J
+.method static synthetic access$2400(Lcom/gemini/chat/ChatActivity$GeminiTask;)J
     .locals 2
 
     .prologue
-    .line 120
+    .line 200
     iget-wide v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->currentChatId:J
 
     return-wide v0
 .end method
 
-.method static synthetic access$1600(Lcom/gemini/chat/ChatActivity$GeminiTask;)Ljava/lang/String;
+.method static synthetic access$2500(Lcom/gemini/chat/ChatActivity$GeminiTask;)Ljava/lang/String;
     .locals 1
 
     .prologue
-    .line 120
+    .line 200
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->usedModel:Ljava/lang/String;
 
     return-object v0
@@ -147,12 +158,12 @@
     .prologue
     const/4 v3, 0x0
 
-    .line 146
+    .line 228
     new-instance v5, Lorg/json/JSONObject;
 
     invoke-direct {v5}, Lorg/json/JSONObject;-><init>()V
 
-    .line 147
+    .line 229
     if-eqz p1, :cond_0
 
     invoke-virtual {p1}, Ljava/lang/String;->trim()Ljava/lang/String;
@@ -165,59 +176,59 @@
 
     if-eqz v0, :cond_0
 
-    .line 148
+    .line 230
     new-instance v0, Lorg/json/JSONObject;
 
     invoke-direct {v0}, Lorg/json/JSONObject;-><init>()V
 
-    .line 149
+    .line 231
     const-string v1, "text"
 
     invoke-virtual {v0, v1, p1}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
 
-    .line 150
+    .line 232
     new-instance v1, Lorg/json/JSONArray;
 
     invoke-direct {v1}, Lorg/json/JSONArray;-><init>()V
 
-    .line 151
+    .line 233
     invoke-virtual {v1, v0}, Lorg/json/JSONArray;->put(Ljava/lang/Object;)Lorg/json/JSONArray;
 
-    .line 152
+    .line 234
     new-instance v0, Lorg/json/JSONObject;
 
     invoke-direct {v0}, Lorg/json/JSONObject;-><init>()V
 
-    .line 153
+    .line 235
     const-string v2, "parts"
 
     invoke-virtual {v0, v2, v1}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
 
-    .line 154
+    .line 236
     const-string v1, "systemInstruction"
 
     invoke-virtual {v5, v1, v0}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
 
-    .line 156
+    .line 238
     :cond_0
     new-instance v6, Ljava/util/ArrayList;
 
     invoke-direct {v6}, Ljava/util/ArrayList;-><init>()V
 
-    .line 157
+    .line 239
     new-instance v7, Ljava/util/ArrayList;
 
     invoke-direct {v7}, Ljava/util/ArrayList;-><init>()V
 
-    .line 158
+    .line 240
     new-instance v8, Ljava/util/ArrayList;
 
     invoke-direct {v8}, Ljava/util/ArrayList;-><init>()V
 
-    .line 159
+    .line 241
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->this$0:Lcom/gemini/chat/ChatActivity;
 
-    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$000(Lcom/gemini/chat/ChatActivity;)Lcom/gemini/chat/DatabaseHelper;
+    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$200(Lcom/gemini/chat/ChatActivity;)Lcom/gemini/chat/DatabaseHelper;
 
     move-result-object v0
 
@@ -227,10 +238,10 @@
 
     move-result-object v9
 
-    .line 160
+    .line 242
     if-eqz v9, :cond_7
 
-    .line 162
+    .line 244
     :try_start_0
     const-string v0, "role"
 
@@ -238,21 +249,21 @@
 
     move-result v10
 
-    .line 163
+    .line 245
     const-string v0, "content"
 
     invoke-interface {v9, v0}, Landroid/database/Cursor;->getColumnIndex(Ljava/lang/String;)I
 
     move-result v11
 
-    .line 164
+    .line 246
     const-string v0, "model"
 
     invoke-interface {v9, v0}, Landroid/database/Cursor;->getColumnIndex(Ljava/lang/String;)I
 
     move-result v12
 
-    .line 165
+    .line 247
     :cond_1
     :goto_0
     invoke-interface {v9}, Landroid/database/Cursor;->moveToNext()Z
@@ -261,19 +272,19 @@
 
     if-eqz v0, :cond_6
 
-    .line 166
+    .line 248
     invoke-interface {v9, v10}, Landroid/database/Cursor;->getString(I)Ljava/lang/String;
 
     move-result-object v1
 
-    .line 167
+    .line 249
     const-string v0, "user"
 
     invoke-virtual {v0, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
 
     move-result v2
 
-    .line 168
+    .line 250
     if-nez v2, :cond_2
 
     const-string v0, "model"
@@ -284,34 +295,34 @@
 
     if-eqz v0, :cond_1
 
-    .line 169
+    .line 251
     :cond_2
     invoke-interface {v9, v11}, Landroid/database/Cursor;->getString(I)Ljava/lang/String;
 
     move-result-object v0
 
-    .line 170
+    .line 252
     if-nez v0, :cond_12
 
     const-string v0, ""
 
     move-object v4, v0
 
-    .line 171
+    .line 253
     :goto_1
     const/4 v0, 0x0
 
-    .line 172
+    .line 254
     if-eqz v2, :cond_11
 
     if-ltz v12, :cond_11
 
-    .line 173
+    .line 255
     invoke-interface {v9, v12}, Landroid/database/Cursor;->getString(I)Ljava/lang/String;
 
     move-result-object v2
 
-    .line 174
+    .line 256
     if-eqz v2, :cond_11
 
     const-string v13, "data:image/"
@@ -328,7 +339,7 @@
 
     move-object v2, v0
 
-    .line 176
+    .line 258
     :goto_2
     invoke-virtual {v6}, Ljava/util/ArrayList;->size()I
 
@@ -336,7 +347,7 @@
 
     add-int/lit8 v0, v0, -0x1
 
-    .line 177
+    .line 259
     if-ltz v0, :cond_3
 
     invoke-virtual {v6, v0}, Ljava/util/ArrayList;->get(I)Ljava/lang/Object;
@@ -349,30 +360,30 @@
 
     if-nez v13, :cond_10
 
-    .line 178
+    .line 260
     :cond_3
     invoke-virtual {v6, v1}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
 
-    .line 179
+    .line 261
     new-instance v1, Ljava/lang/StringBuffer;
 
     invoke-direct {v1}, Ljava/lang/StringBuffer;-><init>()V
 
     invoke-virtual {v7, v1}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
 
-    .line 180
+    .line 262
     new-instance v1, Ljava/util/ArrayList;
 
     invoke-direct {v1}, Ljava/util/ArrayList;-><init>()V
 
     invoke-virtual {v8, v1}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
 
-    .line 181
+    .line 263
     add-int/lit8 v0, v0, 0x1
 
     move v1, v0
 
-    .line 183
+    .line 265
     :goto_3
     invoke-virtual {v7, v1}, Ljava/util/ArrayList;->get(I)Ljava/lang/Object;
 
@@ -380,14 +391,14 @@
 
     check-cast v0, Ljava/lang/StringBuffer;
 
-    .line 184
+    .line 266
     invoke-virtual {v4}, Ljava/lang/String;->length()I
 
     move-result v13
 
     if-lez v13, :cond_5
 
-    .line 185
+    .line 267
     invoke-virtual {v0}, Ljava/lang/StringBuffer;->length()I
 
     move-result v13
@@ -398,11 +409,11 @@
 
     invoke-virtual {v0, v13}, Ljava/lang/StringBuffer;->append(Ljava/lang/String;)Ljava/lang/StringBuffer;
 
-    .line 186
+    .line 268
     :cond_4
     invoke-virtual {v0, v4}, Ljava/lang/StringBuffer;->append(Ljava/lang/String;)Ljava/lang/StringBuffer;
 
-    .line 188
+    .line 270
     :cond_5
     if-eqz v2, :cond_1
 
@@ -418,20 +429,20 @@
 
     goto/16 :goto_0
 
-    .line 191
+    .line 273
     :catchall_0
     move-exception v0
 
     invoke-interface {v9}, Landroid/database/Cursor;->close()V
 
-    .line 192
+    .line 274
     throw v0
 
-    .line 191
+    .line 273
     :cond_6
     invoke-interface {v9}, Landroid/database/Cursor;->close()V
 
-    .line 194
+    .line 276
     :cond_7
     new-instance v4, Lorg/json/JSONArray;
 
@@ -439,7 +450,7 @@
 
     move v2, v3
 
-    .line 195
+    .line 277
     :goto_4
     invoke-virtual {v6}, Ljava/util/ArrayList;->size()I
 
@@ -447,19 +458,19 @@
 
     if-ge v2, v0, :cond_b
 
-    .line 196
+    .line 278
     new-instance v9, Lorg/json/JSONArray;
 
     invoke-direct {v9}, Lorg/json/JSONArray;-><init>()V
 
-    .line 197
+    .line 279
     invoke-virtual {v8, v2}, Ljava/util/ArrayList;->get(I)Ljava/lang/Object;
 
     move-result-object v0
 
     check-cast v0, Ljava/util/ArrayList;
 
-    .line 199
+    .line 281
     invoke-virtual {v7, v2}, Ljava/util/ArrayList;->get(I)Ljava/lang/Object;
 
     move-result-object v1
@@ -478,13 +489,13 @@
 
     if-eqz v1, :cond_9
 
-    .line 200
+    .line 282
     :cond_8
     new-instance v10, Lorg/json/JSONObject;
 
     invoke-direct {v10}, Lorg/json/JSONObject;-><init>()V
 
-    .line 201
+    .line 283
     const-string v11, "text"
 
     invoke-virtual {v7, v2}, Ljava/util/ArrayList;->get(I)Ljava/lang/Object;
@@ -499,13 +510,13 @@
 
     invoke-virtual {v10, v11, v1}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
 
-    .line 202
+    .line 284
     invoke-virtual {v9, v10}, Lorg/json/JSONArray;->put(Ljava/lang/Object;)Lorg/json/JSONArray;
 
     :cond_9
     move v1, v3
 
-    .line 204
+    .line 286
     :goto_5
     invoke-virtual {v0}, Ljava/util/ArrayList;->size()I
 
@@ -523,13 +534,13 @@
 
     goto :goto_5
 
-    .line 205
+    .line 287
     :cond_a
     new-instance v0, Lorg/json/JSONObject;
 
     invoke-direct {v0}, Lorg/json/JSONObject;-><init>()V
 
-    .line 206
+    .line 288
     const-string v1, "role"
 
     invoke-virtual {v6, v2}, Ljava/util/ArrayList;->get(I)Ljava/lang/Object;
@@ -538,28 +549,28 @@
 
     invoke-virtual {v0, v1, v10}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
 
-    .line 207
+    .line 289
     const-string v1, "parts"
 
     invoke-virtual {v0, v1, v9}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
 
-    .line 208
+    .line 290
     invoke-virtual {v4, v0}, Lorg/json/JSONArray;->put(Ljava/lang/Object;)Lorg/json/JSONArray;
 
-    .line 195
+    .line 277
     add-int/lit8 v0, v2, 0x1
 
     move v2, v0
 
     goto :goto_4
 
-    .line 210
+    .line 292
     :cond_b
     const-string v0, "contents"
 
     invoke-virtual {v5, v0, v4}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
 
-    .line 211
+    .line 293
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->thinkingLevel:Ljava/lang/String;
 
     if-nez v0, :cond_c
@@ -568,13 +579,13 @@
 
     if-eqz v0, :cond_f
 
-    .line 212
+    .line 294
     :cond_c
     new-instance v0, Lorg/json/JSONObject;
 
     invoke-direct {v0}, Lorg/json/JSONObject;-><init>()V
 
-    .line 213
+    .line 295
     iget-object v1, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->thinkingLevel:Ljava/lang/String;
 
     if-eqz v1, :cond_d
@@ -585,7 +596,7 @@
 
     invoke-virtual {v0, v1, v2}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
 
-    .line 214
+    .line 296
     :cond_d
     iget-boolean v1, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->includeThoughts:Z
 
@@ -597,7 +608,7 @@
 
     invoke-virtual {v0, v1, v2}, Lorg/json/JSONObject;->put(Ljava/lang/String;Z)Lorg/json/JSONObject;
 
-    .line 215
+    .line 297
     :cond_e
     const-string v1, "generationConfig"
 
@@ -613,7 +624,7 @@
 
     invoke-virtual {v5, v1, v0}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
 
-    .line 217
+    .line 299
     :cond_f
     invoke-virtual {v5}, Lorg/json/JSONObject;->toString()Ljava/lang/String;
 
@@ -641,12 +652,12 @@
     .locals 1
 
     .prologue
-    .line 140
+    .line 222
     const/4 v0, 0x1
 
     iput-boolean v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->failed:Z
 
-    .line 141
+    .line 223
     return-object p1
 .end method
 
@@ -663,22 +674,22 @@
 
     const/4 v6, 0x0
 
-    .line 387
+    .line 488
     new-instance v0, Lorg/json/JSONObject;
 
     invoke-direct {v0, p2}, Lorg/json/JSONObject;-><init>(Ljava/lang/String;)V
 
-    .line 388
+    .line 489
     const-string v1, "error"
 
     invoke-virtual {v0, v1}, Lorg/json/JSONObject;->optJSONObject(Ljava/lang/String;)Lorg/json/JSONObject;
 
     move-result-object v1
 
-    .line 389
+    .line 490
     if-eqz v1, :cond_1
 
-    .line 390
+    .line 491
     const-string v0, "code"
 
     const/16 v2, 0x1f4
@@ -689,7 +700,7 @@
 
     iput v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->lastCode:I
 
-    .line 391
+    .line 492
     new-instance v0, Ljava/lang/StringBuilder;
 
     invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
@@ -730,103 +741,148 @@
 
     iput-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->streamError:Ljava/lang/String;
 
-    .line 402
+    .line 510
     :cond_0
     :goto_0
     return-void
 
-    .line 394
+    .line 496
     :cond_1
+    iget-object v1, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->partialLock:Ljava/lang/Object;
+
+    monitor-enter v1
+
+    .line 497
+    :try_start_0
     invoke-virtual {p1, v0}, Lcom/gemini/chat/ReplyParser;->feed(Lorg/json/JSONObject;)V
 
-    .line 395
+    .line 498
     iget-object v0, p1, Lcom/gemini/chat/ReplyParser;->text:Ljava/lang/StringBuffer;
 
-    invoke-virtual {v0}, Ljava/lang/StringBuffer;->toString()Ljava/lang/String;
+    invoke-virtual {v0}, Ljava/lang/StringBuffer;->length()I
 
-    move-result-object v0
+    move-result v0
 
-    iput-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->partialText:Ljava/lang/String;
+    iget-object v2, p1, Lcom/gemini/chat/ReplyParser;->thoughts:Ljava/lang/StringBuffer;
 
-    .line 396
+    invoke-virtual {v2}, Ljava/lang/StringBuffer;->length()I
+
+    move-result v2
+
+    add-int/2addr v0, v2
+
+    .line 499
+    monitor-exit v1
+    :try_end_0
+    .catchall {:try_start_0 .. :try_end_0} :catchall_0
+
+    .line 500
+    invoke-static {}, Ljava/lang/System;->currentTimeMillis()J
+
+    move-result-wide v2
+
+    .line 501
+    iget-wide v4, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->lastProgress:J
+
+    sub-long v4, v2, v4
+
+    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->streamIntervalMs(I)J
+
+    move-result-wide v0
+
+    cmp-long v0, v4, v0
+
+    if-ltz v0, :cond_0
+
+    .line 502
+    iput-wide v2, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->lastProgress:J
+
+    .line 504
+    iget-object v1, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->partialLock:Ljava/lang/Object;
+
+    monitor-enter v1
+
+    .line 505
+    :try_start_1
     iget-object v0, p1, Lcom/gemini/chat/ReplyParser;->thoughts:Ljava/lang/StringBuffer;
 
     invoke-virtual {v0}, Ljava/lang/StringBuffer;->toString()Ljava/lang/String;
 
     move-result-object v0
 
-    iput-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->partialThoughts:Ljava/lang/String;
-
-    .line 397
-    invoke-static {}, Ljava/lang/System;->currentTimeMillis()J
-
-    move-result-wide v0
-
-    .line 398
-    iget-wide v2, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->lastProgress:J
-
-    sub-long v2, v0, v2
-
-    const-wide/16 v4, 0xfa
-
-    cmp-long v2, v2, v4
-
-    if-ltz v2, :cond_0
-
-    .line 399
-    iput-wide v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->lastProgress:J
-
-    .line 400
-    new-array v0, v7, [Ljava/lang/Object;
-
-    const/4 v1, 0x2
-
-    new-array v1, v1, [Ljava/lang/String;
-
-    iget-object v2, p1, Lcom/gemini/chat/ReplyParser;->thoughts:Ljava/lang/StringBuffer;
-
-    invoke-virtual {v2}, Ljava/lang/StringBuffer;->toString()Ljava/lang/String;
-
-    move-result-object v2
-
-    aput-object v2, v1, v6
-
+    .line 506
     iget-object v2, p1, Lcom/gemini/chat/ReplyParser;->text:Ljava/lang/StringBuffer;
 
     invoke-virtual {v2}, Ljava/lang/StringBuffer;->toString()Ljava/lang/String;
 
     move-result-object v2
 
-    aput-object v2, v1, v7
+    .line 507
+    monitor-exit v1
+    :try_end_1
+    .catchall {:try_start_1 .. :try_end_1} :catchall_1
 
-    aput-object v1, v0, v6
+    .line 508
+    new-array v1, v7, [Ljava/lang/Object;
 
-    invoke-virtual {p0, v0}, Lcom/gemini/chat/ChatActivity$GeminiTask;->publishProgress([Ljava/lang/Object;)V
+    const/4 v3, 0x2
+
+    new-array v3, v3, [Ljava/lang/String;
+
+    aput-object v0, v3, v6
+
+    aput-object v2, v3, v7
+
+    aput-object v3, v1, v6
+
+    invoke-virtual {p0, v1}, Lcom/gemini/chat/ChatActivity$GeminiTask;->publishProgress([Ljava/lang/Object;)V
 
     goto :goto_0
+
+    .line 499
+    :catchall_0
+    move-exception v0
+
+    :try_start_2
+    monitor-exit v1
+    :try_end_2
+    .catchall {:try_start_2 .. :try_end_2} :catchall_0
+
+    throw v0
+
+    .line 507
+    :catchall_1
+    move-exception v0
+
+    :try_start_3
+    monitor-exit v1
+    :try_end_3
+    .catchall {:try_start_3 .. :try_end_3} :catchall_1
+
+    throw v0
 .end method
 
 .method private finish(Lcom/gemini/chat/ReplyParser;)Ljava/lang/String;
     .locals 1
 
     .prologue
-    .line 241
+    .line 323
     invoke-virtual {p1}, Lcom/gemini/chat/ReplyParser;->error()Ljava/lang/String;
 
     move-result-object v0
 
-    .line 242
+    .line 324
     if-eqz v0, :cond_0
 
     invoke-direct {p0, v0}, Lcom/gemini/chat/ChatActivity$GeminiTask;->fail(Ljava/lang/String;)Ljava/lang/String;
 
     move-result-object v0
 
-    .line 244
+    .line 326
     :goto_0
     return-object v0
 
-    .line 243
+    .line 325
     :cond_0
     iget-boolean v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->includeThoughts:Z
 
@@ -839,14 +895,14 @@
     :goto_1
     iput-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->thoughts:Ljava/lang/String;
 
-    .line 244
+    .line 326
     invoke-virtual {p1}, Lcom/gemini/chat/ReplyParser;->answer()Ljava/lang/String;
 
     move-result-object v0
 
     goto :goto_0
 
-    .line 243
+    .line 325
     :cond_1
     const-string v0, ""
 
@@ -857,8 +913,8 @@
     .locals 3
 
     .prologue
-    .line 221
-    .line 223
+    .line 303
+    .line 305
     :try_start_0
     new-instance v0, Lorg/json/JSONObject;
 
@@ -870,10 +926,10 @@
 
     move-result-object v0
 
-    .line 224
+    .line 306
     if-eqz v0, :cond_0
 
-    .line 225
+    .line 307
     const-string v1, "message"
 
     const-string v2, ""
@@ -882,7 +938,7 @@
 
     move-result-object v0
 
-    .line 226
+    .line 308
     invoke-virtual {v0}, Ljava/lang/String;->length()I
     :try_end_0
     .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_0
@@ -893,7 +949,7 @@
 
     move-object p2, v0
 
-    .line 230
+    .line 312
     :cond_0
     :goto_0
     new-instance v0, Ljava/lang/StringBuilder;
@@ -930,7 +986,7 @@
 
     return-object v0
 
-    .line 228
+    .line 310
     :catch_0
     move-exception v0
 
@@ -946,19 +1002,19 @@
     .end annotation
 
     .prologue
-    .line 235
+    .line 317
     new-instance v0, Lcom/gemini/chat/ReplyParser;
 
     invoke-direct {v0}, Lcom/gemini/chat/ReplyParser;-><init>()V
 
-    .line 236
+    .line 318
     new-instance v1, Lorg/json/JSONObject;
 
     invoke-direct {v1, p1}, Lorg/json/JSONObject;-><init>(Ljava/lang/String;)V
 
     invoke-virtual {v0, v1}, Lcom/gemini/chat/ReplyParser;->feed(Lorg/json/JSONObject;)V
 
-    .line 237
+    .line 319
     invoke-direct {p0, v0}, Lcom/gemini/chat/ChatActivity$GeminiTask;->finish(Lcom/gemini/chat/ReplyParser;)Ljava/lang/String;
 
     move-result-object v0
@@ -976,13 +1032,16 @@
 
     const/4 v1, 0x0
 
-    .line 323
+    .line 420
     iput v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->lastCode:I
 
-    .line 324
+    .line 421
+    iput-object v1, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->lastRetryAfter:Ljava/lang/String;
+
+    .line 422
     const/4 v2, 0x0
 
-    .line 326
+    .line 424
     :try_start_0
     new-instance v0, Ljava/net/URL;
 
@@ -1018,165 +1077,165 @@
 
     check-cast v0, Ljava/net/HttpURLConnection;
 
-    .line 327
+    .line 425
     iput-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->conn:Ljava/net/HttpURLConnection;
 
-    .line 328
-    const/16 v4, 0x7530
+    .line 426
+    const/16 v4, 0x4e20
 
     invoke-virtual {v0, v4}, Ljava/net/HttpURLConnection;->setConnectTimeout(I)V
 
-    .line 329
+    .line 427
     const v4, 0x2bf20
 
     invoke-virtual {v0, v4}, Ljava/net/HttpURLConnection;->setReadTimeout(I)V
 
-    .line 330
+    .line 428
     const-string v4, "POST"
 
     invoke-virtual {v0, v4}, Ljava/net/HttpURLConnection;->setRequestMethod(Ljava/lang/String;)V
 
-    .line 331
+    .line 429
     const-string v4, "Content-Type"
 
     const-string v5, "application/json; charset=utf-8"
 
     invoke-virtual {v0, v4, v5}, Ljava/net/HttpURLConnection;->setRequestProperty(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 332
+    .line 430
     const-string v4, "x-goog-api-key"
 
     invoke-virtual {v0, v4, p1}, Ljava/net/HttpURLConnection;->setRequestProperty(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 333
+    .line 431
     const/4 v4, 0x1
 
     invoke-virtual {v0, v4}, Ljava/net/HttpURLConnection;->setDoOutput(Z)V
 
-    .line 334
+    .line 432
     const-string v4, "UTF-8"
 
     invoke-virtual {p3, v4}, Ljava/lang/String;->getBytes(Ljava/lang/String;)[B
 
     move-result-object v4
 
-    .line 335
+    .line 433
     array-length v5, v4
 
     invoke-virtual {v0, v5}, Ljava/net/HttpURLConnection;->setFixedLengthStreamingMode(I)V
 
-    .line 336
+    .line 434
     invoke-virtual {v0}, Ljava/net/HttpURLConnection;->getOutputStream()Ljava/io/OutputStream;
     :try_end_0
     .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_0
-    .catchall {:try_start_0 .. :try_end_0} :catchall_2
+    .catchall {:try_start_0 .. :try_end_0} :catchall_3
 
     move-result-object v5
 
-    .line 338
+    .line 436
     :try_start_1
     invoke-virtual {v5, v4}, Ljava/io/OutputStream;->write([B)V
     :try_end_1
     .catchall {:try_start_1 .. :try_end_1} :catchall_0
 
-    .line 340
+    .line 438
     :try_start_2
     invoke-virtual {v5}, Ljava/io/OutputStream;->close()V
 
-    .line 342
+    .line 440
     invoke-virtual {v0}, Ljava/net/HttpURLConnection;->getResponseCode()I
 
     move-result v4
 
-    .line 343
+    .line 441
     iput v4, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->lastCode:I
 
-    .line 344
+    .line 442
     invoke-virtual {p0}, Lcom/gemini/chat/ChatActivity$GeminiTask;->isCancelled()Z
     :try_end_2
     .catch Ljava/lang/Exception; {:try_start_2 .. :try_end_2} :catch_0
-    .catchall {:try_start_2 .. :try_end_2} :catchall_2
+    .catchall {:try_start_2 .. :try_end_2} :catchall_3
 
     move-result v5
 
     if-eqz v5, :cond_2
 
-    .line 369
+    .line 473
     if-eqz v1, :cond_0
 
-    .line 371
+    .line 475
     :try_start_3
     invoke-virtual {v2}, Ljava/io/BufferedReader;->close()V
     :try_end_3
     .catch Ljava/lang/Exception; {:try_start_3 .. :try_end_3} :catch_2
 
-    .line 375
+    .line 479
     :cond_0
     :goto_0
     invoke-virtual {p0}, Lcom/gemini/chat/ChatActivity$GeminiTask;->disconnect()V
 
-    .line 376
+    .line 480
     iput-object v1, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->conn:Ljava/net/HttpURLConnection;
 
     move-object v0, v1
 
-    .line 367
+    .line 471
     :goto_1
     return-object v0
 
-    .line 340
+    .line 438
     :catchall_0
     move-exception v0
 
     :try_start_4
     invoke-virtual {v5}, Ljava/io/OutputStream;->close()V
 
-    .line 341
+    .line 439
     throw v0
     :try_end_4
     .catch Ljava/lang/Exception; {:try_start_4 .. :try_end_4} :catch_0
-    .catchall {:try_start_4 .. :try_end_4} :catchall_2
+    .catchall {:try_start_4 .. :try_end_4} :catchall_3
 
-    .line 364
+    .line 468
     :catch_0
     move-exception v0
 
     move-object v2, v1
 
-    .line 365
+    .line 469
     :goto_2
     :try_start_5
     invoke-virtual {p0}, Lcom/gemini/chat/ChatActivity$GeminiTask;->isCancelled()Z
     :try_end_5
-    .catchall {:try_start_5 .. :try_end_5} :catchall_1
+    .catchall {:try_start_5 .. :try_end_5} :catchall_2
 
     move-result v3
 
     if-eqz v3, :cond_13
 
-    .line 369
+    .line 473
     if-eqz v2, :cond_1
 
-    .line 371
+    .line 475
     :try_start_6
     invoke-virtual {v2}, Ljava/io/BufferedReader;->close()V
     :try_end_6
     .catch Ljava/lang/Exception; {:try_start_6 .. :try_end_6} :catch_8
 
-    .line 375
+    .line 479
     :cond_1
     :goto_3
     invoke-virtual {p0}, Lcom/gemini/chat/ChatActivity$GeminiTask;->disconnect()V
 
-    .line 376
+    .line 480
     iput-object v1, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->conn:Ljava/net/HttpURLConnection;
 
     move-object v0, v1
 
-    .line 365
+    .line 469
     goto :goto_1
 
-    .line 345
+    .line 443
     :cond_2
     const/16 v5, 0xc8
 
@@ -1186,8 +1245,18 @@
 
     if-lt v4, v5, :cond_5
 
+    .line 444
     :cond_3
     :try_start_7
+    const-string v3, "Retry-After"
+
+    invoke-virtual {v0, v3}, Ljava/net/HttpURLConnection;->getHeaderField(Ljava/lang/String;)Ljava/lang/String;
+
+    move-result-object v3
+
+    iput-object v3, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->lastRetryAfter:Ljava/lang/String;
+
+    .line 445
     invoke-virtual {v0}, Ljava/net/HttpURLConnection;->getErrorStream()Ljava/io/InputStream;
 
     move-result-object v0
@@ -1199,30 +1268,30 @@
     invoke-direct {p0, v4, v0}, Lcom/gemini/chat/ChatActivity$GeminiTask;->parseError(ILjava/lang/String;)Ljava/lang/String;
     :try_end_7
     .catch Ljava/lang/Exception; {:try_start_7 .. :try_end_7} :catch_0
-    .catchall {:try_start_7 .. :try_end_7} :catchall_2
+    .catchall {:try_start_7 .. :try_end_7} :catchall_3
 
     move-result-object v0
 
-    .line 369
+    .line 473
     if-eqz v1, :cond_4
 
-    .line 371
+    .line 475
     :try_start_8
     invoke-virtual {v2}, Ljava/io/BufferedReader;->close()V
     :try_end_8
     .catch Ljava/lang/Exception; {:try_start_8 .. :try_end_8} :catch_3
 
-    .line 375
+    .line 479
     :cond_4
     :goto_4
     invoke-virtual {p0}, Lcom/gemini/chat/ChatActivity$GeminiTask;->disconnect()V
 
-    .line 376
+    .line 480
     iput-object v1, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->conn:Ljava/net/HttpURLConnection;
 
     goto :goto_1
 
-    .line 346
+    .line 447
     :cond_5
     :try_start_9
     new-instance v2, Ljava/io/BufferedReader;
@@ -1242,25 +1311,43 @@
     invoke-direct {v2, v4, v0}, Ljava/io/BufferedReader;-><init>(Ljava/io/Reader;I)V
     :try_end_9
     .catch Ljava/lang/Exception; {:try_start_9 .. :try_end_9} :catch_0
-    .catchall {:try_start_9 .. :try_end_9} :catchall_2
+    .catchall {:try_start_9 .. :try_end_9} :catchall_3
 
-    .line 347
+    .line 448
     :try_start_a
     new-instance v4, Lcom/gemini/chat/ReplyParser;
 
     invoke-direct {v4}, Lcom/gemini/chat/ReplyParser;-><init>()V
 
-    .line 348
+    .line 449
+    iget-object v5, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->partialLock:Ljava/lang/Object;
+
+    monitor-enter v5
+    :try_end_a
+    .catch Ljava/lang/Exception; {:try_start_a .. :try_end_a} :catch_1
+    .catchall {:try_start_a .. :try_end_a} :catchall_2
+
+    .line 450
+    :try_start_b
+    iput-object v4, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->activeParser:Lcom/gemini/chat/ReplyParser;
+
+    .line 451
+    monitor-exit v5
+    :try_end_b
+    .catchall {:try_start_b .. :try_end_b} :catchall_1
+
+    .line 452
+    :try_start_c
     new-instance v5, Ljava/lang/StringBuffer;
 
     invoke-direct {v5}, Ljava/lang/StringBuffer;-><init>()V
 
-    .line 350
+    .line 454
     const/4 v0, 0x0
 
     iput-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->streamError:Ljava/lang/String;
 
-    .line 351
+    .line 455
     :cond_6
     :goto_5
     invoke-virtual {v2}, Ljava/io/BufferedReader;->readLine()Ljava/lang/String;
@@ -1273,55 +1360,72 @@
 
     if-nez v0, :cond_c
 
-    .line 352
+    .line 456
     invoke-virtual {p0}, Lcom/gemini/chat/ChatActivity$GeminiTask;->isCancelled()Z
-    :try_end_a
-    .catch Ljava/lang/Exception; {:try_start_a .. :try_end_a} :catch_1
-    .catchall {:try_start_a .. :try_end_a} :catchall_1
+    :try_end_c
+    .catch Ljava/lang/Exception; {:try_start_c .. :try_end_c} :catch_1
+    .catchall {:try_start_c .. :try_end_c} :catchall_2
 
     move-result v0
 
     if-eqz v0, :cond_8
 
-    .line 369
+    .line 473
     if-eqz v2, :cond_7
 
-    .line 371
-    :try_start_b
+    .line 475
+    :try_start_d
     invoke-virtual {v2}, Ljava/io/BufferedReader;->close()V
-    :try_end_b
-    .catch Ljava/lang/Exception; {:try_start_b .. :try_end_b} :catch_4
+    :try_end_d
+    .catch Ljava/lang/Exception; {:try_start_d .. :try_end_d} :catch_4
 
-    .line 375
+    .line 479
     :cond_7
     :goto_6
     invoke-virtual {p0}, Lcom/gemini/chat/ChatActivity$GeminiTask;->disconnect()V
 
-    .line 376
+    .line 480
     iput-object v1, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->conn:Ljava/net/HttpURLConnection;
 
     move-object v0, v1
 
-    .line 352
-    goto :goto_1
+    .line 456
+    goto/16 :goto_1
 
-    .line 353
+    .line 451
+    :catchall_1
+    move-exception v0
+
+    :try_start_e
+    monitor-exit v5
+    :try_end_e
+    .catchall {:try_start_e .. :try_end_e} :catchall_1
+
+    :try_start_f
+    throw v0
+
+    .line 468
+    :catch_1
+    move-exception v0
+
+    goto :goto_2
+
+    .line 457
     :cond_8
-    :try_start_c
     const-string v0, "data:"
 
     invoke-virtual {v6, v0}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
 
     move-result v0
 
-    if-eqz v0, :cond_a
+    if-eqz v0, :cond_b
 
-    .line 354
+    .line 458
     invoke-virtual {v6}, Ljava/lang/String;->length()I
 
     move-result v0
 
-    if-le v0, v3, :cond_9
+    if-le v0, v3, :cond_a
 
     const/4 v0, 0x5
 
@@ -1331,7 +1435,7 @@
 
     const/16 v7, 0x20
 
-    if-ne v0, v7, :cond_9
+    if-ne v0, v7, :cond_a
 
     const/4 v0, 0x6
 
@@ -1341,23 +1445,45 @@
     move-result-object v0
 
     invoke-virtual {v5, v0}, Ljava/lang/StringBuffer;->append(Ljava/lang/String;)Ljava/lang/StringBuffer;
+    :try_end_f
+    .catch Ljava/lang/Exception; {:try_start_f .. :try_end_f} :catch_1
+    .catchall {:try_start_f .. :try_end_f} :catchall_2
 
     goto :goto_5
 
-    .line 364
-    :catch_1
+    .line 473
+    :catchall_2
     move-exception v0
 
-    goto/16 :goto_2
+    :goto_8
+    if-eqz v2, :cond_9
 
+    .line 475
+    :try_start_10
+    invoke-virtual {v2}, Ljava/io/BufferedReader;->close()V
+    :try_end_10
+    .catch Ljava/lang/Exception; {:try_start_10 .. :try_end_10} :catch_a
+
+    .line 479
     :cond_9
+    :goto_9
+    invoke-virtual {p0}, Lcom/gemini/chat/ChatActivity$GeminiTask;->disconnect()V
+
+    .line 480
+    iput-object v1, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->conn:Ljava/net/HttpURLConnection;
+
+    .line 481
+    throw v0
+
+    :cond_a
     move v0, v3
 
-    .line 354
+    .line 458
     goto :goto_7
 
-    .line 355
-    :cond_a
+    .line 459
+    :cond_b
+    :try_start_11
     invoke-virtual {v6}, Ljava/lang/String;->length()I
 
     move-result v0
@@ -1370,50 +1496,22 @@
 
     if-lez v0, :cond_6
 
-    .line 356
+    .line 460
     invoke-virtual {v5}, Ljava/lang/StringBuffer;->toString()Ljava/lang/String;
 
     move-result-object v0
 
     invoke-direct {p0, v4, v0}, Lcom/gemini/chat/ChatActivity$GeminiTask;->feedEvent(Lcom/gemini/chat/ReplyParser;Ljava/lang/String;)V
 
-    .line 357
+    .line 461
     const/4 v0, 0x0
 
     invoke-virtual {v5, v0}, Ljava/lang/StringBuffer;->setLength(I)V
-    :try_end_c
-    .catch Ljava/lang/Exception; {:try_start_c .. :try_end_c} :catch_1
-    .catchall {:try_start_c .. :try_end_c} :catchall_1
 
     goto :goto_5
 
-    .line 369
-    :catchall_1
-    move-exception v0
-
-    :goto_8
-    if-eqz v2, :cond_b
-
-    .line 371
-    :try_start_d
-    invoke-virtual {v2}, Ljava/io/BufferedReader;->close()V
-    :try_end_d
-    .catch Ljava/lang/Exception; {:try_start_d .. :try_end_d} :catch_a
-
-    .line 375
-    :cond_b
-    :goto_9
-    invoke-virtual {p0}, Lcom/gemini/chat/ChatActivity$GeminiTask;->disconnect()V
-
-    .line 376
-    iput-object v1, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->conn:Ljava/net/HttpURLConnection;
-
-    .line 377
-    throw v0
-
-    .line 360
+    .line 464
     :cond_c
-    :try_start_e
     invoke-virtual {v5}, Ljava/lang/StringBuffer;->length()I
 
     move-result v0
@@ -1430,42 +1528,42 @@
 
     invoke-direct {p0, v4, v0}, Lcom/gemini/chat/ChatActivity$GeminiTask;->feedEvent(Lcom/gemini/chat/ReplyParser;Ljava/lang/String;)V
 
-    .line 361
+    .line 465
     :cond_d
     invoke-virtual {p0}, Lcom/gemini/chat/ChatActivity$GeminiTask;->isCancelled()Z
-    :try_end_e
-    .catch Ljava/lang/Exception; {:try_start_e .. :try_end_e} :catch_1
-    .catchall {:try_start_e .. :try_end_e} :catchall_1
+    :try_end_11
+    .catch Ljava/lang/Exception; {:try_start_11 .. :try_end_11} :catch_1
+    .catchall {:try_start_11 .. :try_end_11} :catchall_2
 
     move-result v0
 
     if-eqz v0, :cond_f
 
-    .line 369
+    .line 473
     if-eqz v2, :cond_e
 
-    .line 371
-    :try_start_f
+    .line 475
+    :try_start_12
     invoke-virtual {v2}, Ljava/io/BufferedReader;->close()V
-    :try_end_f
-    .catch Ljava/lang/Exception; {:try_start_f .. :try_end_f} :catch_5
+    :try_end_12
+    .catch Ljava/lang/Exception; {:try_start_12 .. :try_end_12} :catch_5
 
-    .line 375
+    .line 479
     :cond_e
     :goto_a
     invoke-virtual {p0}, Lcom/gemini/chat/ChatActivity$GeminiTask;->disconnect()V
 
-    .line 376
+    .line 480
     iput-object v1, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->conn:Ljava/net/HttpURLConnection;
 
     move-object v0, v1
 
-    .line 361
+    .line 465
     goto/16 :goto_1
 
-    .line 362
+    .line 466
     :cond_f
-    :try_start_10
+    :try_start_13
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->streamError:Ljava/lang/String;
 
     if-eqz v0, :cond_11
@@ -1473,70 +1571,70 @@
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->streamError:Ljava/lang/String;
 
     invoke-direct {p0, v0}, Lcom/gemini/chat/ChatActivity$GeminiTask;->fail(Ljava/lang/String;)Ljava/lang/String;
-    :try_end_10
-    .catch Ljava/lang/Exception; {:try_start_10 .. :try_end_10} :catch_1
-    .catchall {:try_start_10 .. :try_end_10} :catchall_1
+    :try_end_13
+    .catch Ljava/lang/Exception; {:try_start_13 .. :try_end_13} :catch_1
+    .catchall {:try_start_13 .. :try_end_13} :catchall_2
 
     move-result-object v0
 
-    .line 369
+    .line 473
     if-eqz v2, :cond_10
 
-    .line 371
-    :try_start_11
+    .line 475
+    :try_start_14
     invoke-virtual {v2}, Ljava/io/BufferedReader;->close()V
-    :try_end_11
-    .catch Ljava/lang/Exception; {:try_start_11 .. :try_end_11} :catch_6
+    :try_end_14
+    .catch Ljava/lang/Exception; {:try_start_14 .. :try_end_14} :catch_6
 
-    .line 375
+    .line 479
     :cond_10
     :goto_b
     invoke-virtual {p0}, Lcom/gemini/chat/ChatActivity$GeminiTask;->disconnect()V
 
-    .line 376
+    .line 480
     iput-object v1, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->conn:Ljava/net/HttpURLConnection;
 
     goto/16 :goto_1
 
-    .line 363
+    .line 467
     :cond_11
-    :try_start_12
+    :try_start_15
     invoke-direct {p0, v4}, Lcom/gemini/chat/ChatActivity$GeminiTask;->finish(Lcom/gemini/chat/ReplyParser;)Ljava/lang/String;
-    :try_end_12
-    .catch Ljava/lang/Exception; {:try_start_12 .. :try_end_12} :catch_1
-    .catchall {:try_start_12 .. :try_end_12} :catchall_1
+    :try_end_15
+    .catch Ljava/lang/Exception; {:try_start_15 .. :try_end_15} :catch_1
+    .catchall {:try_start_15 .. :try_end_15} :catchall_2
 
     move-result-object v0
 
-    .line 369
+    .line 473
     if-eqz v2, :cond_12
 
-    .line 371
-    :try_start_13
+    .line 475
+    :try_start_16
     invoke-virtual {v2}, Ljava/io/BufferedReader;->close()V
-    :try_end_13
-    .catch Ljava/lang/Exception; {:try_start_13 .. :try_end_13} :catch_7
+    :try_end_16
+    .catch Ljava/lang/Exception; {:try_start_16 .. :try_end_16} :catch_7
 
-    .line 375
+    .line 479
     :cond_12
     :goto_c
     invoke-virtual {p0}, Lcom/gemini/chat/ChatActivity$GeminiTask;->disconnect()V
 
-    .line 376
+    .line 480
     iput-object v1, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->conn:Ljava/net/HttpURLConnection;
 
     goto/16 :goto_1
 
-    .line 366
+    .line 470
     :cond_13
-    :try_start_14
+    :try_start_17
     const-string v3, "Gemini"
 
     const-string v4, "Request failed"
 
     invoke-static {v3, v4, v0}, Landroid/util/Log;->e(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
 
-    .line 367
+    .line 471
     new-instance v3, Ljava/lang/StringBuilder;
 
     invoke-direct {v3}, Ljava/lang/StringBuilder;-><init>()V
@@ -1560,31 +1658,31 @@
     move-result-object v0
 
     invoke-direct {p0, v0}, Lcom/gemini/chat/ChatActivity$GeminiTask;->fail(Ljava/lang/String;)Ljava/lang/String;
-    :try_end_14
-    .catchall {:try_start_14 .. :try_end_14} :catchall_1
+    :try_end_17
+    .catchall {:try_start_17 .. :try_end_17} :catchall_2
 
     move-result-object v0
 
-    .line 369
+    .line 473
     if-eqz v2, :cond_14
 
-    .line 371
-    :try_start_15
+    .line 475
+    :try_start_18
     invoke-virtual {v2}, Ljava/io/BufferedReader;->close()V
-    :try_end_15
-    .catch Ljava/lang/Exception; {:try_start_15 .. :try_end_15} :catch_9
+    :try_end_18
+    .catch Ljava/lang/Exception; {:try_start_18 .. :try_end_18} :catch_9
 
-    .line 375
+    .line 479
     :cond_14
     :goto_d
     invoke-virtual {p0}, Lcom/gemini/chat/ChatActivity$GeminiTask;->disconnect()V
 
-    .line 376
+    .line 480
     iput-object v1, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->conn:Ljava/net/HttpURLConnection;
 
     goto/16 :goto_1
 
-    .line 372
+    .line 476
     :catch_2
     move-exception v0
 
@@ -1630,8 +1728,8 @@
 
     goto/16 :goto_9
 
-    .line 369
-    :catchall_2
+    .line 473
+    :catchall_3
     move-exception v0
 
     move-object v2, v1
@@ -1645,24 +1743,24 @@
     .locals 1
 
     .prologue
-    .line 248
+    .line 330
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->conn:Ljava/net/HttpURLConnection;
 
-    .line 249
+    .line 331
     if-eqz v0, :cond_0
 
-    .line 251
+    .line 333
     :try_start_0
     invoke-virtual {v0}, Ljava/net/HttpURLConnection;->disconnect()V
     :try_end_0
     .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_0
 
-    .line 255
+    .line 337
     :cond_0
     :goto_0
     return-void
 
-    .line 252
+    .line 334
     :catch_0
     move-exception v0
 
@@ -1673,17 +1771,17 @@
     .locals 3
 
     .prologue
-    .line 259
+    .line 341
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->conn:Ljava/net/HttpURLConnection;
 
-    .line 260
+    .line 342
     if-nez v0, :cond_0
 
-    .line 271
+    .line 353
     :goto_0
     return-void
 
-    .line 261
+    .line 343
     :cond_0
     new-instance v1, Ljava/lang/Thread;
 
@@ -1693,12 +1791,12 @@
 
     invoke-direct {v1, v2}, Ljava/lang/Thread;-><init>(Ljava/lang/Runnable;)V
 
-    .line 269
+    .line 351
     const/4 v0, 0x1
 
     invoke-virtual {v1, v0}, Ljava/lang/Thread;->setDaemon(Z)V
 
-    .line 270
+    .line 352
     invoke-virtual {v1}, Ljava/lang/Thread;->start()V
 
     goto :goto_0
@@ -1708,7 +1806,7 @@
     .locals 1
 
     .prologue
-    .line 120
+    .line 200
     check-cast p1, [Ljava/lang/String;
 
     invoke-virtual {p0, p1}, Lcom/gemini/chat/ChatActivity$GeminiTask;->doInBackground([Ljava/lang/String;)Ljava/lang/String;
@@ -1719,84 +1817,84 @@
 .end method
 
 .method protected varargs doInBackground([Ljava/lang/String;)Ljava/lang/String;
-    .locals 11
+    .locals 13
 
     .prologue
-    const/4 v4, 0x3
+    .line 366
+    const/4 v0, 0x0
 
-    const/4 v2, 0x1
-
-    const/4 v10, 0x2
-
-    const/4 v1, 0x0
-
-    const/4 v3, 0x0
-
-    .line 276
-    aget-object v0, p1, v3
+    aget-object v0, p1, v0
 
     invoke-virtual {v0}, Ljava/lang/String;->trim()Ljava/lang/String;
 
-    move-result-object v6
+    move-result-object v4
 
-    .line 277
-    aget-object v7, p1, v2
+    .line 367
+    const/4 v0, 0x1
 
-    .line 278
-    iput-object v7, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->usedModel:Ljava/lang/String;
+    aget-object v5, p1, v0
 
-    .line 279
+    .line 368
+    iput-object v5, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->usedModel:Ljava/lang/String;
+
+    .line 369
     array-length v0, p1
 
-    if-le v0, v4, :cond_1
+    const/4 v1, 0x3
 
-    aget-object v0, p1, v4
+    if-le v0, v1, :cond_1
+
+    const/4 v0, 0x3
+
+    aget-object v0, p1, v0
 
     :goto_0
-    invoke-static {v7, v0}, Lcom/gemini/chat/ReplyParser;->levelFor(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+    invoke-static {v5, v0}, Lcom/gemini/chat/ReplyParser;->levelFor(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 
     move-result-object v0
 
     iput-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->thinkingLevel:Ljava/lang/String;
 
-    .line 280
+    .line 370
     array-length v0, p1
 
-    const/4 v4, 0x4
+    const/4 v1, 0x4
 
-    if-le v0, v4, :cond_2
+    if-le v0, v1, :cond_2
 
     const-string v0, "1"
 
-    const/4 v4, 0x4
+    const/4 v1, 0x4
 
-    aget-object v4, p1, v4
+    aget-object v1, p1, v1
 
-    invoke-virtual {v0, v4}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    invoke-virtual {v0, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
 
     move-result v0
 
     if-eqz v0, :cond_2
 
-    move v0, v2
+    const/4 v0, 0x1
 
     :goto_1
     iput-boolean v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->includeThoughts:Z
 
-    .line 283
+    .line 373
     :try_start_0
-    iget-object v4, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->this$0:Lcom/gemini/chat/ChatActivity;
+    iget-object v1, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->this$0:Lcom/gemini/chat/ChatActivity;
 
     array-length v0, p1
 
-    if-le v0, v10, :cond_3
+    const/4 v2, 0x2
+
+    if-le v0, v2, :cond_3
 
     const/4 v0, 0x2
 
     aget-object v0, p1, v0
 
     :goto_2
-    invoke-static {v4, v0}, Lcom/gemini/chat/TimeGrounding;->apply(Landroid/content/Context;Ljava/lang/String;)Ljava/lang/String;
+    invoke-static {v1, v0}, Lcom/gemini/chat/TimeGrounding;->apply(Landroid/content/Context;Ljava/lang/String;)Ljava/lang/String;
 
     move-result-object v0
 
@@ -1804,41 +1902,44 @@
     :try_end_0
     .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_0
 
-    move-result-object v4
+    move-result-object v1
 
-    move v5, v3
+    .line 379
+    const/4 v2, 0x2
 
-    move-object v0, v1
+    .line 380
+    const/4 v0, 0x0
 
-    .line 289
+    move v3, v0
+
+    .line 381
     :goto_3
-    if-gt v5, v10, :cond_7
-
-    .line 290
     invoke-virtual {p0}, Lcom/gemini/chat/ChatActivity$GeminiTask;->isCancelled()Z
 
     move-result v0
 
     if-eqz v0, :cond_4
 
-    .line 318
+    const/4 v0, 0x0
+
+    .line 415
     :cond_0
     :goto_4
-    return-object v1
+    return-object v0
 
+    .line 369
     :cond_1
-    move-object v0, v1
+    const/4 v0, 0x0
 
-    .line 279
     goto :goto_0
 
+    .line 370
     :cond_2
-    move v0, v3
+    const/4 v0, 0x0
 
-    .line 280
     goto :goto_1
 
-    .line 283
+    .line 373
     :cond_3
     :try_start_1
     const-string v0, ""
@@ -1847,18 +1948,18 @@
 
     goto :goto_2
 
-    .line 284
+    .line 374
     :catch_0
     move-exception v0
 
-    .line 285
+    .line 375
     const-string v1, "Gemini"
 
     const-string v2, "buildBody failed"
 
     invoke-static {v1, v2, v0}, Landroid/util/Log;->e(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
 
-    .line 286
+    .line 376
     new-instance v1, Ljava/lang/StringBuilder;
 
     invoke-direct {v1}, Ljava/lang/StringBuilder;-><init>()V
@@ -1883,161 +1984,295 @@
 
     invoke-direct {p0, v0}, Lcom/gemini/chat/ChatActivity$GeminiTask;->fail(Ljava/lang/String;)Ljava/lang/String;
 
-    move-result-object v1
+    move-result-object v0
 
     goto :goto_4
 
-    .line 291
+    .line 382
     :cond_4
-    if-lez v5, :cond_5
+    if-lez v3, :cond_6
 
-    .line 292
-    const-string v0, ""
+    .line 383
+    iget-object v6, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->partialLock:Ljava/lang/Object;
 
-    iput-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->partialText:Ljava/lang/String;
+    monitor-enter v6
 
-    .line 293
-    const-string v0, ""
-
-    iput-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->partialThoughts:Ljava/lang/String;
-
-    .line 294
-    new-array v0, v2, [Ljava/lang/Object;
-
-    invoke-static {v5}, Ljava/lang/Integer;->valueOf(I)Ljava/lang/Integer;
-
-    move-result-object v8
-
-    aput-object v8, v0, v3
-
-    invoke-virtual {p0, v0}, Lcom/gemini/chat/ChatActivity$GeminiTask;->publishProgress([Ljava/lang/Object;)V
-
-    .line 296
-    const-wide/16 v8, 0x7d0
-
-    add-int/lit8 v0, v5, -0x1
-
-    shl-long/2addr v8, v0
+    .line 384
+    const/4 v0, 0x0
 
     :try_start_2
-    invoke-static {v8, v9}, Ljava/lang/Thread;->sleep(J)V
-    :try_end_2
-    .catch Ljava/lang/InterruptedException; {:try_start_2 .. :try_end_2} :catch_2
+    iput-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->activeParser:Lcom/gemini/chat/ReplyParser;
 
-    .line 300
+    .line 385
+    monitor-exit v6
+    :try_end_2
+    .catchall {:try_start_2 .. :try_end_2} :catchall_0
+
+    .line 386
+    iget v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->lastCode:I
+
+    iget-object v6, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->lastRetryAfter:Ljava/lang/String;
+
+    invoke-static {}, Ljava/lang/System;->nanoTime()J
+
+    move-result-wide v8
+
+    invoke-static {v3, v0, v6, v8, v9}, Lcom/gemini/chat/ChatActivity;->retryDelayMs(IILjava/lang/String;J)J
+
+    move-result-wide v6
+
+    .line 387
+    const-wide/16 v8, 0x1f4
+
+    add-long/2addr v8, v6
+
+    const-wide/16 v10, 0x3e8
+
+    div-long/2addr v8, v10
+
+    long-to-int v0, v8
+
+    .line 388
+    const/4 v8, 0x1
+
+    new-array v8, v8, [Ljava/lang/Object;
+
+    const/4 v9, 0x0
+
+    const/4 v10, 0x4
+
+    new-array v10, v10, [I
+
+    const/4 v11, 0x0
+
+    aput v3, v10, v11
+
+    const/4 v11, 0x1
+
+    aput v2, v10, v11
+
+    const/4 v11, 0x2
+
+    iget v12, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->lastCode:I
+
+    aput v12, v10, v11
+
+    const/4 v11, 0x3
+
+    aput v0, v10, v11
+
+    aput-object v10, v8, v9
+
+    invoke-virtual {p0, v8}, Lcom/gemini/chat/ChatActivity$GeminiTask;->publishProgress([Ljava/lang/Object;)V
+
+    .line 390
+    :try_start_3
+    invoke-static {v6, v7}, Ljava/lang/Thread;->sleep(J)V
+    :try_end_3
+    .catch Ljava/lang/InterruptedException; {:try_start_3 .. :try_end_3} :catch_1
+
+    .line 394
     invoke-virtual {p0}, Lcom/gemini/chat/ChatActivity$GeminiTask;->isCancelled()Z
 
     move-result v0
 
-    if-nez v0, :cond_0
+    if-eqz v0, :cond_5
 
-    .line 301
-    iput-boolean v3, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->failed:Z
+    const/4 v0, 0x0
 
-    .line 303
+    goto :goto_4
+
+    .line 385
+    :catchall_0
+    move-exception v0
+
+    :try_start_4
+    monitor-exit v6
+    :try_end_4
+    .catchall {:try_start_4 .. :try_end_4} :catchall_0
+
+    throw v0
+
+    .line 391
+    :catch_1
+    move-exception v0
+
+    .line 392
+    const/4 v0, 0x0
+
+    goto :goto_4
+
+    .line 395
     :cond_5
-    invoke-direct {p0, v6, v7, v4}, Lcom/gemini/chat/ChatActivity$GeminiTask;->request(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+    const/4 v0, 0x0
+
+    iput-boolean v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->failed:Z
+
+    .line 396
+    const/4 v0, 0x1
+
+    new-array v0, v0, [Ljava/lang/Object;
+
+    const/4 v6, 0x0
+
+    const/4 v7, 0x2
+
+    new-array v7, v7, [Ljava/lang/String;
+
+    const/4 v8, 0x0
+
+    const-string v9, ""
+
+    aput-object v9, v7, v8
+
+    const/4 v8, 0x1
+
+    const-string v9, ""
+
+    aput-object v9, v7, v8
+
+    aput-object v7, v0, v6
+
+    invoke-virtual {p0, v0}, Lcom/gemini/chat/ChatActivity$GeminiTask;->publishProgress([Ljava/lang/Object;)V
+
+    .line 398
+    :cond_6
+    invoke-direct {p0, v4, v5, v1}, Lcom/gemini/chat/ChatActivity$GeminiTask;->request(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 
     move-result-object v0
 
-    .line 304
-    iget-boolean v8, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->failed:Z
+    .line 399
+    iget-boolean v6, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->failed:Z
 
-    if-eqz v8, :cond_6
+    if-eqz v6, :cond_7
 
-    iget v8, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->lastCode:I
+    iget v6, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->lastCode:I
 
-    const/16 v9, 0x190
+    const/16 v7, 0x190
 
-    if-ne v8, v9, :cond_6
+    if-ne v6, v7, :cond_7
 
-    iget-object v8, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->thinkingLevel:Ljava/lang/String;
+    iget-object v6, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->thinkingLevel:Ljava/lang/String;
 
-    if-eqz v8, :cond_6
+    if-eqz v6, :cond_7
 
-    if-eqz v0, :cond_6
+    if-eqz v0, :cond_7
 
-    .line 305
+    .line 400
     invoke-virtual {v0}, Ljava/lang/String;->toLowerCase()Ljava/lang/String;
 
-    move-result-object v8
+    move-result-object v6
 
-    const-string v9, "thinking"
+    const-string v7, "thinking"
 
-    invoke-virtual {v8, v9}, Ljava/lang/String;->indexOf(Ljava/lang/String;)I
+    invoke-virtual {v6, v7}, Ljava/lang/String;->indexOf(Ljava/lang/String;)I
 
-    move-result v8
+    move-result v6
 
-    if-ltz v8, :cond_6
+    if-ltz v6, :cond_7
 
-    .line 307
-    iput-object v1, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->thinkingLevel:Ljava/lang/String;
+    .line 402
+    const/4 v0, 0x0
 
-    .line 308
-    iput-boolean v3, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->failed:Z
+    iput-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->thinkingLevel:Ljava/lang/String;
 
-    .line 310
-    :try_start_3
-    iget-object v4, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->this$0:Lcom/gemini/chat/ChatActivity;
+    .line 403
+    const/4 v0, 0x0
+
+    iput-boolean v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->failed:Z
+
+    .line 405
+    :try_start_5
+    iget-object v1, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->this$0:Lcom/gemini/chat/ChatActivity;
 
     array-length v0, p1
 
-    if-le v0, v10, :cond_8
+    const/4 v6, 0x2
+
+    if-le v0, v6, :cond_a
 
     const/4 v0, 0x2
 
     aget-object v0, p1, v0
 
     :goto_5
-    invoke-static {v4, v0}, Lcom/gemini/chat/TimeGrounding;->apply(Landroid/content/Context;Ljava/lang/String;)Ljava/lang/String;
+    invoke-static {v1, v0}, Lcom/gemini/chat/TimeGrounding;->apply(Landroid/content/Context;Ljava/lang/String;)Ljava/lang/String;
 
     move-result-object v0
 
     invoke-direct {p0, v0}, Lcom/gemini/chat/ChatActivity$GeminiTask;->buildBody(Ljava/lang/String;)Ljava/lang/String;
-    :try_end_3
-    .catch Ljava/lang/Exception; {:try_start_3 .. :try_end_3} :catch_1
+    :try_end_5
+    .catch Ljava/lang/Exception; {:try_start_5 .. :try_end_5} :catch_2
 
-    move-result-object v4
+    move-result-object v1
 
-    .line 314
-    invoke-direct {p0, v6, v7, v4}, Lcom/gemini/chat/ChatActivity$GeminiTask;->request(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+    .line 409
+    invoke-direct {p0, v4, v5, v1}, Lcom/gemini/chat/ChatActivity$GeminiTask;->request(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 
     move-result-object v0
 
-    .line 316
-    :cond_6
-    iget-boolean v8, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->failed:Z
-
-    if-eqz v8, :cond_7
-
-    iget v8, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->lastCode:I
-
-    invoke-static {v8}, Lcom/gemini/chat/ChatActivity;->retryable(I)Z
-
-    move-result v8
-
-    if-nez v8, :cond_9
-
+    .line 411
     :cond_7
-    move-object v1, v0
+    iget-boolean v6, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->failed:Z
 
-    .line 318
+    if-eqz v6, :cond_8
+
+    iget v6, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->lastCode:I
+
+    invoke-static {v6, v0}, Lcom/gemini/chat/ChatActivity;->maxRetriesFor(ILjava/lang/String;)I
+
+    move-result v6
+
+    invoke-static {v2, v6}, Ljava/lang/Math;->min(II)I
+
+    move-result v2
+
+    .line 412
+    :cond_8
+    iget-boolean v6, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->failed:Z
+
+    if-eqz v6, :cond_9
+
+    iget v6, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->lastCode:I
+
+    invoke-static {v6}, Lcom/gemini/chat/ChatActivity;->retryable(I)Z
+
+    move-result v6
+
+    if-eqz v6, :cond_9
+
+    if-lt v3, v2, :cond_b
+
+    .line 414
+    :cond_9
+    iget-boolean v1, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->failed:Z
+
+    if-eqz v1, :cond_0
+
+    if-eqz v0, :cond_0
+
+    iget v1, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->lastCode:I
+
+    invoke-static {v1, v0}, Lcom/gemini/chat/ChatActivity;->friendlyError(ILjava/lang/String;)Ljava/lang/String;
+
+    move-result-object v0
+
     goto/16 :goto_4
 
-    .line 310
-    :cond_8
-    :try_start_4
+    .line 405
+    :cond_a
+    :try_start_6
     const-string v0, ""
-    :try_end_4
-    .catch Ljava/lang/Exception; {:try_start_4 .. :try_end_4} :catch_1
+    :try_end_6
+    .catch Ljava/lang/Exception; {:try_start_6 .. :try_end_6} :catch_2
 
     goto :goto_5
 
-    .line 311
-    :catch_1
+    .line 406
+    :catch_2
     move-exception v0
 
-    .line 312
+    .line 407
     new-instance v1, Ljava/lang/StringBuilder;
 
     invoke-direct {v1}, Ljava/lang/StringBuilder;-><init>()V
@@ -2062,31 +2297,27 @@
 
     invoke-direct {p0, v0}, Lcom/gemini/chat/ChatActivity$GeminiTask;->fail(Ljava/lang/String;)Ljava/lang/String;
 
-    move-result-object v1
+    move-result-object v0
 
     goto/16 :goto_4
 
-    .line 289
-    :cond_9
-    add-int/lit8 v5, v5, 0x1
+    .line 380
+    :cond_b
+    add-int/lit8 v0, v3, 0x1
+
+    move v3, v0
 
     goto/16 :goto_3
-
-    .line 297
-    :catch_2
-    move-exception v0
-
-    goto/16 :goto_4
 .end method
 
 .method protected onCancelled()V
     .locals 2
 
     .prologue
-    .line 423
+    .line 535
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->this$0:Lcom/gemini/chat/ChatActivity;
 
-    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$200(Lcom/gemini/chat/ChatActivity;)Lcom/gemini/chat/ChatActivity$GeminiTask;
+    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$500(Lcom/gemini/chat/ChatActivity;)Lcom/gemini/chat/ChatActivity$GeminiTask;
 
     move-result-object v0
 
@@ -2096,9 +2327,9 @@
 
     const/4 v1, 0x0
 
-    invoke-static {v0, v1}, Lcom/gemini/chat/ChatActivity;->access$202(Lcom/gemini/chat/ChatActivity;Lcom/gemini/chat/ChatActivity$GeminiTask;)Lcom/gemini/chat/ChatActivity$GeminiTask;
+    invoke-static {v0, v1}, Lcom/gemini/chat/ChatActivity;->access$502(Lcom/gemini/chat/ChatActivity;Lcom/gemini/chat/ChatActivity$GeminiTask;)Lcom/gemini/chat/ChatActivity$GeminiTask;
 
-    .line 424
+    .line 536
     :cond_0
     return-void
 .end method
@@ -2107,7 +2338,7 @@
     .locals 0
 
     .prologue
-    .line 120
+    .line 200
     check-cast p1, Ljava/lang/String;
 
     invoke-virtual {p0, p1}, Lcom/gemini/chat/ChatActivity$GeminiTask;->onPostExecute(Ljava/lang/String;)V
@@ -2116,12 +2347,14 @@
 .end method
 
 .method protected onPostExecute(Ljava/lang/String;)V
-    .locals 9
+    .locals 10
 
     .prologue
+    const/4 v9, 0x1
+
     const/4 v4, 0x0
 
-    .line 428
+    .line 540
     invoke-virtual {p0}, Lcom/gemini/chat/ChatActivity$GeminiTask;->isCancelled()Z
 
     move-result v0
@@ -2136,38 +2369,38 @@
 
     if-eqz v0, :cond_1
 
-    .line 442
+    .line 554
     :cond_0
     :goto_0
     return-void
 
-    .line 429
+    .line 541
     :cond_1
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->this$0:Lcom/gemini/chat/ChatActivity;
 
-    invoke-static {v0, v4}, Lcom/gemini/chat/ChatActivity;->access$202(Lcom/gemini/chat/ChatActivity;Lcom/gemini/chat/ChatActivity$GeminiTask;)Lcom/gemini/chat/ChatActivity$GeminiTask;
+    invoke-static {v0, v4}, Lcom/gemini/chat/ChatActivity;->access$502(Lcom/gemini/chat/ChatActivity;Lcom/gemini/chat/ChatActivity$GeminiTask;)Lcom/gemini/chat/ChatActivity$GeminiTask;
 
-    .line 430
+    .line 542
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->this$0:Lcom/gemini/chat/ChatActivity;
 
-    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$300(Lcom/gemini/chat/ChatActivity;)V
+    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$600(Lcom/gemini/chat/ChatActivity;)V
 
-    .line 431
+    .line 543
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->this$0:Lcom/gemini/chat/ChatActivity;
 
     const/4 v1, 0x0
 
-    invoke-static {v0, v1}, Lcom/gemini/chat/ChatActivity;->access$100(Lcom/gemini/chat/ChatActivity;Z)V
+    invoke-static {v0, v1}, Lcom/gemini/chat/ChatActivity;->access$300(Lcom/gemini/chat/ChatActivity;Z)V
 
-    .line 432
+    .line 544
     if-eqz p1, :cond_0
 
-    .line 433
+    .line 545
     iget-boolean v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->failed:Z
 
     if-eqz v0, :cond_2
 
-    .line 434
+    .line 546
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->this$0:Lcom/gemini/chat/ChatActivity;
 
     const-wide/16 v1, -0x1
@@ -2182,35 +2415,35 @@
 
     move-object v8, v4
 
-    invoke-static/range {v0 .. v8}, Lcom/gemini/chat/ChatActivity;->access$600(Lcom/gemini/chat/ChatActivity;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;)V
+    invoke-static/range {v0 .. v9}, Lcom/gemini/chat/ChatActivity;->access$800(Lcom/gemini/chat/ChatActivity;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Z)V
 
-    .line 439
+    .line 551
     :goto_1
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->this$0:Lcom/gemini/chat/ChatActivity;
 
     invoke-static {v0}, Lcom/gemini/chat/Compat;->invalidateMenu(Landroid/app/Activity;)V
 
-    .line 440
+    .line 552
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->this$0:Lcom/gemini/chat/ChatActivity;
 
-    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$700(Lcom/gemini/chat/ChatActivity;)V
+    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$900(Lcom/gemini/chat/ChatActivity;)V
 
-    .line 441
+    .line 553
     iget-boolean v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->failed:Z
 
     if-nez v0, :cond_0
 
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->this$0:Lcom/gemini/chat/ChatActivity;
 
-    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$800(Lcom/gemini/chat/ChatActivity;)V
+    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$1000(Lcom/gemini/chat/ChatActivity;)V
 
     goto :goto_0
 
-    .line 436
+    .line 548
     :cond_2
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->this$0:Lcom/gemini/chat/ChatActivity;
 
-    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$000(Lcom/gemini/chat/ChatActivity;)Lcom/gemini/chat/DatabaseHelper;
+    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$200(Lcom/gemini/chat/ChatActivity;)Lcom/gemini/chat/DatabaseHelper;
 
     move-result-object v1
 
@@ -2228,7 +2461,7 @@
 
     move-result-wide v1
 
-    .line 437
+    .line 549
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->this$0:Lcom/gemini/chat/ChatActivity;
 
     const-string v3, "model"
@@ -2243,137 +2476,261 @@
 
     move-object v5, p1
 
-    invoke-static/range {v0 .. v8}, Lcom/gemini/chat/ChatActivity;->access$600(Lcom/gemini/chat/ChatActivity;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;)V
+    invoke-static/range {v0 .. v9}, Lcom/gemini/chat/ChatActivity;->access$800(Lcom/gemini/chat/ChatActivity;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Z)V
 
     goto :goto_1
 .end method
 
 .method protected onPreExecute()V
-    .locals 2
+    .locals 4
 
     .prologue
-    .line 406
+    .line 514
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->this$0:Lcom/gemini/chat/ChatActivity;
 
     const/4 v1, 0x1
 
-    invoke-static {v0, v1}, Lcom/gemini/chat/ChatActivity;->access$100(Lcom/gemini/chat/ChatActivity;Z)V
+    invoke-static {v0, v1}, Lcom/gemini/chat/ChatActivity;->access$300(Lcom/gemini/chat/ChatActivity;Z)V
 
-    .line 407
+    .line 515
+    iget-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->this$0:Lcom/gemini/chat/ChatActivity;
+
+    iget-object v1, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->usedModel:Ljava/lang/String;
+
+    const-string v2, ""
+
+    const-string v3, ""
+
+    invoke-static {v0, v1, v2, v3}, Lcom/gemini/chat/ChatActivity;->access$400(Lcom/gemini/chat/ChatActivity;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+
+    .line 516
     return-void
 .end method
 
 .method protected varargs onProgressUpdate([Ljava/lang/Object;)V
-    .locals 5
+    .locals 6
 
     .prologue
-    const/4 v3, 0x0
+    const/4 v5, 0x1
 
-    .line 411
+    const/4 v4, 0x0
+
+    .line 520
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->this$0:Lcom/gemini/chat/ChatActivity;
 
-    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$200(Lcom/gemini/chat/ChatActivity;)Lcom/gemini/chat/ChatActivity$GeminiTask;
+    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$500(Lcom/gemini/chat/ChatActivity;)Lcom/gemini/chat/ChatActivity$GeminiTask;
 
     move-result-object v0
 
     if-eq v0, p0, :cond_0
 
-    .line 419
+    .line 531
     :goto_0
     return-void
 
-    .line 412
+    .line 521
     :cond_0
-    aget-object v0, p1, v3
+    aget-object v0, p1, v4
 
-    instance-of v0, v0, Ljava/lang/Integer;
+    instance-of v0, v0, [I
 
     if-eqz v0, :cond_1
 
-    .line 413
-    iget-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->this$0:Lcom/gemini/chat/ChatActivity;
+    .line 522
+    aget-object v0, p1, v4
 
-    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$300(Lcom/gemini/chat/ChatActivity;)V
+    check-cast v0, [I
 
-    .line 414
-    iget-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->this$0:Lcom/gemini/chat/ChatActivity;
+    .line 523
+    iget-object v1, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->this$0:Lcom/gemini/chat/ChatActivity;
 
-    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$400(Lcom/gemini/chat/ChatActivity;)Landroid/widget/EditText;
+    invoke-static {v1}, Lcom/gemini/chat/ChatActivity;->access$600(Lcom/gemini/chat/ChatActivity;)V
+
+    .line 524
+    iget-object v1, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->this$0:Lcom/gemini/chat/ChatActivity;
+
+    invoke-static {v1}, Lcom/gemini/chat/ChatActivity;->access$700(Lcom/gemini/chat/ChatActivity;)Landroid/widget/EditText;
+
+    move-result-object v1
+
+    new-instance v2, Ljava/lang/StringBuilder;
+
+    invoke-direct {v2}, Ljava/lang/StringBuilder;-><init>()V
+
+    const-string v3, "Model is busy ("
+
+    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v2
+
+    const/4 v3, 0x2
+
+    aget v3, v0, v3
+
+    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
+
+    move-result-object v2
+
+    const-string v3, "), retry "
+
+    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v2
+
+    aget v3, v0, v4
+
+    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
+
+    move-result-object v2
+
+    const-string v3, "/"
+
+    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v2
+
+    aget v3, v0, v5
+
+    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
+
+    move-result-object v2
+
+    const-string v3, " in "
+
+    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v2
+
+    const/4 v3, 0x3
+
+    aget v0, v0, v3
+
+    invoke-virtual {v2, v0}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
 
     move-result-object v0
 
-    new-instance v1, Ljava/lang/StringBuilder;
+    const-string v2, "s..."
 
-    invoke-direct {v1}, Ljava/lang/StringBuilder;-><init>()V
+    invoke-virtual {v0, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    const-string v2, "Model is busy ("
+    move-result-object v0
 
-    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    invoke-virtual {v0}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
 
-    move-result-object v1
+    move-result-object v0
 
-    iget v2, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->lastCode:I
-
-    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
-
-    move-result-object v1
-
-    const-string v2, "), retry "
-
-    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v1
-
-    aget-object v2, p1, v3
-
-    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
-
-    move-result-object v1
-
-    const-string v2, "/"
-
-    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v1
-
-    const/4 v2, 0x2
-
-    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
-
-    move-result-object v1
-
-    const-string v2, "..."
-
-    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v1
-
-    invoke-virtual {v1}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-
-    move-result-object v1
-
-    invoke-virtual {v0, v1}, Landroid/widget/EditText;->setHint(Ljava/lang/CharSequence;)V
+    invoke-virtual {v1, v0}, Landroid/widget/EditText;->setHint(Ljava/lang/CharSequence;)V
 
     goto :goto_0
 
-    .line 416
+    .line 527
     :cond_1
-    aget-object v0, p1, v3
+    aget-object v0, p1, v4
 
     check-cast v0, [Ljava/lang/String;
 
-    .line 417
+    .line 528
+    iget-object v1, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->this$0:Lcom/gemini/chat/ChatActivity;
+
+    invoke-static {v1}, Lcom/gemini/chat/ChatActivity;->access$700(Lcom/gemini/chat/ChatActivity;)Landroid/widget/EditText;
+
+    move-result-object v1
+
+    const-string v2, "Model is generating..."
+
+    invoke-virtual {v1, v2}, Landroid/widget/EditText;->setHint(Ljava/lang/CharSequence;)V
+
+    .line 529
     iget-object v1, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->this$0:Lcom/gemini/chat/ChatActivity;
 
     iget-object v2, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->usedModel:Ljava/lang/String;
 
-    aget-object v3, v0, v3
+    aget-object v3, v0, v4
 
-    const/4 v4, 0x1
+    aget-object v0, v0, v5
 
-    aget-object v0, v0, v4
-
-    invoke-static {v1, v2, v3, v0}, Lcom/gemini/chat/ChatActivity;->access$500(Lcom/gemini/chat/ChatActivity;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+    invoke-static {v1, v2, v3, v0}, Lcom/gemini/chat/ChatActivity;->access$400(Lcom/gemini/chat/ChatActivity;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 
     goto :goto_0
+.end method
+
+.method snapshotPartial()[Ljava/lang/String;
+    .locals 4
+
+    .prologue
+    .line 357
+    iget-object v1, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->partialLock:Ljava/lang/Object;
+
+    monitor-enter v1
+
+    .line 358
+    :try_start_0
+    iget-object v0, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->activeParser:Lcom/gemini/chat/ReplyParser;
+
+    if-nez v0, :cond_0
+
+    const/4 v0, 0x2
+
+    new-array v0, v0, [Ljava/lang/String;
+
+    const/4 v2, 0x0
+
+    const-string v3, ""
+
+    aput-object v3, v0, v2
+
+    const/4 v2, 0x1
+
+    const-string v3, ""
+
+    aput-object v3, v0, v2
+
+    monitor-exit v1
+
+    .line 359
+    :goto_0
+    return-object v0
+
+    :cond_0
+    const/4 v0, 0x2
+
+    new-array v0, v0, [Ljava/lang/String;
+
+    const/4 v2, 0x0
+
+    iget-object v3, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->activeParser:Lcom/gemini/chat/ReplyParser;
+
+    iget-object v3, v3, Lcom/gemini/chat/ReplyParser;->text:Ljava/lang/StringBuffer;
+
+    invoke-virtual {v3}, Ljava/lang/StringBuffer;->toString()Ljava/lang/String;
+
+    move-result-object v3
+
+    aput-object v3, v0, v2
+
+    const/4 v2, 0x1
+
+    iget-object v3, p0, Lcom/gemini/chat/ChatActivity$GeminiTask;->activeParser:Lcom/gemini/chat/ReplyParser;
+
+    iget-object v3, v3, Lcom/gemini/chat/ReplyParser;->thoughts:Ljava/lang/StringBuffer;
+
+    invoke-virtual {v3}, Ljava/lang/StringBuffer;->toString()Ljava/lang/String;
+
+    move-result-object v3
+
+    aput-object v3, v0, v2
+
+    monitor-exit v1
+
+    goto :goto_0
+
+    .line 360
+    :catchall_0
+    move-exception v0
+
+    monitor-exit v1
+    :try_end_0
+    .catchall {:try_start_0 .. :try_end_0} :catchall_0
+
+    throw v0
 .end method

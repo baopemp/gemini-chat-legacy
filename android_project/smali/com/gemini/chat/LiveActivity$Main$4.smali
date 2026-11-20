@@ -35,7 +35,7 @@
     .end annotation
 
     .prologue
-    .line 450
+    .line 525
     iput-object p1, p0, Lcom/gemini/chat/LiveActivity$Main$4;->this$1:Lcom/gemini/chat/LiveActivity$Main;
 
     iput-wide p2, p0, Lcom/gemini/chat/LiveActivity$Main$4;->val$tag:J
@@ -55,7 +55,7 @@
     .prologue
     const/4 v1, 0x0
 
-    .line 452
+    .line 527
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Main$4;->this$1:Lcom/gemini/chat/LiveActivity$Main;
 
     invoke-static {v0}, Lcom/gemini/chat/LiveActivity$Main;->access$700(Lcom/gemini/chat/LiveActivity$Main;)Z
@@ -64,11 +64,11 @@
 
     if-nez v0, :cond_0
 
-    .line 458
+    .line 533
     :goto_0
     return-void
 
-    .line 453
+    .line 528
     :cond_0
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Main$4;->this$1:Lcom/gemini/chat/LiveActivity$Main;
 
@@ -76,14 +76,14 @@
 
     invoke-static {v0}, Lcom/gemini/chat/LiveActivity;->access$2100(Lcom/gemini/chat/LiveActivity;)V
 
-    .line 454
+    .line 529
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Main$4;->this$1:Lcom/gemini/chat/LiveActivity$Main;
 
     iget-object v0, v0, Lcom/gemini/chat/LiveActivity$Main;->this$0:Lcom/gemini/chat/LiveActivity;
 
     invoke-static {v0, v1}, Lcom/gemini/chat/LiveActivity;->access$2702(Lcom/gemini/chat/LiveActivity;Z)Z
 
-    .line 455
+    .line 530
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Main$4;->this$1:Lcom/gemini/chat/LiveActivity$Main;
 
     iget-object v0, v0, Lcom/gemini/chat/LiveActivity$Main;->this$0:Lcom/gemini/chat/LiveActivity;
@@ -94,7 +94,7 @@
 
     monitor-enter v1
 
-    .line 456
+    .line 531
     :try_start_0
     iget-object v0, p0, Lcom/gemini/chat/LiveActivity$Main$4;->this$1:Lcom/gemini/chat/LiveActivity$Main;
 
@@ -126,7 +126,7 @@
 
     invoke-virtual {v0, v2}, Ljava/util/LinkedList;->add(Ljava/lang/Object;)Z
 
-    .line 457
+    .line 532
     monitor-exit v1
 
     goto :goto_0

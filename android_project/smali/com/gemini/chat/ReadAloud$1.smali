@@ -25,7 +25,7 @@
     .locals 0
 
     .prologue
-    .line 145
+    .line 146
     iput-object p1, p0, Lcom/gemini/chat/ReadAloud$1;->this$0:Lcom/gemini/chat/ReadAloud;
 
     iput-object p2, p0, Lcom/gemini/chat/ReadAloud$1;->val$c:Ljava/net/HttpURLConnection;
@@ -41,7 +41,7 @@
     .locals 1
 
     .prologue
-    .line 148
+    .line 149
     :try_start_0
     iget-object v0, p0, Lcom/gemini/chat/ReadAloud$1;->val$c:Ljava/net/HttpURLConnection;
 
@@ -49,11 +49,11 @@
     :try_end_0
     .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_0
 
-    .line 151
+    .line 152
     :goto_0
     return-void
 
-    .line 149
+    .line 150
     :catch_0
     move-exception v0
 

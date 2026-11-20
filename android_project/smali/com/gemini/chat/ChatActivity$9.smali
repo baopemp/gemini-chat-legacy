@@ -3,12 +3,12 @@
 .source "ChatActivity.java"
 
 # interfaces
-.implements Lcom/gemini/chat/ReadAloud$Listener;
+.implements Landroid/view/View$OnClickListener;
 
 
 # annotations
 .annotation system Ldalvik/annotation/EnclosingMethod;
-    value = Lcom/gemini/chat/ChatActivity;->readAloud(JLjava/lang/String;)V
+    value = Lcom/gemini/chat/ChatActivity;->buildAttachBar()V
 .end annotation
 
 .annotation system Ldalvik/annotation/InnerClass;
@@ -26,7 +26,7 @@
     .locals 0
 
     .prologue
-    .line 1015
+    .line 931
     iput-object p1, p0, Lcom/gemini/chat/ChatActivity$9;->this$0:Lcom/gemini/chat/ChatActivity;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
@@ -36,54 +36,15 @@
 
 
 # virtual methods
-.method public onDone(Lcom/gemini/chat/ReadAloud;Ljava/lang/String;)V
-    .locals 2
+.method public onClick(Landroid/view/View;)V
+    .locals 1
 
     .prologue
-    .line 1017
+    .line 933
     iget-object v0, p0, Lcom/gemini/chat/ChatActivity$9;->this$0:Lcom/gemini/chat/ChatActivity;
 
-    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$2200(Lcom/gemini/chat/ChatActivity;)Lcom/gemini/chat/ReadAloud;
+    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$2800(Lcom/gemini/chat/ChatActivity;)V
 
-    move-result-object v0
-
-    if-ne v0, p1, :cond_0
-
-    .line 1018
-    iget-object v0, p0, Lcom/gemini/chat/ChatActivity$9;->this$0:Lcom/gemini/chat/ChatActivity;
-
-    const/4 v1, 0x0
-
-    invoke-static {v0, v1}, Lcom/gemini/chat/ChatActivity;->access$2202(Lcom/gemini/chat/ChatActivity;Lcom/gemini/chat/ReadAloud;)Lcom/gemini/chat/ReadAloud;
-
-    .line 1019
-    iget-object v0, p0, Lcom/gemini/chat/ChatActivity$9;->this$0:Lcom/gemini/chat/ChatActivity;
-
-    invoke-static {v0}, Lcom/gemini/chat/Compat;->invalidateMenu(Landroid/app/Activity;)V
-
-    .line 1021
-    :cond_0
-    if-eqz p2, :cond_1
-
-    iget-object v0, p0, Lcom/gemini/chat/ChatActivity$9;->this$0:Lcom/gemini/chat/ChatActivity;
-
-    invoke-virtual {v0}, Lcom/gemini/chat/ChatActivity;->isFinishing()Z
-
-    move-result v0
-
-    if-nez v0, :cond_1
-
-    iget-object v0, p0, Lcom/gemini/chat/ChatActivity$9;->this$0:Lcom/gemini/chat/ChatActivity;
-
-    const/4 v1, 0x1
-
-    invoke-static {v0, p2, v1}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
-
-    move-result-object v0
-
-    invoke-virtual {v0}, Landroid/widget/Toast;->show()V
-
-    .line 1022
-    :cond_1
+    .line 934
     return-void
 .end method

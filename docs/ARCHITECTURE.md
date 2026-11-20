@@ -263,3 +263,20 @@ LiveActivity ── Mic thread (AudioRecord 16 kHz → 100 ms chunks) ──┐
   - `LiveActivity` fixes `onDestroy()` turn-save ordering (`finishUserTurn()` before `finishModelTurn(true)`) and guards `acceptTranscript` so stale transcriber callbacks cannot refill the cleared input box after tapping Send while talking.
   - `LiveSocket` closes pre-assigned raw/TLS sockets in `finally` if proxy CONNECT, TLS handshake, or hostname verification throws.
   - `AutoNamer` clears `RUNNING` in `catch` if `execute()` throws; `EmojiMap.load()` closes its `BufferedReader` in `finally`.
+
+## 15. 0.9.0 additions
+
+- Visual polish (all API-7 Canvas/Drawable, zero external assets):
+  - `ChatActivity.SparkleView` draws a dual four-point star emblem in empty chats above the active model and thinking-level summary (refreshed in `onResume()`).
+  - `ChatActivity` starts a 450 ms `thinkingPulse` immediately on send (`MessageFormatter.formatWaiting`), renders a live green `▍` cursor via `MessageFormatter.formatStreaming`, fades in newly appended live messages (160 ms `AlphaAnimation`, skipped on bulk loads), and displays an inline `readBar` with a one-tap Stop button during Read Aloud.
+  - `MessageFormatter.BlockSpan` draws a 2 dp left accent border alongside bold blue `CODE_LANG` tags and muted parenthetical role metadata; `LiveActivity.AudioMeterView` renders a 12-segment Canvas equalizer driven by subsampled 16-bit LE PCM RMS (`LiveActivity.pcmLevel`).
+- Model-aware thinking clamp & timestamps:
+  - `ReplyParser.supportsXhigh(model)` distinguishes models supporting `xhigh` (`gemini-4-hydrogen`, `gemini-4-neon`, unknown future models) from models capped at `high` (`gemini-4-carbon`, `gemini-4-argon`, Gemini 3.x/2.5, Gemma 4, robotics). `SettingsActivity.syncThinkingForModel()` snaps `Extra High` -> `High` on spinner changes, custom model typing, load, and save.
+  - `DatabaseHelper.touchMessageTimestamp(chatId, msgId, now)` refreshes the preceding user message's timestamp (and bumps `chats.timestamp`) on Regenerate, Retry, and Edit -> Resend.
+- Anti-429 retry hardening for Hydrogen 503 spikes:
+  - `ChatActivity.maxRetriesFor(code, body)` caps `503` high-demand/overloaded/unavailable responses at 1 retry (never retrying `429`), `parseRetryAfterMs`/`retryDelayMs` honor `Retry-After` and apply ~4.5 to 5.5 s jittered backoff on `503`, and `friendlyError` appends actionable tips. `ReadAloud` shares the same policy.
+- Weak-phone performance & memory:
+  - `ChatActivity.GeminiTask` eliminates O(N^2) SSE partial string copying via synchronized `activeParser` snapshots and adaptive `streamIntervalMs(charCount)` (250/400/600/850 ms), moves photo encoding into `AttachImageTask`, reuses a single `scrollDownRunnable`, and clears `Thumbnail` cache on `onLowMemory()`.
+  - `DatabaseHelper` creates `idx_messages_chat(chat_id, id)` on create/open, adds indexed `LIMIT 1` helpers (`getLastMessageId`, `getLastSavedRole`, `hasMessages`), and omits `thoughts` blobs from `firstExchange()`.
+  - `Thumbnail` uses `RGB_565`, a 12-entry LRU cache, and a 128-entry Base64 decode table; `EmojiMap` adds volatile-published `preloadAsync()`; `Markdown` adds an O(1) `TEX_MAP` and ASCII batch-copy fast path; `MessageFormatter` caches `SimpleDateFormat`, `gridChars`, and list measure paints.
+

@@ -31,25 +31,25 @@
     .locals 0
 
     .prologue
-    .line 26
+    .line 27
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 
-    .line 27
+    .line 28
     iput p1, p0, Lcom/gemini/chat/Markdown$Span;->start:I
 
-    .line 28
+    .line 29
     iput p2, p0, Lcom/gemini/chat/Markdown$Span;->end:I
 
-    .line 29
+    .line 30
     iput p3, p0, Lcom/gemini/chat/Markdown$Span;->type:I
 
-    .line 30
+    .line 31
     iput p4, p0, Lcom/gemini/chat/Markdown$Span;->level:I
 
-    .line 31
+    .line 32
     iput-object p5, p0, Lcom/gemini/chat/Markdown$Span;->arg:Ljava/lang/String;
 
-    .line 32
+    .line 33
     return-void
 .end method
 
@@ -59,7 +59,7 @@
     .locals 3
 
     .prologue
-    .line 35
+    .line 36
     new-instance v0, Ljava/lang/StringBuilder;
 
     invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V

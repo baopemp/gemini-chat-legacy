@@ -491,6 +491,94 @@ public class Tests {
         check("tts error message", "Error 429: Quota exceeded".equals(m(ra, "errorMessage", int.class, String.class).invoke(null, 429, "{\"error\":{\"code\":429,\"message\":\"Quota exceeded\"}}"))
                 && "Error 500".equals(m(ra, "errorMessage", int.class, String.class).invoke(null, 500, "<html>")), "");
 
+        // ---------- 5. v0.9.0: xhigh capability, anti-429 retry hardening, stream pacing, PCM meter, ASCII fast-path ----------
+        Method supportsXhigh = m(rp, "supportsXhigh", String.class);
+        check("supportsXhigh: Hydrogen/Neon/future true", (Boolean) supportsXhigh.invoke(null, "gemini-4-hydrogen")
+                && (Boolean) supportsXhigh.invoke(null, "models/gemini-4-hydrogen")
+                && (Boolean) supportsXhigh.invoke(null, "GEMINI-4-NEON")
+                && (Boolean) supportsXhigh.invoke(null, "gemini-5-pro")
+                && (Boolean) supportsXhigh.invoke(null, "")
+                && (Boolean) supportsXhigh.invoke(null, (Object) null), "");
+        check("supportsXhigh: Carbon/Argon/3.x/2.5/Gemma/Robotics false",
+                !(Boolean) supportsXhigh.invoke(null, "gemini-4-carbon")
+                && !(Boolean) supportsXhigh.invoke(null, "gemini-4-argon")
+                && !(Boolean) supportsXhigh.invoke(null, "gemini-3.8-flash")
+                && !(Boolean) supportsXhigh.invoke(null, "gemini-3.5-flash-lite")
+                && !(Boolean) supportsXhigh.invoke(null, "gemini-flash-latest")
+                && !(Boolean) supportsXhigh.invoke(null, "gemini-flash-lite-latest")
+                && !(Boolean) supportsXhigh.invoke(null, "gemini-pro-latest")
+                && !(Boolean) supportsXhigh.invoke(null, "gemini-2.5-pro")
+                && !(Boolean) supportsXhigh.invoke(null, "gemini-robotics-er-2-preview")
+                && !(Boolean) supportsXhigh.invoke(null, "gemma-4-31b-it")
+                && !(Boolean) supportsXhigh.invoke(null, "gemma-4-26b-a4b-it"), "");
+
+        Method maxRetriesFor = m(ca, "maxRetriesFor", int.class, String.class);
+        check("maxRetriesFor: 503 high demand/overloaded capped at 1",
+                (Integer) maxRetriesFor.invoke(null, 503, "{\"error\":{\"status\":\"UNAVAILABLE\",\"message\":\"This model is currently experiencing high demand.\"}}") == 1
+                && (Integer) maxRetriesFor.invoke(null, 503, "Model is overloaded") == 1
+                && (Integer) maxRetriesFor.invoke(null, 503, "Service temporarily unavailable") == 1, "");
+        check("maxRetriesFor: 500/502/504/plain 503 -> 2, 429/400/200 -> 0",
+                (Integer) maxRetriesFor.invoke(null, 503, "<html>503</html>") == 2
+                && (Integer) maxRetriesFor.invoke(null, 500, "") == 2
+                && (Integer) maxRetriesFor.invoke(null, 502, "bad gateway") == 2
+                && (Integer) maxRetriesFor.invoke(null, 504, null) == 2
+                && (Integer) maxRetriesFor.invoke(null, 429, "Too many requests") == 0
+                && (Integer) maxRetriesFor.invoke(null, 400, "bad") == 0
+                && (Integer) maxRetriesFor.invoke(null, 200, "ok") == 0, "");
+
+        Method parseRetryAfter = m(ca, "parseRetryAfterMs", String.class);
+        check("parseRetryAfterMs: parses and clamps 2s..20s",
+                (Long) parseRetryAfter.invoke(null, "5") == 5000L
+                && (Long) parseRetryAfter.invoke(null, "1") == 2000L
+                && (Long) parseRetryAfter.invoke(null, "120") == 20000L
+                && (Long) parseRetryAfter.invoke(null, "  7  ") == 7000L
+                && (Long) parseRetryAfter.invoke(null, "not-a-num") == -1L
+                && (Long) parseRetryAfter.invoke(null, (Object) null) == -1L, "");
+
+        Method retryDelay = m(ca, "retryDelayMs", int.class, int.class, String.class, long.class);
+        long d503 = (Long) retryDelay.invoke(null, 1, 503, (Object) null, 12345L);
+        long d500 = (Long) retryDelay.invoke(null, 1, 500, (Object) null, 12345L);
+        long dHdr = (Long) retryDelay.invoke(null, 1, 503, "9", Long.MIN_VALUE);
+        check("retryDelayMs: 503 ~4.5-5.5s, 500 ~2-2.5s, Retry-After respected, MIN_VALUE safe",
+                d503 >= 4500L && d503 <= 5500L && d500 >= 2000L && d500 <= 2500L && dHdr == 9000L,
+                "d503=" + d503 + " d500=" + d500 + " dHdr=" + dHdr);
+
+        Method friendlyErr = m(ca, "friendlyError", int.class, String.class);
+        String fe429 = (String) friendlyErr.invoke(null, 429, "Error 429: Resource exhausted.");
+        String fe503 = (String) friendlyErr.invoke(null, 503, "Error 503: High demand.");
+        String fe400 = (String) friendlyErr.invoke(null, 400, "Error 400: Bad key.");
+        check("friendlyError: adds guidance for 429/503 only",
+                fe429.contains("Rate limit") && fe503.contains("busy") && fe400.equals("Error 400: Bad key."), fe503);
+
+        Method streamInt = m(ca, "streamIntervalMs", int.class);
+        check("streamIntervalMs: adaptive ramp for weak CPUs",
+                (Long) streamInt.invoke(null, 0) == 250L
+                && (Long) streamInt.invoke(null, 799) == 250L
+                && (Long) streamInt.invoke(null, 800) == 400L
+                && (Long) streamInt.invoke(null, 2499) == 400L
+                && (Long) streamInt.invoke(null, 2500) == 600L
+                && (Long) streamInt.invoke(null, 5999) == 600L
+                && (Long) streamInt.invoke(null, 6000) == 850L, "");
+
+        Method pcmLevel = m(la, "pcmLevel", byte[].class, int.class, int.class);
+        byte[] silence = new byte[640];
+        byte[] loud = new byte[640];
+        for (int i = 0; i < loud.length; i += 2) {
+            short v = (short) ((i % 4 == 0) ? 20000 : -20000);
+            loud[i] = (byte) (v & 0xFF);
+            loud[i + 1] = (byte) ((v >> 8) & 0xFF);
+        }
+        int lvlLoud = (Integer) pcmLevel.invoke(null, loud, 0, loud.length);
+        check("pcmLevel: silence=0, loud in 70..100, null/bounds safe",
+                (Integer) pcmLevel.invoke(null, (Object) null, 0, 0) == 0
+                && (Integer) pcmLevel.invoke(null, silence, 0, silence.length) == 0
+                && (Integer) pcmLevel.invoke(null, loud, 639, 1) == 0
+                && lvlLoud >= 70 && lvlLoud <= 100, "lvlLoud=" + lvlLoud);
+
+        Object dFast = P.apply("Plain 123 #tag *a* then 1\uFE0F\u20E3 and #\uFE0F\u20E3 plus Ti\u1EBFng Vi\u1EC7t \uD83D\uDE00!", 30);
+        check("md ASCII fast-path preserves keycaps, digits, Vietnamese, emoji",
+                T.apply(dFast).equals("Plain 123 #tag a then :one: and :hash: plus Ti\u1EBFng Vi\u1EC7t :grinning:!"), T.apply(dFast));
+
         System.out.println("PASS " + pass + " / FAIL " + fail);
         if (fail > 0) System.exit(1);
     }

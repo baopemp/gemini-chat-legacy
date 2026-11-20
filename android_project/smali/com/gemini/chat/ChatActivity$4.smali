@@ -3,7 +3,7 @@
 .source "ChatActivity.java"
 
 # interfaces
-.implements Landroid/view/View$OnClickListener;
+.implements Landroid/text/TextWatcher;
 
 
 # annotations
@@ -26,7 +26,7 @@
     .locals 0
 
     .prologue
-    .line 561
+    .line 694
     iput-object p1, p0, Lcom/gemini/chat/ChatActivity$4;->this$0:Lcom/gemini/chat/ChatActivity;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
@@ -36,173 +36,50 @@
 
 
 # virtual methods
-.method public onClick(Landroid/view/View;)V
-    .locals 19
+.method public afterTextChanged(Landroid/text/Editable;)V
+    .locals 2
 
     .prologue
-    .line 563
-    move-object/from16 v0, p0
+    .line 696
+    iget-object v0, p0, Lcom/gemini/chat/ChatActivity$4;->this$0:Lcom/gemini/chat/ChatActivity;
 
-    iget-object v2, v0, Lcom/gemini/chat/ChatActivity$4;->this$0:Lcom/gemini/chat/ChatActivity;
+    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$500(Lcom/gemini/chat/ChatActivity;)Lcom/gemini/chat/ChatActivity$GeminiTask;
 
-    invoke-static {v2}, Lcom/gemini/chat/ChatActivity;->access$200(Lcom/gemini/chat/ChatActivity;)Lcom/gemini/chat/ChatActivity$GeminiTask;
+    move-result-object v0
 
-    move-result-object v2
+    if-nez v0, :cond_0
 
-    .line 564
-    if-eqz v2, :cond_0
+    iget-object v0, p0, Lcom/gemini/chat/ChatActivity$4;->this$0:Lcom/gemini/chat/ChatActivity;
 
-    .line 565
-    iget-object v3, v2, Lcom/gemini/chat/ChatActivity$GeminiTask;->partialText:Ljava/lang/String;
+    invoke-static {v0}, Lcom/gemini/chat/ChatActivity;->access$2000(Lcom/gemini/chat/ChatActivity;)Landroid/widget/Button;
 
-    invoke-virtual {v3}, Ljava/lang/String;->trim()Ljava/lang/String;
+    move-result-object v0
 
-    move-result-object v3
+    iget-object v1, p0, Lcom/gemini/chat/ChatActivity$4;->this$0:Lcom/gemini/chat/ChatActivity;
 
-    .line 566
-    move-object/from16 v0, p0
+    invoke-static {v1}, Lcom/gemini/chat/ChatActivity;->access$1900(Lcom/gemini/chat/ChatActivity;)Z
 
-    iget-object v4, v0, Lcom/gemini/chat/ChatActivity$4;->this$0:Lcom/gemini/chat/ChatActivity;
+    move-result v1
 
-    invoke-static {v4}, Lcom/gemini/chat/ChatActivity;->access$1300(Lcom/gemini/chat/ChatActivity;)V
+    invoke-virtual {v0, v1}, Landroid/widget/Button;->setEnabled(Z)V
 
-    .line 567
-    move-object/from16 v0, p0
-
-    iget-object v4, v0, Lcom/gemini/chat/ChatActivity$4;->this$0:Lcom/gemini/chat/ChatActivity;
-
-    const/4 v5, 0x0
-
-    invoke-static {v4, v5}, Lcom/gemini/chat/ChatActivity;->access$100(Lcom/gemini/chat/ChatActivity;Z)V
-
-    .line 568
-    invoke-virtual {v3}, Ljava/lang/String;->length()I
-
-    move-result v4
-
-    if-lez v4, :cond_2
-
-    .line 569
-    new-instance v4, Ljava/lang/StringBuilder;
-
-    invoke-direct {v4}, Ljava/lang/StringBuilder;-><init>()V
-
-    invoke-virtual {v4, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v3
-
-    const-string v4, "\n\n*[Stopped]*"
-
-    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v3
-
-    invoke-virtual {v3}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-
-    move-result-object v7
-
-    .line 570
-    invoke-static {v2}, Lcom/gemini/chat/ChatActivity$GeminiTask;->access$1400(Lcom/gemini/chat/ChatActivity$GeminiTask;)Z
-
-    move-result v3
-
-    if-eqz v3, :cond_1
-
-    iget-object v3, v2, Lcom/gemini/chat/ChatActivity$GeminiTask;->partialThoughts:Ljava/lang/String;
-
-    invoke-virtual {v3}, Ljava/lang/String;->trim()Ljava/lang/String;
-
-    move-result-object v9
-
-    .line 571
-    :goto_0
-    move-object/from16 v0, p0
-
-    iget-object v3, v0, Lcom/gemini/chat/ChatActivity$4;->this$0:Lcom/gemini/chat/ChatActivity;
-
-    invoke-static {v3}, Lcom/gemini/chat/ChatActivity;->access$000(Lcom/gemini/chat/ChatActivity;)Lcom/gemini/chat/DatabaseHelper;
-
-    move-result-object v3
-
-    invoke-static {v2}, Lcom/gemini/chat/ChatActivity$GeminiTask;->access$1500(Lcom/gemini/chat/ChatActivity$GeminiTask;)J
-
-    move-result-wide v4
-
-    const-string v6, "model"
-
-    invoke-static {v2}, Lcom/gemini/chat/ChatActivity$GeminiTask;->access$1600(Lcom/gemini/chat/ChatActivity$GeminiTask;)Ljava/lang/String;
-
-    move-result-object v8
-
-    invoke-virtual/range {v3 .. v9}, Lcom/gemini/chat/DatabaseHelper;->addMessage(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)J
-
-    move-result-wide v11
-
-    .line 572
-    move-object/from16 v0, p0
-
-    iget-object v10, v0, Lcom/gemini/chat/ChatActivity$4;->this$0:Lcom/gemini/chat/ChatActivity;
-
-    const-string v13, "model"
-
-    invoke-static {v2}, Lcom/gemini/chat/ChatActivity$GeminiTask;->access$1600(Lcom/gemini/chat/ChatActivity$GeminiTask;)Ljava/lang/String;
-
-    move-result-object v14
-
-    invoke-static {}, Ljava/lang/System;->currentTimeMillis()J
-
-    move-result-wide v16
-
-    move-object v15, v7
-
-    move-object/from16 v18, v9
-
-    invoke-static/range {v10 .. v18}, Lcom/gemini/chat/ChatActivity;->access$600(Lcom/gemini/chat/ChatActivity;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;)V
-
-    .line 573
-    move-object/from16 v0, p0
-
-    iget-object v2, v0, Lcom/gemini/chat/ChatActivity$4;->this$0:Lcom/gemini/chat/ChatActivity;
-
-    invoke-static {v2}, Lcom/gemini/chat/Compat;->invalidateMenu(Landroid/app/Activity;)V
-
-    .line 577
-    :goto_1
-    move-object/from16 v0, p0
-
-    iget-object v2, v0, Lcom/gemini/chat/ChatActivity$4;->this$0:Lcom/gemini/chat/ChatActivity;
-
-    invoke-static {v2}, Lcom/gemini/chat/ChatActivity;->access$700(Lcom/gemini/chat/ChatActivity;)V
-
-    .line 579
+    .line 697
     :cond_0
     return-void
+.end method
 
-    .line 570
-    :cond_1
-    const-string v9, ""
+.method public beforeTextChanged(Ljava/lang/CharSequence;III)V
+    .locals 0
 
-    goto :goto_0
+    .prologue
+    .line 700
+    return-void
+.end method
 
-    .line 575
-    :cond_2
-    move-object/from16 v0, p0
+.method public onTextChanged(Ljava/lang/CharSequence;III)V
+    .locals 0
 
-    iget-object v2, v0, Lcom/gemini/chat/ChatActivity$4;->this$0:Lcom/gemini/chat/ChatActivity;
-
-    const-wide/16 v3, -0x1
-
-    const-string v5, "system"
-
-    const/4 v6, 0x0
-
-    const-string v7, "Request stopped by user."
-
-    invoke-static {}, Ljava/lang/System;->currentTimeMillis()J
-
-    move-result-wide v8
-
-    invoke-static/range {v2 .. v9}, Lcom/gemini/chat/ChatActivity;->access$1700(Lcom/gemini/chat/ChatActivity;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;J)V
-
-    goto :goto_1
+    .prologue
+    .line 703
+    return-void
 .end method

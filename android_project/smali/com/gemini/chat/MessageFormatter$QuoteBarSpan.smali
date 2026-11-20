@@ -30,19 +30,19 @@
     .locals 0
 
     .prologue
-    .line 424
+    .line 503
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 
-    .line 425
+    .line 504
     iput p1, p0, Lcom/gemini/chat/MessageFormatter$QuoteBarSpan;->color:I
 
-    .line 426
+    .line 505
     iput p2, p0, Lcom/gemini/chat/MessageFormatter$QuoteBarSpan;->width:I
 
-    .line 427
+    .line 506
     iput p3, p0, Lcom/gemini/chat/MessageFormatter$QuoteBarSpan;->gap:I
 
-    .line 428
+    .line 507
     return-void
 .end method
 
@@ -52,34 +52,34 @@
     .locals 8
 
     .prologue
-    .line 436
+    .line 515
     invoke-virtual {p2}, Landroid/graphics/Paint;->getColor()I
 
     move-result v6
 
-    .line 437
+    .line 516
     invoke-virtual {p2}, Landroid/graphics/Paint;->getStyle()Landroid/graphics/Paint$Style;
 
     move-result-object v7
 
-    .line 438
+    .line 517
     sget-object v0, Landroid/graphics/Paint$Style;->FILL:Landroid/graphics/Paint$Style;
 
     invoke-virtual {p2, v0}, Landroid/graphics/Paint;->setStyle(Landroid/graphics/Paint$Style;)V
 
-    .line 439
+    .line 518
     iget v0, p0, Lcom/gemini/chat/MessageFormatter$QuoteBarSpan;->color:I
 
     invoke-virtual {p2, v0}, Landroid/graphics/Paint;->setColor(I)V
 
-    .line 440
+    .line 519
     iget v0, p0, Lcom/gemini/chat/MessageFormatter$QuoteBarSpan;->width:I
 
     mul-int/2addr v0, p4
 
     add-int/2addr v0, p3
 
-    .line 441
+    .line 520
     invoke-static {p3, v0}, Ljava/lang/Math;->min(II)I
 
     move-result v1
@@ -102,13 +102,13 @@
 
     invoke-virtual/range {v0 .. v5}, Landroid/graphics/Canvas;->drawRect(FFFFLandroid/graphics/Paint;)V
 
-    .line 442
+    .line 521
     invoke-virtual {p2, v6}, Landroid/graphics/Paint;->setColor(I)V
 
-    .line 443
+    .line 522
     invoke-virtual {p2, v7}, Landroid/graphics/Paint;->setStyle(Landroid/graphics/Paint$Style;)V
 
-    .line 444
+    .line 523
     return-void
 .end method
 
@@ -116,7 +116,7 @@
     .locals 2
 
     .prologue
-    .line 431
+    .line 510
     iget v0, p0, Lcom/gemini/chat/MessageFormatter$QuoteBarSpan;->width:I
 
     iget v1, p0, Lcom/gemini/chat/MessageFormatter$QuoteBarSpan;->gap:I

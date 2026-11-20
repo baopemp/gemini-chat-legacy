@@ -17,12 +17,29 @@ import java.util.HashMap;
  * their single-codepoint parts.
  */
 public final class EmojiMap {
-    private static HashMap<String, String> map;
+    private static volatile HashMap<String, String> map;
     /** first UTF-16 unit of any key -> true; cheap pre-filter before substring lookups */
     private static boolean[] startUnits;
     private static int maxLen;
 
+    private static volatile boolean preloadStarted;
+
     private EmojiMap() {
+    }
+
+    /** Loads the emoji table on a background thread so opening the first chat doesn't stall weak CPUs. */
+    public static void preloadAsync(Context context) {
+        if (map != null || preloadStarted || context == null) return;
+        preloadStarted = true;
+        final Context app = context.getApplicationContext() != null ? context.getApplicationContext() : context;
+        Thread t = new Thread(new Runnable() {
+            public void run() {
+                ensureLoaded(app);
+            }
+        }, "EmojiPreload");
+        t.setDaemon(true);
+        t.setPriority(Thread.MIN_PRIORITY);
+        t.start();
     }
 
     public static synchronized void ensureLoaded(Context context) {
@@ -50,7 +67,7 @@ public final class EmojiMap {
     public static synchronized void load(InputStream in) throws IOException {
         BufferedReader r = new BufferedReader(new InputStreamReader(in, "UTF-8"), 8192);
         try {
-            HashMap<String, String> m = new HashMap<String, String>(7000);
+            HashMap<String, String> m = new HashMap<String, String>(8192);
             boolean[] st = new boolean[65536];
             int ml = 0;
             String line;
@@ -62,9 +79,9 @@ public final class EmojiMap {
                 st[key.charAt(0)] = true;
                 if (key.length() > ml) ml = key.length();
             }
-            map = m;
             startUnits = st;
             maxLen = ml;
+            map = m;
         } finally {
             r.close();
         }
@@ -79,7 +96,6 @@ public final class EmojiMap {
         HashMap<String, String> m = map;
         if (m == null || maxLen == 0) return 0;
         char c = s.charAt(i);
-        if (!startUnits[c]) return 0;
         int n = s.length();
         if (c < 0x80) {
             // keycaps (#, *, 0-9) only count when followed by U+FE0F or U+20E3
@@ -87,16 +103,25 @@ public final class EmojiMap {
             char d = s.charAt(i + 1);
             if (d != 0xFE0F && d != 0x20E3) return 0;
         }
+        if (!startUnits[c]) return 0;
         int max = Math.min(maxLen, n - i);
-        for (int len = max; len >= 1; len--) {
-            if (m.containsKey(s.subSequence(i, i + len).toString())) return len;
+        if (s instanceof String) {
+            String str = (String) s;
+            for (int len = max; len >= 1; len--) {
+                if (m.containsKey(str.substring(i, i + len))) return len;
+            }
+        } else {
+            for (int len = max; len >= 1; len--) {
+                if (m.containsKey(s.subSequence(i, i + len).toString())) return len;
+            }
         }
         return 0;
     }
 
     public static String nameAt(CharSequence s, int i, int len) {
         HashMap<String, String> m = map;
-        return m == null ? null : m.get(s.subSequence(i, i + len).toString());
+        if (m == null) return null;
+        return m.get(s instanceof String ? ((String) s).substring(i, i + len) : s.subSequence(i, i + len).toString());
     }
 
     /** Variation selectors and joiners left over after conversion would render as boxes. */

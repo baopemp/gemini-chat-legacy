@@ -23,6 +23,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE chats (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, timestamp INTEGER, named INTEGER DEFAULT 0)");
         db.execSQL("CREATE TABLE messages (id INTEGER PRIMARY KEY AUTOINCREMENT, chat_id INTEGER, role TEXT, content TEXT, timestamp INTEGER, model TEXT, thoughts TEXT)");
+        db.execSQL("CREATE INDEX IF NOT EXISTS idx_messages_chat ON messages(chat_id, id)");
     }
 
     @Override
@@ -56,6 +57,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         addColumnIfMissing(db, "messages", "model", "TEXT");
         addColumnIfMissing(db, "messages", "thoughts", "TEXT");
         addColumnIfMissing(db, "chats", "named", "INTEGER DEFAULT 0");
+        try {
+            db.execSQL("CREATE INDEX IF NOT EXISTS idx_messages_chat ON messages(chat_id, id)");
+        } catch (Exception ignored) {
+        }
     }
 
     private static void addColumnIfMissing(SQLiteDatabase db, String table, String column, String type) {
@@ -139,10 +144,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     /** First user and first model message text {user, model}, or null when the chat has no reply yet. */
     public String[] firstExchange(long chatId) {
         String user = null, model = null;
-        Cursor c = getMessages(chatId);
+        Cursor c = getReadableDatabase().query("messages", new String[]{"role", "content", "model"},
+                "chat_id=?", args(chatId), null, null, "id ASC");
         if (c == null) return null;
         try {
-            int iRole = c.getColumnIndex("role"), iContent = c.getColumnIndex("content"), iModel = c.getColumnIndex("model");
+            int iRole = 0, iContent = 1, iModel = 2;
             while (c.moveToNext() && (user == null || model == null)) {
                 String role = c.getString(iRole), text = c.getString(iContent);
                 if (text == null) text = "";
@@ -200,6 +206,53 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues v = new ContentValues();
         v.put("content", content);
         getWritableDatabase().update("messages", v, "id=?", args(msgId));
+    }
+
+    /** Updates a message's timestamp (and bumps the parent chat) when regenerating, retrying, or resending. */
+    public void touchMessageTimestamp(long chatId, long msgId, long now) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues v = new ContentValues();
+        v.put("timestamp", Long.valueOf(now));
+        db.update("messages", v, "id=?", args(msgId));
+        touchChat(db, chatId, now);
+    }
+
+    /** Highest message id for the given chat and role, or -1 when none exists. */
+    public long getLastMessageId(long chatId, String role) {
+        Cursor c = getReadableDatabase().query("messages", new String[]{"id"},
+                "chat_id=? AND role=?", new String[]{String.valueOf(chatId), role},
+                null, null, "id DESC", "1");
+        if (c == null) return -1L;
+        try {
+            return c.moveToFirst() ? c.getLong(0) : -1L;
+        } finally {
+            c.close();
+        }
+    }
+
+    /** Role of the newest saved user/model row ("user", "model") or null when there is none. */
+    public String getLastSavedRole(long chatId) {
+        Cursor c = getReadableDatabase().query("messages", new String[]{"role"},
+                "chat_id=? AND role IN ('user','model')", args(chatId),
+                null, null, "id DESC", "1");
+        if (c == null) return null;
+        try {
+            return c.moveToFirst() ? c.getString(0) : null;
+        } finally {
+            c.close();
+        }
+    }
+
+    /** Fast existence check (avoids loading every message and image blob just for menu visibility). */
+    public boolean hasMessages(long chatId) {
+        Cursor c = getReadableDatabase().query("messages", new String[]{"1"},
+                "chat_id=?", args(chatId), null, null, null, "1");
+        if (c == null) return false;
+        try {
+            return c.moveToFirst();
+        } finally {
+            c.close();
+        }
     }
 
     /** Deletes every message of the chat newer than msgId (msgId itself is kept). */
